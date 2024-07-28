@@ -4,7 +4,7 @@ import tornado.websocket
 
 class Visualization(tornado.web.RequestHandler):
     def get(self):
-        self.render("../../web/titanium-server/dist/titanium-server/index.html")
+        self.render("../../web/titanium-server/dist/titanium-server/src/index.html")
 
 class VisualizationWebSocketHandler(tornado.websocket.WebSocketHandler):
     def open(self):

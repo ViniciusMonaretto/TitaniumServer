@@ -1,0 +1,34 @@
+{
+    "id": "gateway1",
+    "mainTopic": "gateway1/",
+    "topicsConfig":[
+        {
+            "logicArea": "1",
+            "classStructure": "Credentials",
+            "data": [
+                {
+                    "type": "string",
+                    "name": "ssid"
+                },
+                {
+                    "type": "string",
+                    "name": "password"
+                }
+            ]
+        },
+        {
+            "logicArea": "5",
+            "classStructure": "WaterLevel",
+            "data": [
+                {
+                    "type": "uInt",
+                    "name": "timestamp"
+                },
+                {
+                    "type": "uInt",
+                    "name": "value"
+                }
+            ]
+        }
+    ]
+}
