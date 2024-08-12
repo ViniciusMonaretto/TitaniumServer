@@ -1,6 +1,5 @@
 {
     "id": "gateway1",
-    "mainTopic": "gateway1/",
     "topicsConfig":[
         {
             "logicArea": "1",

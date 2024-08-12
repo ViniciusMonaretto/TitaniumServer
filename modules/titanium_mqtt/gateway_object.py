@@ -5,9 +5,9 @@ class GatewayObject:
     def __init__(self, topics):
         for topic in topics:
             topicInfo = {}
-            topicInfo["classStructure"] = topics["classStructure"]
-            topicInfo["data"] = self.arrange_topic_data(topics["data"])
-            self._topics_map[topic["id"]] = topicInfo
+            topicInfo["classStructure"] = topic["classStructure"]
+            topicInfo["data"] = self.arrange_topic_data(topic["data"])
+            self._topics_map[topic["logicArea"]] = topicInfo
 
     def arrange_topic_data(self, topic_data):
         out_obj = {}
