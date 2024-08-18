@@ -60,6 +60,8 @@ class TitaniumMqtt:
 
         print(f"Received message: {msg.topic} {cls}")
 
+        self._middleware.send_status(cls['name'], cls['data'])
+
     def run(self):
         self.client = mqtt.Client()
 
