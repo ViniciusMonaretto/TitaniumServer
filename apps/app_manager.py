@@ -7,7 +7,7 @@ import tornado.web
 
 class AppManager:
     def __init__(self, middleware):
-        self.m_Server = AppServer()
+        self.m_Server = AppServer(middleware)
         self.thread = Thread(target = self.threaded_function, args = (10, ))
         self._middleware = middleware
 
@@ -21,8 +21,9 @@ class AppManager:
         self.thread.join()
 
 class AppServer:
-    def __init__(self):
-        self.app = self.make_app()
+    def __init__(self, middleware):
+        self._middleware = middleware
+        self.app = self.make_app()       
 
     def run(self):
         self.app.listen(8888)  # Listen on port 8888
@@ -32,7 +33,7 @@ class AppServer:
     def make_app(self):
         return tornado.web.Application([
             (r"/", Visualization),
-            (r"/websocket", VisualizationWebSocketHandler),
+            (r"/websocket", VisualizationWebSocketHandler, {'middleware': self._middleware}),
             (r"/test", ServerHandler),
             (r"/(.*)", tornado.web.StaticFileHandler, {"path": "C:/Titanium/TitaniumServer/web/titanium-server/dist/titanium-server"})
         ],

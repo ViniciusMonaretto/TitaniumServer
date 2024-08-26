@@ -44,7 +44,7 @@ class Middleware:
 
         self._subscribers[id].add_subscriber(status_name)
 
-    def add_subscribe_from_status(self, subscriber, status_name):
+    def remove_subscribe_from_status(self, subscriber, status_name):
         id = subscriber.get_id()
         if(not (id in self._subscribers)):
             print("Middleware::add_subscribe_from_status-> Error, subscriber {id} non existant")

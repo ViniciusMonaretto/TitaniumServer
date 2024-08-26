@@ -1,0 +1,9 @@
+{
+    "panels": [
+        {
+            "panelType": "read",
+            "title": "Nível tanque 1",
+            "topic": "WaterLevel"
+        }
+    ]
+}

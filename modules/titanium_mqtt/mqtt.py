@@ -34,7 +34,7 @@ class TitaniumMqtt:
                     try:
                         data = json.load(json_file)  # Load the JSON data
                         # Process the JSON data (replace this with your logic)
-                        self._gateways[data["id"]] = GatewayObject(data["topicsConfig"])
+                        self._gateways[data["firmware"]["name"]] = GatewayObject(data["firmware"]["memory_areas"])
 
                         print(f"Processing file: {filename}")
                     except json.JSONDecodeError as e:

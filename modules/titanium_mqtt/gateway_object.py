@@ -5,9 +5,9 @@ class GatewayObject:
     def __init__(self, topics):
         for topic in topics:
             topicInfo = {}
-            topicInfo["classStructure"] = topic["classStructure"]
-            topicInfo["data"] = self.arrange_topic_data(topic["data"])
-            self._topics_map[topic["logicArea"]] = topicInfo
+            topicInfo["classStructure"] = topic["name"]
+            topicInfo["data"] = self.arrange_topic_data(topic["fields"])
+            self._topics_map[topic["index"]] = topicInfo
 
     def arrange_topic_data(self, topic_data):
         out_obj = {}
@@ -18,9 +18,13 @@ class GatewayObject:
     def transform_json_obj(self, data, type):
         if(type == "string"):
             return str(data)
-        if(type == "uInt"):
+        if(type == "uint8_t"):
             return int(data)
-        if(type == "int"):
+        if(type == "uint16_t"):
+            return int(data)
+        if(type == "uint32_t"):
+            return int(data)
+        if(type == "uint64_t"):
             return int(data)
         return data
         
