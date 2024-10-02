@@ -1,8 +1,25 @@
-<h1 mat-dialog-title>Delete file</h1>
-<div mat-dialog-content>
-  Would you like to delete cat.jpeg?
-</div>
-<div mat-dialog-actions>
-  <button mat-button mat-dialog-close>No</button>
-  <button mat-button mat-dialog-close cdkFocusInitial>Ok</button>
-</div>
+<h2 mat-dialog-title>Add new Sensor</h2>
+<mat-dialog-content>
+  <mat-form-field appearance="fill">
+    <mat-label>Name</mat-label>
+    <input matInput [(ngModel)]="name" />
+  </mat-form-field>
+  <mat-form-field appearance="fill">
+    <mat-label>Gateway</mat-label>
+    <input matInput [(ngModel)]="gateway" />
+  </mat-form-field>
+  <mat-form-field appearance="fill">
+    <mat-label>Topic</mat-label>
+    <input matInput [(ngModel)]="topic" />
+  </mat-form-field>
+  <mat-form-field appearance="fill">
+    <mat-select  [(ngModel)]="sensorType">
+      <mat-option  *ngFor="let typeSensor of sensorTypes" [value]="typeSensor">{{typeSensor}}</mat-option>
+    </mat-select>
+  </mat-form-field>
+  
+</mat-dialog-content>
+<mat-dialog-actions> 
+  <button mat-button (click)="onNoClick()">No Thanks</button>
+  <button mat-button (click)="onAddCLick()" cdkFocusInitial>Ok</button>
+</mat-dialog-actions>
