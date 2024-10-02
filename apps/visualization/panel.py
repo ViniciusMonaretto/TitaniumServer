@@ -16,8 +16,10 @@ class PanelTypes:
 class Panel:
     _title = ""
     _status = ""
+    _gateway = ""
     _panel_type = PanelTypes.ReadPanel
     def __init__(self, obj):
         self._title = obj["title"]
         self._status = obj["status"]
+        self._gateway = obj["gateway"]
         self._panel_type = PanelTypes.GetType(obj["panelType"])

@@ -3,7 +3,8 @@
         {
             "panelType": "read",
             "title": "Nível tanque 1",
-            "topic": "WaterLevel"
+            "topic": "WaterLevel",
+            "gateway": 1
         }
     ]
 }

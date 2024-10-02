@@ -1,0 +1,24 @@
+.side-nav-class{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    height: 50px;
+}
+
+.transparent-button {
+    background-color: transparent;
+    border: none;
+    color: inherit; /* Inherit the text color from the parent */
+    box-shadow: none; /* Remove the shadow if any */
+    transition: background-color 0.2s ease-in-out;
+    cursor: pointer;
+  }
+
+  .transparent-button:hover {
+    background-color: rgba(0, 0, 0, 0.1); /* Slightly dark */
+  }
+
+  .transparent-button:active {
+    background-color: rgba(0, 0, 0, 0.2); /* Slightly dark */
+  }
