@@ -6,7 +6,7 @@ import { webSocket, WebSocketSubject } from 'rxjs/webSocket';
 })
 export class ServerConectorService {
   private socket: WebSocketSubject<any>;
-  private wsUrl = 'wss://localhost:4200/websocket'
+  private wsUrl = 'http://localhost:8888/websocket'
 
   constructor() { 
     this.socket = webSocket(this.wsUrl);

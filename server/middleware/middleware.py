@@ -1,12 +1,14 @@
 from .data_converter.data_converter import DataConverter
 import threading
 
-class Subscriber:
+class SubscriberManager:
     def __init__(self, subscriber_obj):
+        if(subscriber_obj.get_id() == -1):
+            raise Exception("Subscriver Id is invalid")
         self._status_subscriber = {}
         self._subscriber_obj = subscriber_obj
         self._lock = threading.Lock()
-        self._id = subscriber_obj.id
+        self._id = subscriber_obj.get_id()
     
     def add_subscriber(self, status_name):
         self._lock.acquire()
@@ -40,7 +42,7 @@ class Middleware:
     def add_subscribe_to_status(self, subscriber, status_name):
         id = subscriber.get_id()
         if(not (subscriber in self._subscribers)):
-            self._subscribers[id] = Subscriber(subscriber)
+            self._subscribers[id] = SubscriberManager(subscriber)
 
         self._subscribers[id].add_subscriber(status_name)
 

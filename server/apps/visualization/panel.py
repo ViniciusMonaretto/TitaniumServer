@@ -4,22 +4,22 @@ class PanelTypes:
     WritePanel = "write"
     Unknow = "Unknow"
 
-    @staticmethod
-    def GetType(self, panelName):
-        if panelName == self.ReadPanel:
-            return self.ReadPanel
-        elif panelName == self.WritePanel:
-            return self.WritePanel
+    @classmethod
+    def GetType(cls, panelName):
+        if panelName == cls.ReadPanel:
+            return cls.ReadPanel
+        elif panelName == cls.WritePanel:
+            return cls.WritePanel
         
-        return self.Unknow
+        return cls.Unknow
 
 class Panel:
     _title = ""
-    _status = ""
     _gateway = ""
+    _topic = ""
     _panel_type = PanelTypes.ReadPanel
     def __init__(self, obj):
         self._title = obj["title"]
-        self._status = obj["status"]
         self._gateway = obj["gateway"]
+        self._topic = obj["topic"]
         self._panel_type = PanelTypes.GetType(obj["panelType"])
