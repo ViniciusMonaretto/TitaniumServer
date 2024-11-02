@@ -56,14 +56,25 @@ class VisualizationWebSocketHandler(tornado.websocket.WebSocketHandler):
     
     def open(self):
         print("WebSocket opened")
-        
-        self.write_message(self._ui_config)
+        self.send_message_to_ui("uiConfig", self._ui_config)
 
     def on_message(self, message):
         self.write_message("You said: " + message)
-        if("addPanel" in message):
+        if("addPanel" in message["status"]):
             panel_info = json.load(message["panelInfo"])
-            
+        else:
+            self.send_message_to_ui(message["status"], message["message"])
+
+    
+
+    def send_message_to_ui(self, status, message):
+        obj = {
+            "status": status,
+            "message": message
+        }
+
+        self.write_message(obj)
+        
 
     def add_panels(self, panels_info):
         for panel_info in panels_info['panels']:

@@ -1,32 +1,82 @@
 import { Injectable } from '@angular/core';
+import {UiPanelService} from './ui-panels.service'
 import { webSocket, WebSocketSubject } from 'rxjs/webSocket';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ServerConectorService {
-  private socket: WebSocketSubject<any>;
-  private wsUrl = 'http://localhost:8888/websocket'
+  private socket: WebSocket | null;
+  private wsUrl = 'ws://localhost:8888/websocket'
 
-  constructor() { 
-    this.socket = webSocket(this.wsUrl);
-    this.connect();
+  private reconnectAttempts: number = 0;
+  private maxReconnectAttempts: number = 10;
+  private reconnectDelay: number = 2000;
+  constructor(private uiPanelService: UiPanelService) { 
+    this.socket = null
+    setTimeout(()=>{
+      this.connectToServer();
+    }, 100)
+    
   }
 
-  private connect(): void {
-    
+  private connectToServer(): void {
+    this.socket = new WebSocket(this.wsUrl);
 
-    // Handle incoming messages
-    this.socket.subscribe({
-      next: (message) => this.onMessage(message),
-      error: (err) => this.onError(err),
-      complete: () => console.log('WebSocket connection closed')
-    });
+    this.socket.onmessage = (message) => {this.onMessage(message)}
+
+    this.socket.onclose = () => {this.onDisconnection()}
+
+    this.socket.onerror = (err) => {this.onError(err)}
+
+    this.socket.onopen = () => {
+      console.log('WebSocket connected successfully!');
+      this.reconnectAttempts = 0;  // Reset reconnect attempts on successful connection
+    };
+  }
+
+  private onDisconnection()
+  {
+    if(this.handleReconnection)
+    {
+      this.handleReconnection();
+    }
+      
+  }
+
+  private handleReconnection() {
+    if (this.reconnectAttempts < this.maxReconnectAttempts) {
+      setTimeout(() => {
+        console.log(`Attempting reconnection (${this.reconnectAttempts + 1}/${this.maxReconnectAttempts})...`);
+        this.reconnectAttempts++;
+        this.connectToServer();
+      }, this.reconnectDelay);
+      this.reconnectDelay *= 2; // Exponential backoff
+    } else {
+      console.error('Max reconnection attempts reached.');
+    }
+  }
+
+  public sendCommand(commandName: string, payload: any)
+  {
+    if (this.socket?.readyState === WebSocket.OPEN) {
+      let obj = {
+        "commandName": commandName,
+        "payload": payload
+      }
+      this.socket?.send(JSON.stringify(obj));
+    } else {
+      console.error('WebSocket is not open. Message not sent.');
+    }
   }
 
   private onMessage(message: any): void {
     console.log('Received message:', message);
-    // Process the message as needed
+    let data = JSON.parse(message["data"])
+    if(data["status"] == "uiConfig")
+    {
+      this.uiPanelService.SetNewUiConfig(data["message"])
+    }
   }
 
   // Handle WebSocket errors

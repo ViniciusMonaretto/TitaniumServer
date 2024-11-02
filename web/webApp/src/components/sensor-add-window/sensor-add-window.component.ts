@@ -1,6 +1,8 @@
 import { Component, Inject } from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {SensorTypesEnum} from "../../enum/sensor-type"
+import {SensorModule} from "../../models/sensor-module"
+
 
 @Component({
   selector: 'app-sensor-add-window',
@@ -8,10 +10,7 @@ import {SensorTypesEnum} from "../../enum/sensor-type"
   styleUrls: ['./sensor-add-window.component.scss']
 })
 export class SensorAddWindowComponent {
-  name: string = "";
-  gateway: string = "";
-  topic: string = "";
-  sensorType: SensorTypesEnum = SensorTypesEnum.READ
+  public sensorModule: SensorModule = new SensorModule()
 
   public sensorTypes = Object.values(SensorTypesEnum);
 
@@ -28,10 +27,10 @@ export class SensorAddWindowComponent {
   getSensorData()
   {
     return {
-      "name": this.name,
-      "gateway": this.gateway,
-      "topic": this.topic,
-      "sensorType": this.sensorType,
+      "name": this.sensorModule.name,
+      "gateway": this.sensorModule.gateway,
+      "topic": this.sensorModule.topic,
+      "sensorType": this.sensorModule.sensorType,
     }
   }
 

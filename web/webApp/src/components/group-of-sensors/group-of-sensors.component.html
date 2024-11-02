@@ -1,0 +1,12 @@
+<mat-card>
+    <mat-card-title>{{name}}</mat-card-title>
+    <mat-card-content>
+      <div>
+        <sensor *ngFOr="let sensor of sensorArray"></sensor>
+      </div>
+        
+    </mat-card-content>
+    <mat-card-actions align="end">
+      <button mat-button>Add Sensor</button>
+    </mat-card-actions>
+</mat-card>

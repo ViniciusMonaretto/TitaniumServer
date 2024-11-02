@@ -2,18 +2,18 @@
 <mat-dialog-content>
   <mat-form-field appearance="fill">
     <mat-label>Name</mat-label>
-    <input matInput [(ngModel)]="name" />
+    <input matInput [(ngModel)]="sensorModule.name" />
   </mat-form-field>
   <mat-form-field appearance="fill">
     <mat-label>Gateway</mat-label>
-    <input matInput [(ngModel)]="gateway" />
+    <input matInput [(ngModel)]="sensorModule.gateway" />
   </mat-form-field>
   <mat-form-field appearance="fill">
     <mat-label>Topic</mat-label>
-    <input matInput [(ngModel)]="topic" />
+    <input matInput [(ngModel)]="sensorModule.topic" />
   </mat-form-field>
   <mat-form-field appearance="fill">
-    <mat-select  [(ngModel)]="sensorType">
+    <mat-select  [(ngModel)]="sensorModule.sensorType">
       <mat-option  *ngFor="let typeSensor of sensorTypes" [value]="typeSensor">{{typeSensor}}</mat-option>
     </mat-select>
   </mat-form-field>

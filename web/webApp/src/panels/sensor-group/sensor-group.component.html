@@ -1,0 +1,9 @@
+<div class="group-div-display">
+    <group-of-sensors 
+        *ngFor="let groupName of getGroupSensorUi()" 
+        [name]="groupName" 
+        [sensorArray]="getInfoOfGroup(groupName)">
+
+    </group-of-sensors>
+</div>
+
