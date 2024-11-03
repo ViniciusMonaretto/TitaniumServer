@@ -1,10 +1,22 @@
 {
     "panels": [
         {
-            "panelType": "read",
-            "title": "Nível tanque 1",
+            "name": "Medidor1",
+            "gateway": 2,
             "topic": "WaterLevel",
-            "gateway": 1
+            "sensorType": "Temperature"
+        },
+        {
+            "name": "Medidor2",
+            "gateway": 2,
+            "topic": "WaterLevel",
+            "sensorType": "Temperature"
+        },
+        {
+            "name": "Medidor3",
+            "gateway": 2,
+            "topic": "WaterLevel",
+            "sensorType": "Temperature"
         }
     ]
 }

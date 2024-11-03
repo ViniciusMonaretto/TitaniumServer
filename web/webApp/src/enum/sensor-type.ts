@@ -1,4 +1,4 @@
 export enum SensorTypesEnum {
-    READ = "Read",
-    WRITE = "Write"
+    PREASSURE = "Pressure",
+    TEMPERATURE = "Temperature"
 }

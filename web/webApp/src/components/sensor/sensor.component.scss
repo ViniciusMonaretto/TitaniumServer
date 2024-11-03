@@ -1,5 +1,40 @@
 .sensor{
-    width: 60px;
-    height: 80px;
+    width: 200px;
+    height: 220px;
+    border: solid;
+    border-width: thin;
     border-color: black;
+    border-radius: 10px;
+}
+
+.header-sensor
+{
+    height: 15%;
+    display: flex;
+    align-items: center;
+    padding-left: 10px;
+    font-size: 25px;
+}
+
+.measure-display
+{
+    display: flex;
+    height: 70%;
+    align-items: center;
+    justify-content: space-around;
+}
+
+.middle-measure
+{
+    width: 60%;
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    font-size: 70px;
+}
+
+.border-measure
+{
+    width: 20%;
+    font-size: 40px;
 }

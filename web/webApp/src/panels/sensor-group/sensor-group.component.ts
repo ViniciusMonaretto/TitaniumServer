@@ -15,12 +15,14 @@ export class SensorGroupComponent implements OnInit {
 
   getInfoOfGroup(groupName: string)
   {
-    return this.UiPanelsService.GetUiConfig()[groupName]
+    let info = this.UiPanelsService.GetUiConfig()[groupName]
+    return info
   }
 
   getGroupSensorUi()
   {
-    return Object.keys(this.UiPanelsService.GetUiConfig())
+    let info = Object.keys(this.UiPanelsService.GetUiConfig())
+    return info
   }
 
 }

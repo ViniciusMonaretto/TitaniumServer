@@ -1,3 +1,16 @@
 <div class="sensor">
-
+    <div class="header-sensor">
+        {{sensorInfo.name}}
+    </div>
+    <div class="measure-display">
+        <div class="border-measure"></div>
+        <div class="middle-measure">
+            {{getCurrentReading()}}
+        </div>
+        <div class="border-measure">
+            {{getMeasureIcon()}}
+        </div>
+        
+    </div>
+    <div></div>
 </div>

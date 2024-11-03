@@ -14,9 +14,9 @@ export class UiPanelService {
         
     }
 
-    SetNewUiConfig(uiConfig: Panel )
+    SetNewUiConfig(uiConfig: {'panels': Panel} )
     {
-        this.panels["base"] = uiConfig 
+        this.panels["base"] = uiConfig['panels']
     }
 
     GetUiConfig()

@@ -4,8 +4,7 @@ export class SensorModule{
     public name: string = "";
     public gateway: string = "";
     public topic: string = "";
-    public measure: string = "";
-    public sensorType: SensorTypesEnum = SensorTypesEnum.READ
+    public sensorType: SensorTypesEnum = SensorTypesEnum.PREASSURE
 
     constructor(){
         
