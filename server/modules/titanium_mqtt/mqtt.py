@@ -60,7 +60,8 @@ class TitaniumMqtt:
 
         print(f"Received message: {msg.topic} {cls}")
 
-        self._middleware.send_status(cls['name'], cls['data'])
+        topic_name = TitaniumMqtt.get_topic_from_mosquitto_obj(msg_split[1], cls)
+        self._middleware.send_status(topic_name, cls['data'])
 
     def run(self):
         self.client = mqtt.Client()
@@ -87,3 +88,7 @@ class TitaniumMqtt:
         if command in  self._publish_topics_list:
             return self._publish_topics_list["command"]
         return command
+
+    @staticmethod
+    def get_topic_from_mosquitto_obj(mosquitto_id, cls):
+        return mosquitto_id + '/' + cls['name']

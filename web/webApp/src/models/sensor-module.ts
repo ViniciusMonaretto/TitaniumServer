@@ -5,6 +5,7 @@ export class SensorModule{
     public gateway: string = "";
     public topic: string = "";
     public sensorType: SensorTypesEnum = SensorTypesEnum.PREASSURE
+    public value: Number|null = null
 
     constructor(){
         

@@ -80,13 +80,18 @@ class VisualizationWebSocketHandler(tornado.websocket.WebSocketHandler):
         for panel_info in panels_info['panels']:
             self.add_panel(panel_info)
     
+    def get_panel_topic(self, panel: Panel):
+        return str(panel._gateway) + "/" + panel._topic
+
     def add_panel(self, panel_info):
         panel = Panel(panel_info)
 
-        if(panel._topic not in self._status_subscribers):
-            self._status_subscribers[panel._topic] = StatuSubscribers(self.send_status, panel._topic, self._panels_count)
-            self._middleware.add_subscribe_to_status(self._status_subscribers[panel._topic], panel._topic)
-        self._status_subscribers[panel._topic].add_count()
+        panel_topic = self.get_panel_topic(panel)
+
+        if(panel_topic not in self._status_subscribers):
+            self._status_subscribers[panel_topic] = StatuSubscribers(self.send_status, panel_topic, self._panels_count)
+            self._middleware.add_subscribe_to_status(self._status_subscribers[panel_topic], panel_topic)
+        self._status_subscribers[panel_topic].add_count()
         self._panels_count+=1
     
     def send_status(self, status_data):

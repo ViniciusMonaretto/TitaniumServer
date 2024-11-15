@@ -9,7 +9,6 @@ import { SensorTypesEnum } from 'src/enum/sensor-type';
 })
 export class SensorComponent implements OnInit {
   @Input() sensorInfo: SensorModule = new SensorModule()
-  @Input() value: number | null = null
   
   public sensorTypes = Object.values(SensorTypesEnum);
   
@@ -35,7 +34,7 @@ export class SensorComponent implements OnInit {
 
   getCurrentReading()
   {
-    return this.value ? this.value : "--"
+    return this.sensorInfo?.value ? this.sensorInfo?.value : "--"
   }
 
 }

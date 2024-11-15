@@ -1,36 +1,35 @@
 from .data_converter.data_converter import DataConverter
+from .subscriber_interface import SubscriberInterface
 import threading
 
 class SubscriberManager:
-    def __init__(self, subscriber_obj):
-        if(subscriber_obj.get_id() == -1):
-            raise Exception("Subscriver Id is invalid")
-        self._status_subscriber = {}
-        self._subscriber_obj = subscriber_obj
+    _subscriber_map = {}
+
+    def __init__(self, status_name):
+        self._status_name = status_name
         self._lock = threading.Lock()
-        self._id = subscriber_obj.get_id()
     
-    def add_subscriber(self, status_name):
+    def add_subscriber(self, subscriber: SubscriberInterface):
         self._lock.acquire()
 
-        self._status_subscriber[status_name] = True
+        self._subscriber_map[subscriber.get_id()] = subscriber
         
         self._lock.release()
 
-    def remove_subscriber(self, status_name):
+    def remove_subscriber(self, id):
         self._lock.acquire()
 
-        if(not (status_name in self._status_subscriber)):
+        if(not (id in self._status_subscriber)):
             print("Middleware::add_subscribe_from_status-> Error, subscriber {self._id} non subscribing {status_name}")
             return
 
-        del self._status_subscriber[status_name]
+        del self._status_subscriber[id]
         self._lock.release()
 
     def send_status(self, status_name, data):
         self._lock.acquire()
-        if(status_name in self._status_subscriber):
-            self._subscriber_obj.on_status(status_name, data)
+        for subscriber in self._subscriber_map:
+            subscriber.on_status(status_name, data)
 
         self._lock.release()
 
@@ -39,12 +38,11 @@ class Middleware:
         self._data_converter = DataConverter()
         self._subscribers = {}
 
-    def add_subscribe_to_status(self, subscriber, status_name):
-        id = subscriber.get_id()
-        if(not (subscriber in self._subscribers)):
-            self._subscribers[id] = SubscriberManager(subscriber)
+    def add_subscribe_to_status(self, subscriber: SubscriberInterface, status_name):
+        if(not (status_name in self._subscribers)):
+            self._subscribers[status_name] = SubscriberManager(subscriber)
 
-        self._subscribers[id].add_subscriber(status_name)
+        self._subscribers[status_name].add_subscriber(subscriber)
 
     def remove_subscribe_from_status(self, subscriber, status_name):
         id = subscriber.get_id()
