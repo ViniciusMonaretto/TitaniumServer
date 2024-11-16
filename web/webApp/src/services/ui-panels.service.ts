@@ -30,7 +30,7 @@ export class UiPanelService {
     {
       for(var sensor of panel)
       {
-        let fullTopic = sensor.gateway + '/' + sensor.name
+        let fullTopic = sensor.gateway + '/' + sensor.topic
         if(! (fullTopic in this.subscriptioSensornDic) )
         {
           this.subscriptioSensornDic[fullTopic] = []

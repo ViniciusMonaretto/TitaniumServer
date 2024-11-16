@@ -1,6 +1,7 @@
 import paho.mqtt.client as mqtt
 import os
 import json
+import time
 from .gateway_object import GatewayObject
 
 SUBSCRIBE_TOPIC_LIST = [("titanium_area/#", 0)]
@@ -43,7 +44,7 @@ class TitaniumMqtt:
     def on_connect(self, client, userdata, flags, rc):
         print(f"MqqtServer: Connected with result code {rc}")
         client.subscribe(userdata['subscribe_topics'])
-
+            
     def on_message(self, client, userdata, msg):
         decoded_msg = msg.payload.decode()
         msg_split = msg.topic.split('/')

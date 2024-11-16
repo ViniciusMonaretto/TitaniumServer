@@ -19,16 +19,17 @@ class SubscriberManager:
     def remove_subscriber(self, id):
         self._lock.acquire()
 
-        if(not (id in self._status_subscriber)):
+        if(not (id in self._subscriber_map)):
             print("Middleware::add_subscribe_from_status-> Error, subscriber {self._id} non subscribing {status_name}")
             return
 
-        del self._status_subscriber[id]
+        del self._subscriber_map[id]
         self._lock.release()
 
     def send_status(self, status_name, data):
         self._lock.acquire()
-        for subscriber in self._subscriber_map:
+        for subscriber_id in self._subscriber_map:
+            subscriber = self._subscriber_map[subscriber_id]
             subscriber.on_status(status_name, data)
 
         self._lock.release()
@@ -46,11 +47,11 @@ class Middleware:
 
     def remove_subscribe_from_status(self, subscriber, status_name):
         id = subscriber.get_id()
-        if(not (id in self._subscribers)):
+        if(not (status_name in self._subscribers)):
             print("Middleware::add_subscribe_from_status-> Error, subscriber {id} non existant")
             return
         
-        self._subscribers[id].remove_subscriber(status_name)
+        self._subscribers[status_name].remove_subscriber(id)
 
     def send_status(self, status_name, data):
         data_converted = self._data_converter.convert_data(status_name, data)

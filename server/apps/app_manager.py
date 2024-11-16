@@ -26,8 +26,10 @@ class AppServer:
         self.app = self.make_app()       
 
     def run(self):
+        self.value = 10
         self.app.listen(8888)  # Listen on port 8888
         print("Server is running on http://localhost:8888")
+        #tornado.ioloop.PeriodicCallback(self.send_test_messages, 2000).start()
         tornado.ioloop.IOLoop.current().start()
 
     def make_app(self):

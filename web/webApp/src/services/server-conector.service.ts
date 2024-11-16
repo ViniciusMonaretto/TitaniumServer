@@ -77,6 +77,11 @@ export class ServerConectorService {
     {
       this.uiPanelService.SetNewUiConfig(data["message"])
     }
+    else if(data["status"] == "sensorUpdate")
+    {
+      let message = data["message"]
+      this.uiPanelService.OnSubscriptionUpdate(message["name"], message["data"])
+    }
   }
 
   // Handle WebSocket errors

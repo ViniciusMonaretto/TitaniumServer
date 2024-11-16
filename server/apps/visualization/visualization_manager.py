@@ -3,6 +3,7 @@ import tornado.web
 import tornado.websocket
 import os
 import json
+import uuid
 
 from apps.visualization.panel import Panel
 from middleware.subscriber_interface import SubscriberInterface
@@ -18,8 +19,8 @@ class StatuSubscribers(SubscriberInterface):
         self._count = 0
         self._id = id
 
-    def send_status(self, data):
-        self._callback("{ 'name': {self._status}, 'data': {data} }") 
+    def on_status(self, status_name, data):
+        self._callback({ 'name': status_name, 'data': data}) 
 
     def add_count(self):
         self._count+=1
@@ -37,8 +38,9 @@ class VisualizationWebSocketHandler(tornado.websocket.WebSocketHandler):
         return True
     
     def initialize(self, middleware):
+        self.id = str(uuid.uuid4())
         self._middleware = middleware
-        self._status_subscribers = {}
+        self._status_subscribers: dict[str, SubscriberInterface] = {}
 
         script_directory = os.path.dirname(os.path.abspath(__file__))
         json_directory = os.path.join(script_directory, "ui_config.json")
@@ -56,6 +58,7 @@ class VisualizationWebSocketHandler(tornado.websocket.WebSocketHandler):
     
     def open(self):
         print("WebSocket opened")
+        self._is_init = True
         self.send_message_to_ui("uiConfig", self._ui_config)
 
     def on_message(self, message):
@@ -65,9 +68,10 @@ class VisualizationWebSocketHandler(tornado.websocket.WebSocketHandler):
         else:
             self.send_message_to_ui(message["status"], message["message"])
 
-    
 
     def send_message_to_ui(self, status, message):
+        if(not self._is_init):
+            return 
         obj = {
             "status": status,
             "message": message
@@ -89,15 +93,16 @@ class VisualizationWebSocketHandler(tornado.websocket.WebSocketHandler):
         panel_topic = self.get_panel_topic(panel)
 
         if(panel_topic not in self._status_subscribers):
-            self._status_subscribers[panel_topic] = StatuSubscribers(self.send_status, panel_topic, self._panels_count)
+            self._status_subscribers[panel_topic] = StatuSubscribers(self.send_status, panel_topic, self.id + str(self._panels_count) )
             self._middleware.add_subscribe_to_status(self._status_subscribers[panel_topic], panel_topic)
         self._status_subscribers[panel_topic].add_count()
         self._panels_count+=1
     
     def send_status(self, status_data):
-        obj = "{ 'status': {status_data} }"
-        self.write_message(obj)
+        self.send_message_to_ui("sensorUpdate", status_data)
 
 
     def on_close(self):
         print("WebSocket closed")
+        for subscriber_topic in self._status_subscribers:
+            self._middleware.remove_subscribe_from_status(self._status_subscribers[subscriber_topic], subscriber_topic)
