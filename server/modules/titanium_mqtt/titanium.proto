@@ -1,0 +1,88 @@
+syntax = "proto2";
+import "nanopb.proto";
+
+// Enumeration for representing the status of network connections.
+enum NetworkStatus {
+  DISCONNECTED = 0; // Indicates that the network is disconnected.
+  CONNECTED = 1;    // Indicates that the network is connected.
+}
+
+// Enum specifying different memory areas used by the system.
+enum MemoryAreas {
+  INVALID_MEMORY_AREA = 0;   // Represents an invalid or uninitialized memory area.
+  NETWORK_CREDENTIALS = 1;   // Memory area allocated for storing network credentials.
+  NETWORK_INFORMATION = 2;   // Memory area for storing the status of network connections.
+  BROKER_CONFIG = 3;         // Memory area dedicated to broker configuration settings.
+  COMMUNICATION_CONFIG = 4;  // Memory area used for communication configuration settings.
+  UART_SINGLE_PACKET = 5;    // Memory area for configurations of single UART packets.
+  LORA_SINGLE_PACKET = 6;    // Memory area for configurations of single LoRa packets.
+}
+
+// Message representing network credentials required to connect to a Wi-Fi network.
+message NetworkCredentials {
+    // The SSID (Service Set Identifier) of the Wi-Fi network.
+    required string ssid = 1 [(nanopb).max_size = 32];
+
+    // The password for the Wi-Fi network.
+    required string password = 2 [(nanopb).max_size = 64];
+}
+
+// Message representing the current status of network connections.
+message NetworkInformation {
+    // Status of the access point (AP) connection.
+    required NetworkStatus ap_connected = 1;
+
+    // Status of the station (STA) connection.
+    required NetworkStatus sta_connected = 2;
+}
+
+// Message representing configuration details for the broker.
+message BrokerConfig {
+    // URI of the broker to which the device will connect.
+    required string broker_uri = 1 [(nanopb).max_size = 256];
+}
+
+// Message representing a packet request; write to this area to read some area in memory.
+message PacketRequest {
+    // The address to which this packet should be sent.
+    required int32 destination_address = 1;
+
+    // The memory area in the destination device that will store the received information.
+    required MemoryAreas destination_area = 2;
+
+    // The area that should be sent to the destination device.
+    required MemoryAreas requested_area = 3;
+
+    // The time interval (in milliseconds) between the packets.
+    required uint32 packet_interval = 4;
+
+    // The time the last transmission occurred (in Unix timestamp format).
+    required uint64 last_transmission = 5;
+}
+
+// Message representing a list of continuous packet requests including multiple packet configurations.
+message ContinuosPacketList {
+    // Repeated field of packet requests, with a maximum count of 8.
+    repeated PacketRequest packet_configs = 1 [(nanopb).max_count = 8];
+}
+
+// Message defining the different memory areas and their corresponding structures.
+message MemoryAreasDefinitions {
+    // Network credentials for connecting to a Wi-Fi network.
+    required NetworkCredentials network_credentials = 1;
+
+    // Status information of network connections.
+    required NetworkInformation network_information = 2;
+
+    // Configuration settings for the broker.
+    required BrokerConfig broker_config = 3;
+
+    // Continuous packet configurations for communication.
+    required ContinuosPacketList communication_config = 4;
+
+    // Packet request for UART communication.
+    required PacketRequest uart_packet_request = 5;
+
+    // Packet request for LoRa communication.
+    required PacketRequest lora_packet_request = 6;
+}
