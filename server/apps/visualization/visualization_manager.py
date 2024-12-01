@@ -8,6 +8,7 @@ import uuid
 from apps.visualization.panel import Panel
 from middleware.subscriber_interface import SubscriberInterface
 
+
 class Visualization(tornado.web.RequestHandler):
     def get(self):
         self.render("../../web/titanium-server/dist/titanium-server/src/index.html")
@@ -55,6 +56,9 @@ class VisualizationWebSocketHandler(tornado.websocket.WebSocketHandler):
                 print(f"Processing file: {json_directory}")
             except json.JSONDecodeError as e:
                 print(f"Error processing file {json_directory}: {e}")
+
+    def periodic_status_sender(self):
+        self._middleware.run_status_update()
     
     def open(self):
         print("WebSocket opened")

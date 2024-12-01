@@ -65,11 +65,14 @@ class TitaniumMqtt:
         decoded_msg = msg.payload.decode()
         msg_split = msg.topic.split('/')
 
-        if not len(msg_split) < 2:
+        self._middleware.send_status("1/WaterLevel", 100)
+        return
+
+        if not len(msg_split) == 3:
             print(f"TitaniumMqtt::on_message: mqtt topic {msg.topic} not valid")
             return
 
-        id = msg_split[0]
+        id = str(msg_split[1])
         if not id in self._gateways:
             print("TitaniumMqtt::on_message: gateway id not registered")
             return
@@ -77,7 +80,7 @@ class TitaniumMqtt:
 
         print(f"Received message: {msg.topic} {cls}")
 
-        topic_name = TitaniumMqtt.get_topic_from_mosquitto_obj(msg_split[1], cls)
+        topic_name = TitaniumMqtt.get_topic_from_mosquitto_obj(msg_split[2], cls)
         self._middleware.send_status(topic_name, cls['data'])
 
     def run(self):
@@ -90,7 +93,7 @@ class TitaniumMqtt:
 
         self.client.on_connect = self.on_connect
         self.client.on_message = self.on_message
-        self.client.connect("mqtt.eclipseprojects.io", 1883, 60)
+        self.client.connect("test.mosquitto.org", 1883, 60)
         self.client.loop_start()
 
     def get_class_from_mqtt_message(self, message, gateway):

@@ -1,6 +1,7 @@
 from .data_converter.data_converter import DataConverter
 from .subscriber_interface import SubscriberInterface
 import threading
+import multiprocessing
 
 class SubscriberManager:
     _subscriber_map = {}
@@ -34,10 +35,11 @@ class SubscriberManager:
 
         self._lock.release()
 
-class Middleware:
-    def __init__(self):
+class ClientMiddleware:
+    def __init__(self, middleware):
         self._data_converter = DataConverter()
         self._subscribers = {}
+        self._transfer_queue:  multiprocessing.Queue = middleware.add_new_middleware_listener()
 
     def add_subscribe_to_status(self, subscriber: SubscriberInterface, status_name):
         if(not (status_name in self._subscribers)):
@@ -53,8 +55,26 @@ class Middleware:
         
         self._subscribers[status_name].remove_subscriber(id)
 
+    def run_status_update(self):
+        while(not self._transfer_queue.empty()):
+            new_status = self._transfer_queue.get()
+            status_name = new_status["statusName"]
+            data = new_status["data"]
+
+            data_converted = self._data_converter.convert_data(status_name, data)
+            for subscriber in self._subscribers.values():
+                subscriber.send_status(status_name, data_converted)
+
+class Middleware:
+    def __init__(self):
+        self._subscriber_queues = []
+
+    def add_new_middleware_listener(self):
+        queue = multiprocessing.Queue()
+        self._subscriber_queues.append(queue)
+        return queue
+
     def send_status(self, status_name, data):
-        data_converted = self._data_converter.convert_data(status_name, data)
-        for subscriber in self._subscribers.values():
-            subscriber.send_status(status_name, data_converted)
+        for queue in self._subscriber_queues:
+            queue.put({"statusName": status_name, "data": data})
         

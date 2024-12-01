@@ -3,13 +3,16 @@ from time import sleep
 from .server.server_handler import ServerHandler
 from .visualization.visualization_manager import Visualization, VisualizationWebSocketHandler
 
+from middleware.middleware import ClientMiddleware
+
 import tornado.web
 
 class AppManager:
     def __init__(self, middleware):
-        self.m_Server = AppServer(middleware)
+        self._middleware = ClientMiddleware(middleware)
+        self.m_Server = AppServer(self._middleware)
         self.thread = Thread(target = self.threaded_function, args = (10, ))
-        self._middleware = middleware
+        
 
     def threaded_function(self, args):
         self.m_Server.run()
@@ -21,7 +24,7 @@ class AppManager:
         self.thread.join()
 
 class AppServer:
-    def __init__(self, middleware):
+    def __init__(self, middleware: ClientMiddleware):
         self._middleware = middleware
         self.app = self.make_app()       
 
@@ -29,8 +32,11 @@ class AppServer:
         self.value = 10
         self.app.listen(8888)  # Listen on port 8888
         print("Server is running on http://localhost:8888")
-        #tornado.ioloop.PeriodicCallback(self.send_test_messages, 2000).start()
+        tornado.ioloop.PeriodicCallback(self.send_test_messages, 200).start()
         tornado.ioloop.IOLoop.current().start()
+
+    def send_test_messages(self):
+        self._middleware.run_status_update()
 
     def make_app(self):
         return tornado.web.Application([
