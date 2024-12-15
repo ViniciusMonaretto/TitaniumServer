@@ -5,9 +5,13 @@ import os
 import json
 import uuid
 
+from threading import Thread
+from threading import Lock
+
 from apps.visualization.panel import Panel
 from middleware.subscriber_interface import SubscriberInterface
 
+ui_visualizer_lock = Lock()
 
 class Visualization(tornado.web.RequestHandler):
     def get(self):
@@ -43,6 +47,8 @@ class VisualizationWebSocketHandler(tornado.websocket.WebSocketHandler):
         self._middleware = middleware
         self._status_subscribers: dict[str, SubscriberInterface] = {}
 
+        ui_visualizer_lock.acquire()
+
         script_directory = os.path.dirname(os.path.abspath(__file__))
         json_directory = os.path.join(script_directory, "ui_config.json")
 
@@ -56,6 +62,7 @@ class VisualizationWebSocketHandler(tornado.websocket.WebSocketHandler):
                 print(f"Processing file: {json_directory}")
             except json.JSONDecodeError as e:
                 print(f"Error processing file {json_directory}: {e}")
+        ui_visualizer_lock.release()
 
     def periodic_status_sender(self):
         self._middleware.run_status_update()
@@ -69,6 +76,8 @@ class VisualizationWebSocketHandler(tornado.websocket.WebSocketHandler):
         self.write_message("You said: " + message)
         if("addPanel" in message["status"]):
             panel_info = json.load(message["panelInfo"])
+            self.add_panel(panel_info)
+            self._ui_config["panels"].append(panel_info)
         else:
             self.send_message_to_ui(message["status"], message["message"])
 
@@ -87,6 +96,15 @@ class VisualizationWebSocketHandler(tornado.websocket.WebSocketHandler):
     def add_panels(self, panels_info):
         for panel_info in panels_info['panels']:
             self.add_panel(panel_info)
+
+    def update_ui_file(self, panels_info):
+        ui_visualizer_lock.acquire()
+        script_directory = os.path.dirname(os.path.abspath(__file__))
+        json_directory = os.path.join(script_directory, "ui_config.json")
+
+        with open(json_directory, 'w') as json_file:
+            json_file.write(panels_info)
+        ui_visualizer_lock.release()
     
     def get_panel_topic(self, panel: Panel):
         return str(panel._gateway) + "/" + panel._topic

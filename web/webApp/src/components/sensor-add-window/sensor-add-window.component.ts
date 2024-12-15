@@ -34,6 +34,13 @@ export class SensorAddWindowComponent {
     }
   }
 
+  validForm()
+  {
+    return this.sensorModule.name != "" &&
+           this.sensorModule.gateway != "" &&
+           this.sensorModule.topic != "" 
+  }
+
   onAddCLick(): void{
     this.data.callback(this.getSensorData())
     this.dialogRef.close();

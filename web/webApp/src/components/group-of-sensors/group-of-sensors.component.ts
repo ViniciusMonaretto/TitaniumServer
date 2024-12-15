@@ -1,5 +1,7 @@
 import { Component, OnInit, Input } from '@angular/core';
 import { SensorModule } from "../../models/sensor-module"
+import {MatDialog} from '@angular/material/dialog';
+import {SensorAddWindowComponent} from '../../components/sensor-add-window/sensor-add-window.component'
 
 @Component({
   selector: 'group-of-sensors',
@@ -11,9 +13,20 @@ export class GroupOfSensorsComponent implements OnInit {
   @Input() name: string = "";
   @Input() sensorArray: Array<SensorModule> = [];
 
-  constructor() { }
+  constructor(public dialog: MatDialog) { }
 
   ngOnInit(): void {
   }
 
+  addSensor(): void {
+    const dialogRef = this.dialog.open(SensorAddWindowComponent, {
+      width: '250px',
+      data: {callback: this.addNewSensorCallback.bind(this)}
+    });
+  }
+
+  addNewSensorCallback(sensorData: any): void {
+    console.log('Sensor added:', sensorData);
+    // Handle the sensor data (e.g., save it to the server)
+  }
 }

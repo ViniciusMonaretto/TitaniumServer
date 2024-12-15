@@ -2,19 +2,19 @@
     "panels": [
         {
             "name": "Medidor1",
-            "gateway": 2,
+            "gateway": 1,
             "topic": "WaterLevel",
             "sensorType": "Temperature"
         },
         {
             "name": "Medidor2",
-            "gateway": 2,
+            "gateway": 1,
             "topic": "WaterLevel",
             "sensorType": "Temperature"
         },
         {
             "name": "Medidor3",
-            "gateway": 2,
+            "gateway": 1,
             "topic": "WaterLevel",
             "sensorType": "Temperature"
         }

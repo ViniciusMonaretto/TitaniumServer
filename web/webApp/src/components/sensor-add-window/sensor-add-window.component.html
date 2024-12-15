@@ -13,6 +13,7 @@
     <input matInput [(ngModel)]="sensorModule.topic" />
   </mat-form-field>
   <mat-form-field appearance="fill">
+    <mat-label>Type</mat-label>
     <mat-select  [(ngModel)]="sensorModule.sensorType">
       <mat-option  *ngFor="let typeSensor of sensorTypes" [value]="typeSensor">{{typeSensor}}</mat-option>
     </mat-select>
@@ -20,6 +21,6 @@
   
 </mat-dialog-content>
 <mat-dialog-actions> 
-  <button mat-button (click)="onNoClick()">No Thanks</button>
-  <button mat-button (click)="onAddCLick()" cdkFocusInitial>Ok</button>
+  <button mat-button (click)="onNoClick()">Cancel</button>
+  <button mat-button [disabled]="!validForm()" (click)="onAddCLick()" cdkFocusInitial>Add</button>
 </mat-dialog-actions>
