@@ -73,14 +73,17 @@ class VisualizationWebSocketHandler(tornado.websocket.WebSocketHandler):
         self.send_message_to_ui("uiConfig", self._ui_config)
 
     def on_message(self, message):
-        self.write_message("You said: " + message)
-        if("addPanel" in message["status"]):
-            panel_info = json.load(message["panelInfo"])
+        print("You said: " + message)
+        messageObj = json.loads(message)
+        payload = messageObj["payload"]
+        if("addPanel" in messageObj["commandName"]):
+            panel_info = payload
             self.add_panel(panel_info)
             self._ui_config["panels"].append(panel_info)
+            self.update_ui_file(self._ui_config)
+            self.send_message_to_ui("uiConfig", self._ui_config)
         else:
-            self.send_message_to_ui(message["status"], message["message"])
-
+            print("unknown command: " + messageObj["commandName"])
 
     def send_message_to_ui(self, status, message):
         if(not self._is_init):
@@ -103,7 +106,7 @@ class VisualizationWebSocketHandler(tornado.websocket.WebSocketHandler):
         json_directory = os.path.join(script_directory, "ui_config.json")
 
         with open(json_directory, 'w') as json_file:
-            json_file.write(panels_info)
+            json_file.write( json.dumps(panels_info))
         ui_visualizer_lock.release()
     
     def get_panel_topic(self, panel: Panel):

@@ -3,6 +3,8 @@ import { SensorModule } from "../../models/sensor-module"
 import {MatDialog} from '@angular/material/dialog';
 import {SensorAddWindowComponent} from '../../components/sensor-add-window/sensor-add-window.component'
 
+import {ServerConectorService} from "../../services/server-conector.service"
+
 @Component({
   selector: 'group-of-sensors',
   templateUrl: './group-of-sensors.component.html',
@@ -13,7 +15,7 @@ export class GroupOfSensorsComponent implements OnInit {
   @Input() name: string = "";
   @Input() sensorArray: Array<SensorModule> = [];
 
-  constructor(public dialog: MatDialog) { }
+  constructor(public dialog: MatDialog, private serverConnector: ServerConectorService) { }
 
   ngOnInit(): void {
   }
@@ -27,6 +29,6 @@ export class GroupOfSensorsComponent implements OnInit {
 
   addNewSensorCallback(sensorData: any): void {
     console.log('Sensor added:', sensorData);
-    // Handle the sensor data (e.g., save it to the server)
+    this.serverConnector.sendCommand("addPanel", sensorData)
   }
 }
