@@ -2,21 +2,27 @@
     "panels": [
         {
             "name": "Medidor1",
-            "gateway": 1,
+            "gateway": "1C692031BE04",
             "topic": "WaterLevel",
-            "sensorType": "Temperature"
+            "sensorType": "humidity"
         },
         {
             "name": "Medidor2",
-            "gateway": 1,
-            "topic": "WaterLevel",
-            "sensorType": "Temperature"
+            "gateway": "1C692031BE04",
+            "topic": "temperature",
+            "sensorType": "temperature"
         },
         {
             "name": "Medidor3",
-            "gateway": 1,
+            "gateway": "1C692031BE04",
             "topic": "WaterLevel",
-            "sensorType": "Temperature"
+            "sensorType": "humidity"
+        },
+        {
+            "name": "1",
+            "gateway": "1C692031BE04",
+            "topic": "temperature",
+            "sensorType": "temperature"
         }
     ]
 }

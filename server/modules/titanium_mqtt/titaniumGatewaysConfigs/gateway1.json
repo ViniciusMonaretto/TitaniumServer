@@ -154,8 +154,24 @@
             },
             {
                 "index": 8,
-                "name": "WaterLevel",
-                "package": "WaterLevel",
+                "name": "2",
+                "package": "Temperature",
+                "description": "Index for Water Level custom process area.",
+                "fields": [
+                    {
+                        "type": "uint64_t",
+                        "name": "timestamp"
+                    },
+                    {
+                        "type": "uint32_t",
+                        "name": "value"
+                    }
+                ]
+            },
+            {
+                "index": 9,
+                "name": "2",
+                "package": "Humidity",
                 "description": "Index for Water Level custom process area.",
                 "fields": [
                     {

@@ -1,0 +1,9 @@
+{
+    "dbCOnfig": [
+        {
+            "gateway": "1C692031BE04",
+            "topic": "temperature",
+            "tableConfig": "CREATE TABLE IF NOT EXISTS temperature (\nid INTEGER PRIMARY KEY AUTOINCREMENT,\ntopic REAL,\nvalue NUMBER,\ntimestamp TEXT\n)"
+        }
+    ]
+}
