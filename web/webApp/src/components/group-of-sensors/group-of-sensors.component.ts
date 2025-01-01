@@ -31,4 +31,9 @@ export class GroupOfSensorsComponent implements OnInit {
     console.log('Sensor added:', sensorData);
     this.serverConnector.sendCommand("addPanel", sensorData)
   }
+
+  removeSensorCallback(sensorData: any): void {
+    console.log('Sensor removed:', sensorData);
+    this.serverConnector.sendCommand("removePanel", sensorData)
+  }
 }

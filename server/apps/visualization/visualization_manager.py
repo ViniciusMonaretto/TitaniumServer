@@ -58,14 +58,28 @@ class VisualizationWebSocketHandler(tornado.websocket.WebSocketHandler):
         print("You said: " + message)
         messageObj = json.loads(message)
         payload = messageObj["payload"]
-        if("addPanel" in messageObj["commandName"]):
-            panel_info = payload
-            self.add_panel(panel_info)
-            self._ui_config["panels"].append(panel_info)
-            self.update_ui_file(self._ui_config)
-            self.send_message_to_ui("uiConfig", self._ui_config)
-        else:
-            print("unknown command: " + messageObj["commandName"])
+        try:
+            if("addPanel" in messageObj["commandName"]):
+                self.add_new_panel(payload)
+            elif "removePanel" in messageObj["commandName"]:
+                self.remove_panel(payload)
+            else:
+                print("unknown command: " + messageObj["commandName"])
+        except Exception as e:
+            print(f"Exception occured on panel message: {e}")
+
+    def add_new_panel(self, panel_info):
+        new_panel_info = self.add_panel(panel_info)
+        self._ui_config["panels"].append(new_panel_info)
+        self.update_ui_file(self._ui_config)
+        self.send_message_to_ui("uiConfig", self._ui_config)
+    
+    def remove_panel(self, panel_id):
+        for index, panel in enumerate(self._ui_config["panels"]):
+            if(panel['id'] == panel_id):
+                del self._ui_config["panels"][index]
+        self.update_ui_file(self._ui_config)
+        self.send_message_to_ui("uiConfig", self._ui_config)
 
     def send_message_to_ui(self, status, message):
         if(not self._is_init):
@@ -104,6 +118,10 @@ class VisualizationWebSocketHandler(tornado.websocket.WebSocketHandler):
             self._middleware.add_subscribe_to_status(self._status_subscribers[panel_topic], panel_topic)
         self._status_subscribers[panel_topic].add_count()
         self._panels_count+=1
+
+        panel_info["id"] = panel._id
+
+        return panel_info
     
     def send_status(self, status_data):
         self.send_message_to_ui("sensorUpdate", status_data)

@@ -1,4 +1,4 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { SensorModule } from 'src/models/sensor-module';
 import { SensorTypesEnum } from 'src/enum/sensor-type';
 
@@ -9,6 +9,7 @@ import { SensorTypesEnum } from 'src/enum/sensor-type';
 })
 export class SensorComponent implements OnInit {
   @Input() sensorInfo: SensorModule = new SensorModule()
+  @Output() deleteCallback: EventEmitter<any> = new EventEmitter();
   
   public sensorTypes = Object.values(SensorTypesEnum);
   
@@ -22,7 +23,11 @@ export class SensorComponent implements OnInit {
     }
     if(this.sensorInfo.sensorType == SensorTypesEnum.TEMPERATURE)
     {
-        return "c"
+        return "C"
+    }
+    if(this.sensorInfo.sensorType == SensorTypesEnum.HUMIDITY)
+    {
+        return "%"
     }
 
     return ""
@@ -30,6 +35,11 @@ export class SensorComponent implements OnInit {
 
   ngOnInit(): void {
     this.sensorInfo.name
+  }
+
+  deletePanel()
+  {
+    this.deleteCallback.emit(this.sensorInfo.id)
   }
 
   getCurrentReading()

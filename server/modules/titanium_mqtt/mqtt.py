@@ -92,8 +92,12 @@ class TitaniumMqtt:
 
         self.client.on_connect = self.on_connect
         self.client.on_message = self.on_message
-        self.client.connect(MQTT_SERVER, MQTT_PORT, 60)
-        self.client.loop_start()
+        try:
+
+            self.client.connect(MQTT_SERVER, MQTT_PORT, 60)
+            self.client.loop_start()
+        except Exception as e:
+            print(f"Error Connecting to Mqtt: {e}")
     
     def execute(self, command):
         topic = self.get_topic_from_command(command.name)

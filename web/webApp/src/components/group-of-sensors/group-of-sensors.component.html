@@ -2,7 +2,7 @@
     <mat-card-title>{{name}}</mat-card-title>
     <mat-card-content>
       <div class="main-group-div">
-        <sensor *ngFor="let sensor of sensorArray" [sensorInfo]="sensor"></sensor>
+        <sensor *ngFor="let sensor of sensorArray" [sensorInfo]="sensor" (deleteCallback)="removeSensorCallback($event)"></sensor>
       </div>
         
     </mat-card-content>

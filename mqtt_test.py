@@ -7,7 +7,7 @@ from datetime import datetime
 # Define the broker and port
 BROKER = "mqtt.eclipseprojects.io"
 PORT = 1883
-TOPIC = "titanium/1C692031BE04/temperature"
+TOPIC = "/titanium/1C692031BE04/temperature"
 
 # Callback for successful connection
 def on_connect(client, userdata, flags, rc):

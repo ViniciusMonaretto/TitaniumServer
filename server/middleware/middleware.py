@@ -62,8 +62,9 @@ class ClientMiddleware:
             data = new_status["data"]
 
             data_converted = self._data_converter.convert_data(status_name, data)
-            for subscriber in self._subscribers.values():
-                subscriber.send_status(status_name, data_converted)
+            for sub_status_name, subscriber in self._subscribers.items():
+                if sub_status_name == status_name:
+                    subscriber.send_status(status_name, data_converted)
 
 class Middleware:
     def __init__(self):

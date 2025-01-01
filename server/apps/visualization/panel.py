@@ -1,3 +1,4 @@
+import uuid
 
 class SensorTypes:
     Pressure = "Pressure"
@@ -14,11 +15,16 @@ class SensorTypes:
         return cls.Unknow
 
 class Panel:
+    _id = 0
     _name = ""
     _gateway = ""
     _topic = ""
     _sensor_type = SensorTypes.Unknow
     def __init__(self, obj):
+        if("id" in obj):
+            self._id = obj["id"]
+        else:
+            self._id = uuid.uuid4()
         self._name = obj["name"]
         self._gateway = obj["gateway"]
         self._topic = obj["topic"]

@@ -3,6 +3,8 @@ import tornado.web
 import tornado.websocket
 import json
 
+from .server_data import ServerDataInput
+
 class TitaniumServer:
     def __init__(self, middleware):
         self._middleware = middleware
@@ -27,10 +29,11 @@ class InfoReceiverHandler(tornado.web.RequestHandler):
 
     def post(self):
         try:
-            data = json.loads(self.request.body)
+            data = ServerDataInput(json.loads(self.request.body))
             # You can process the received data here
-            print("received data from sensor {}: {}", data["Id"], data)
-            self.write({"status": "success", "data_received": data})
+            print("received data from sensor {}: {}", data.id, data.value)
+            self.set_status(200)
+            self.write({"status": "success"})
         except json.JSONDecodeError:
             self.set_status(400)
             self.write({"status": "error", "message": "Invalid JSON"})

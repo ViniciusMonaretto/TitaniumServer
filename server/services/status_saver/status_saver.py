@@ -9,7 +9,7 @@ import uuid
 DB_CONFIG = "db_status_saves.json"
 DB_NAME = "status_saver.db"
 
-class SatatusSaver:
+class StatusSaver:
     def __init__(self, middleware: ClientMiddleware):
         self.id = str(uuid.uuid4())
         self._subscriptions_add = 0
@@ -43,6 +43,16 @@ class SatatusSaver:
     
     def subscribe_to_status(self, gateway, status_name):
         topic = self.get_panel_topic(gateway, status_name)
-        self._status_subscribers[topic] = StatuSubscribers(self.send_status, topic, self.id + str(self._subscriptions_add))
+        self._status_subscribers[topic] = StatuSubscribers(self.save_status_on_db, topic, self.id + str(self._subscriptions_add))
         self._middleware.add_subscribe_to_status(self._status_subscribers[topic], topic)
         self._subscriptions_add+=1
+    
+    def save_status_on_db(self, status_info):
+        conn = sqlite3.connect(DB_NAME)
+        cursor = conn.cursor()
+        status_name = status_info['name']
+
+        cursor.execute(f'INSERT INTO "{status_name}" (timestamp, value) VALUES (?, ?)', (datetime.now().isoformat(), status_info["data"]))
+
+        conn.commit()
+        conn.close()
