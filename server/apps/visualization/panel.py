@@ -24,7 +24,7 @@ class Panel:
         if("id" in obj):
             self._id = obj["id"]
         else:
-            self._id = uuid.uuid4()
+            self._id = str(uuid.uuid4())
         self._name = obj["name"]
         self._gateway = obj["gateway"]
         self._topic = obj["topic"]

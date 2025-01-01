@@ -1,1 +1,1 @@
-{"panels": [{"id": 1, "name": "Medidor1", "gateway": "1C692031BE04", "topic": "WaterLevel", "sensorType": "humidity"}, {"id": 3, "name": "Medidor3", "gateway": "1C692031BE04", "topic": "WaterLevel", "sensorType": "humidity"}]}
+{"panels": [{"name": "Temp", "gateway": "1C692031BE04", "topic": "temperature", "sensorType": "Temperature", "id": "590143d9-9806-48cc-8a37-9bb382ff36de"}, {"name": "Tanque 1", "gateway": "1C692031BE04", "topic": "humidity", "sensorType": "Humidity", "id": "587ec1e5-dd83-422b-b7f8-04804cb3109c"}]}

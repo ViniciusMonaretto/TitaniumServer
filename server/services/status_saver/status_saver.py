@@ -7,7 +7,7 @@ from middleware.middleware import ClientMiddleware
 import uuid
 
 DB_CONFIG = "db_status_saves.json"
-DB_NAME = "status_saver.db"
+DB_NAME = "titanium_server_db.db"
 
 class StatusSaver:
     def __init__(self, middleware: ClientMiddleware):
