@@ -126,7 +126,6 @@ class VisualizationWebSocketHandler(tornado.websocket.WebSocketHandler):
     def send_status(self, status_data):
         self.send_message_to_ui("sensorUpdate", status_data)
 
-
     def on_close(self):
         print("WebSocket closed")
         for subscriber_topic in self._status_subscribers:
