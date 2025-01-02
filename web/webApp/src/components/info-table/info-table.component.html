@@ -1,0 +1,13 @@
+<div>
+    <table mat-table [dataSource]="tableInfo" class="mat-elevation-z8">
+        
+        <!-- Name Column -->
+        <ng-container *ngFor="let field of fieldsInfo" [matColumnDef]="field">
+            <th mat-header-cell *matHeaderCellDef> Name </th>
+            <td mat-cell *matCellDef="let element"> {{element[field]}} </td>
+        </ng-container>
+        
+        <tr mat-header-row *matHeaderRowDef="fieldsInfo"></tr>
+        <tr mat-row *matRowDef="let row; columns: fieldsInfo;"></tr>
+    </table>
+</div>

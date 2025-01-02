@@ -50,7 +50,7 @@ class StatusSaver:
     def save_status_on_db(self, status_info):
         conn = sqlite3.connect(DB_NAME)
         cursor = conn.cursor()
-        status_name = status_info['name']
+        status_name = status_info['name'].replace('/', '-')
 
         cursor.execute(f'INSERT INTO "{status_name}" (timestamp, value) VALUES (?, ?)', (datetime.now().isoformat(), status_info["data"]))
 
