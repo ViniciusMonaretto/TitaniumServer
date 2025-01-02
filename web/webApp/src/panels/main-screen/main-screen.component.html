@@ -1,1 +1,2 @@
-<sensor-groups style="width: 100%;"></sensor-groups>
+<sensor-groups *ngIf="isSensorSelected()" style="width: 100%;"></sensor-groups>
+<table-view *ngIf="isStatusLogSelected()" style="width: 100%;"></table-view>

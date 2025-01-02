@@ -1,7 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import {MatDialog} from '@angular/material/dialog';
 import {SensorAddWindowComponent} from '../../components/sensor-add-window/sensor-add-window.component'
-import {ServerConectorService} from "../../services/server-conector.service"
+import {MainScreenSelector} from "../../services/main-screen-selector.service"
+import {MainScreenOptions} from "../../enum/screen-type"
 
 @Component({
   selector: 'app-navbar',
@@ -10,7 +11,7 @@ import {ServerConectorService} from "../../services/server-conector.service"
 })
 export class NavbarComponent implements OnInit {
 
-  constructor(public dialog: MatDialog, private serverConector: ServerConectorService) { }
+  constructor(public dialog: MatDialog, private mainScreenService: MainScreenSelector) { }
 
   ngOnInit(): void {
   }
@@ -25,8 +26,16 @@ export class NavbarComponent implements OnInit {
       width: '250px',
       data: {callback: this.addNewSensorCallback.bind(this)}
     });
-    
-      
+  }
+
+  setSensor()
+  {
+    this.mainScreenService.SelectScreen(MainScreenOptions.SENSORS)
+  }
+
+  setStatusLOg()
+  {
+    this.mainScreenService.SelectScreen(MainScreenOptions.STATUS_LOG)
   }
 
 }

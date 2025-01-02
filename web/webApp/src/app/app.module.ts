@@ -9,6 +9,7 @@ import { AppComponent } from './app.component';
 import { MainScreenComponent } from 'src/panels/main-screen/main-screen.component';
 import { SensorGroupComponent } from 'src/panels/sensor-group/sensor-group.component';
 import { NavbarComponent } from 'src/panels/navbar/navbar.component';
+import { TableViewComponent } from 'src/panels/table-view/table-view.component'
 
 //Project Components
 import { SensorAddWindowComponent } from 'src/components/sensor-add-window/sensor-add-window.component';
@@ -42,7 +43,8 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
     SensorAddWindowComponent,
     SensorGroupComponent,
     GroupOfSensorsComponent,
-    InfoTableComponent
+    InfoTableComponent,
+    TableViewComponent
   ],
   imports: [
     BrowserModule,
