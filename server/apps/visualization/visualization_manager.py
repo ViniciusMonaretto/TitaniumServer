@@ -45,9 +45,6 @@ class VisualizationWebSocketHandler(tornado.websocket.WebSocketHandler):
             except json.JSONDecodeError as e:
                 print(f"Error processing file {json_directory}: {e}")
         ui_visualizer_lock.release()
-
-    def periodic_status_sender(self):
-        self._middleware.run_status_update()
     
     def open(self):
         print("WebSocket opened")

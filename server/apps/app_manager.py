@@ -11,8 +11,7 @@ class AppManager:
     def __init__(self, middleware):
         self._middleware = ClientMiddleware(middleware)
         self.m_Server = AppServer(self._middleware)
-        self.thread = Thread(target = self.threaded_function, args = (10, ))
-        
+        self.thread = Thread(target = self.threaded_function, args = (10, ))   
 
     def threaded_function(self, args):
         self.m_Server.run()
@@ -36,7 +35,7 @@ class AppServer:
         tornado.ioloop.IOLoop.current().start()
 
     def send_test_messages(self):
-        self._middleware.run_status_update()
+        self._middleware.run_middleware_update()
 
     def make_app(self):
         return tornado.web.Application([

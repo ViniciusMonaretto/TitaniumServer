@@ -5,21 +5,32 @@ from datetime import datetime
 from middleware.status_subscriber import StatuSubscribers
 from middleware.middleware import ClientMiddleware
 import uuid
+from ..service_interface import ServiceInterface
+from .status_saver_commands import Commands
 
 DB_CONFIG = "db_status_saves.json"
 DB_NAME = "titanium_server_db.db"
 
-class StatusSaver:
+class StatusSaver(ServiceInterface):
     def __init__(self, middleware: ClientMiddleware):
         self.id = str(uuid.uuid4())
         self._subscriptions_add = 0
         self._status_subscribers = {}
         self._middleware = middleware
 
+        self.initialize_commands()
         self.initialize_data_bank()
         
     def get_panel_topic(self, gateway, status_name):
         return gateway + "/" + status_name
+    
+    def initialize_commands(self):
+        commands = {Commands.GET_TABLE_INFO: self.get_table_info_command}
+        self._middleware.add_commands(commands)
+    
+
+    def get_table_info_command(self, command):
+        pass
 
     def initialize_data_bank(self):
         conn = sqlite3.connect(DB_NAME)
