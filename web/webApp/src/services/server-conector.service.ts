@@ -9,6 +9,8 @@ export class ServerConectorService {
   private socket: WebSocket | null;
   private wsUrl = 'ws://localhost:8888/websocket'
 
+  private tableCallback: Function|null = null
+
   private reconnectAttempts: number = 0;
   private maxReconnectAttempts: number = 10;
   private reconnectDelay: number = 2000;
@@ -28,6 +30,8 @@ export class ServerConectorService {
     this.socket.onclose = () => {this.onDisconnection()}
 
     this.socket.onerror = (err) => {this.onError(err)}
+
+    this.tableCallback = null
 
     this.socket.onopen = () => {
       console.log('WebSocket connected successfully!');
@@ -57,6 +61,12 @@ export class ServerConectorService {
     }
   }
 
+  public sendRequestForTableInfo(gateway: string| null, table: string, callback: Function)
+  {
+    this.tableCallback = callback
+    this.sendCommand("getStatusHistory", {"gateway": gateway, "table": table})
+  }
+
   public sendCommand(commandName: string, payload: any)
   {
     if (this.socket?.readyState === WebSocket.OPEN) {
@@ -81,6 +91,14 @@ export class ServerConectorService {
     {
       let message = data["message"]
       this.uiPanelService.OnSubscriptionUpdate(message["name"], message["data"])
+    }
+    else if(data["status"] == "statusInfo")
+    {
+      let message = data["message"]
+      if(this.tableCallback)
+      {
+        this.tableCallback(message["data"])
+      }
     }
   }
 

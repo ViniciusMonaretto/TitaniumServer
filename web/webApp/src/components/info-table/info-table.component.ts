@@ -1,7 +1,7 @@
 import { Component, OnInit, Input } from '@angular/core';
 
 @Component({
-  selector: 'app-info-table',
+  selector: 'info-table',
   templateUrl: './info-table.component.html',
   styleUrls: ['./info-table.component.scss']
 })

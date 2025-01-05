@@ -1,1 +1,9 @@
-<p>table-view works!</p>
+<div>
+    <div class="footer-measure">
+        <button mat-icon-button  (click)="getTAble()">
+            Get Table
+        </button>
+    </div>
+    <info-table [fieldsInfo]="headerInfo" [tableInfo]="array"></info-table>
+</div>
+

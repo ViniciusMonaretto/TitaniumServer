@@ -11,6 +11,8 @@ from threading import Lock
 from apps.visualization.panel import Panel
 from middleware.subscriber_interface import SubscriberInterface
 from middleware.status_subscriber import StatuSubscribers
+from middleware.middleware import ClientMiddleware
+from services.status_saver.status_saver_commands import Commands as StatusSaverCommands
 
 ui_visualizer_lock = Lock()
 
@@ -23,10 +25,10 @@ class VisualizationWebSocketHandler(tornado.websocket.WebSocketHandler):
 
     def check_origin(self, origin):
         return True
-    
+
     def initialize(self, middleware):
         self.id = str(uuid.uuid4())
-        self._middleware = middleware
+        self._middleware:ClientMiddleware  = middleware
         self._status_subscribers: dict[str, SubscriberInterface] = {}
 
         ui_visualizer_lock.acquire()
@@ -60,10 +62,19 @@ class VisualizationWebSocketHandler(tornado.websocket.WebSocketHandler):
                 self.add_new_panel(payload)
             elif "removePanel" in messageObj["commandName"]:
                 self.remove_panel(payload)
+            elif "getStatusHistory" in messageObj["commandName"]:
+                self.request_status(payload)
             else:
                 print("unknown command: " + messageObj["commandName"])
         except Exception as e:
             print(f"Exception occured on panel message: {e}")
+
+    def request_status(self, request):
+        data = {'table':request["table"], 'gateway': request["gateway"]}
+        self._middleware.send_command(StatusSaverCommands.GET_TABLE_INFO, data, self.send_status_history)                                    
+    
+    def send_status_history(self, data):
+        self.send_message_to_ui("statusInfo", data)  
 
     def add_new_panel(self, panel_info):
         new_panel_info = self.add_panel(panel_info)

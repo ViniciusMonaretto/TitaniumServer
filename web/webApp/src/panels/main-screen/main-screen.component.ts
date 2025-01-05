@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import {MainScreenSelector} from "../../services/main-screen-selector.service"
+import {ServerConectorService} from "../../services/server-conector.service"
 import {MainScreenOptions} from "../../enum/screen-type"
 
 @Component({
@@ -9,7 +10,7 @@ import {MainScreenOptions} from "../../enum/screen-type"
 })
 export class MainScreenComponent implements OnInit {
 
-  constructor(private mainScreenSelectorServce: MainScreenSelector) { }
+  constructor(private mainScreenSelectorServce: MainScreenSelector, private serverConnector: ServerConectorService) { }
 
   ngOnInit(): void {
   }

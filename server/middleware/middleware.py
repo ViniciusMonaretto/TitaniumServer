@@ -47,7 +47,7 @@ class Middleware:
             queue.put({"name": status_name, "data": data, "isCommand": False})
     
     def send_command(self, command_name, data):
-        request_id = str(uuid.uuid4)
+        request_id = str(uuid.uuid4())
         for queue in self._subscriber_queues:
             queue.put({"name": command_name, "data": data, "requestId": request_id, "isCommand": True})
         
@@ -89,14 +89,17 @@ class ClientMiddleware:
         self._lock.release()
 
     def send_command(self, command_name, data, callback_handler):
-        self._request_queue.add(self._middleware.send_command(command_name, data), callback_handler)
+        self._request_queue[self._middleware.send_command(command_name, data)] = callback_handler
+
+    def send_command_answear(self, data, request_id):
+        self._middleware.send_command_answear("", data, request_id)
     
     def run_middleware_update(self):
         while(not self._transfer_queue.empty()):
             new_info = self._transfer_queue.get()
             if new_info["isCommand"]:
-                if new_info["requestId"] in self._request_queue:
-                    if self._request_queue[new_info["requestId"]] != None:
+                if new_info["requestId"] in self._request_queue and new_info["name"] == "":
+                    if self._request_queue[new_info["requestId"]]:
                         self._request_queue[new_info["requestId"]](new_info)
                     del self._request_queue[new_info["requestId"]]
                 else:
@@ -107,7 +110,8 @@ class ClientMiddleware:
     def command_update(self, new_command):
         command_name = new_command["name"]
         if command_name in self._commands_available:
-            self._commands_available[command_name](new_command["data"])
+            self._commands_available[command_name](new_command)
+            
 
     def status_update(self, new_status):
         status_name = new_status["name"]

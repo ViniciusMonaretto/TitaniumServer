@@ -30,7 +30,24 @@ class StatusSaver(ServiceInterface):
     
 
     def get_table_info_command(self, command):
-        pass
+        data = command["data"]
+
+        table_name = data["table"]
+        gateway = data["gateway"]
+        
+        conn = sqlite3.connect(DB_NAME)
+        cursor = conn.cursor()
+        if(gateway):
+            table_name = gateway + '-' + table_name
+
+        cursor.execute(f'SELECT * FROM "{table_name}"')
+
+        data = {'info': cursor.fetchall()}
+
+        conn.commit()
+        conn.close()
+
+        self._middleware.send_command_answear( data, command["requestId"])
 
     def initialize_data_bank(self):
         conn = sqlite3.connect(DB_NAME)
