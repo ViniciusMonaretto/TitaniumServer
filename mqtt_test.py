@@ -7,7 +7,7 @@ from datetime import datetime
 # Define the broker and port
 BROKER = "mqtt.eclipseprojects.io"
 PORT = 1883
-TOPIC = "/titanium/1C692031BE04/temperature"
+TOPIC = "/titanium/1C692031BE04/tag"
 
 # Callback for successful connection
 def on_connect(client, userdata, flags, rc):
@@ -36,7 +36,7 @@ try:
         timestamp = datetime.utcnow().isoformat() + "Z"  # ISO 8601 UTC format
         # Create a JSON payload
         payload = {
-            "value": temperature,
+            "value": "Jalin Habei",
             "timestamp": timestamp
         }
         # Convert the payload to a JSON string

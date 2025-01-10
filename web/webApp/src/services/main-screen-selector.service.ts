@@ -8,7 +8,7 @@ type Panel = Array<SensorModule>
 })
 export class MainScreenSelector {
     
-    screenOption: MainScreenOptions = MainScreenOptions.SENSORS
+    screenOption: MainScreenOptions = MainScreenOptions.STATUS_LOG
     
     constructor() 
     { 

@@ -8,17 +8,32 @@ import {ServerConectorService} from "../../services/server-conector.service"
 })
 export class TableViewComponent implements OnInit {
 
-  constructor(private serverConnector: ServerConectorService) { }
-
-  array: Array<any> = []
-  headerInfo: Array<any> = ['value', 'timestamp']
-
-  ngOnInit(): void {
+  constructor(private serverConnector: ServerConectorService) { 
+    //this.getTable()
   }
 
-  getTAble(): void{
-    this.serverConnector.sendRequestForTableInfo("1C692031BE04", "temperature", (value: any)=>{
+  refreshing: boolean = false
+  array: Array<any> = []
+  /*[
+    {"person": 'Thomas Turbando', "time": new Date(Date.now()).toISOString()},
+    {"person": 'Jalin Habei', "time": new Date(Date.now()).toISOString()},
+    {"person": 'Oscar Alho', "time": new Date(Date.now()).toISOString()},
+    {"person": 'Paula Noku', "time": new Date(Date.now()).toISOString()},
+    {"person": 'Cuca Beludo', "time": new Date(Date.now()).toISOString()},
+    {"person": 'Ana Konda', "time": new Date(Date.now()).toISOString()},
+    {"person": 'Caio Pinto', "time": new Date(Date.now()).toISOString()}
+  ]*/
+  headerInfo: Array<any> = [["value", "Pessoa"], ["timestamp","Data"]]//['value', 'timestamp']
+  gateway: string = ""
+  table: string = "tag"
+
+  ngOnInit(): void {}
+
+  getTable(): void{
+    this.refreshing = true
+    this.serverConnector.sendRequestForTableInfo(this.gateway, this.table, (value: any)=>{
       this.array = value.info
+      this.refreshing = false
     })
 
   }

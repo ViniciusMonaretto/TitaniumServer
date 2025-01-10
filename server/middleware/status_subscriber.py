@@ -8,8 +8,8 @@ class StatuSubscribers(SubscriberInterface):
         self._count = 0
         self._id = id
 
-    def on_status(self, status_name, data):
-        self._callback({ 'name': status_name, 'data': data}) 
+    def on_status(self, status_name, data, sub_status_name):
+        self._callback({ 'name': status_name, 'data': data, 'subStatusName': sub_status_name}) 
 
     def add_count(self):
         self._count+=1

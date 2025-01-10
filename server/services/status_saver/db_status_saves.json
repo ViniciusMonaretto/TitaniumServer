@@ -9,6 +9,11 @@
             "gateway": "1C692031BE04",
             "topic": "humidity",
             "tableConfig": "CREATE TABLE IF NOT EXISTS '1C692031BE04-humidity' (id INTEGER PRIMARY KEY AUTOINCREMENT,value NUMBER,timestamp TEXT)"
+        },
+        {
+            "gateway": "*",
+            "topic": "tag",
+            "tableConfig": "CREATE TABLE IF NOT EXISTS 'tag' (id INTEGER PRIMARY KEY AUTOINCREMENT,value TEXT,timestamp TEXT)"
         }
     ]
 }

@@ -7,10 +7,11 @@ from typing import List
 from collections.abc import Callable
 
 class SubscriberManager:
-    _subscriber_map = {}
+   
 
-    def __init__(self, status_name, lock):
-        self._status_name = status_name
+    def __init__(self, status, lock):
+        self._status_name = status._status
+        self._subscriber_map = {}
     
     def add_subscriber(self, subscriber: SubscriberInterface):
         self._subscriber_map[subscriber.get_id()] = subscriber
@@ -25,7 +26,7 @@ class SubscriberManager:
     def send_status(self, status_name, data):
         for subscriber_id in self._subscriber_map:
             subscriber = self._subscriber_map[subscriber_id]
-            subscriber.on_status(status_name, data)
+            subscriber.on_status(status_name, data, self._status_name)
 
 class Middleware:
     def __init__(self):
@@ -111,7 +112,14 @@ class ClientMiddleware:
         command_name = new_command["name"]
         if command_name in self._commands_available:
             self._commands_available[command_name](new_command)
-            
+
+    def check_if_subscribed(self, sub_status_name: str, status_name: str):
+        sub_info = sub_status_name.split('/')
+        status_info = status_name.split('/')
+
+        bGatewayMatch = (sub_info[0] == '*') or (sub_info[0] == status_info[0])
+        bTopicMatch = (sub_info[1] == '*') or (sub_info[1] == status_info[1])
+        return bGatewayMatch and bTopicMatch
 
     def status_update(self, new_status):
         status_name = new_status["name"]
@@ -119,6 +127,6 @@ class ClientMiddleware:
 
         data_converted = self._data_converter.convert_data(status_name, data)
         for sub_status_name, subscriber in self._subscribers.items():
-            if sub_status_name == status_name:
+            if self.check_if_subscribed(sub_status_name, status_name):
                 subscriber.send_status(status_name, data_converted)
         

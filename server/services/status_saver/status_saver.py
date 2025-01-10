@@ -36,13 +36,16 @@ class StatusSaver(ServiceInterface):
         gateway = data["gateway"]
         
         conn = sqlite3.connect(DB_NAME)
+        conn.row_factory = sqlite3.Row
         cursor = conn.cursor()
         if(gateway):
             table_name = gateway + '-' + table_name
 
         cursor.execute(f'SELECT * FROM "{table_name}"')
 
-        data = {'info': cursor.fetchall()}
+        rows = cursor.fetchall()
+
+        data = {'info': [dict(row) for row in rows]}
 
         conn.commit()
         conn.close()
@@ -75,10 +78,19 @@ class StatusSaver(ServiceInterface):
         self._middleware.add_subscribe_to_status(self._status_subscribers[topic], topic)
         self._subscriptions_add+=1
     
+    def get_table_name(self, status_info):
+        stat_info = status_info['name'].split('/')
+        sub_info = status_info['subStatusName'].split('/')
+
+        if(sub_info[0] == '*'):
+            return stat_info[1]
+        else:
+            return stat_info[0] + '-' + stat_info[1]
+
     def save_status_on_db(self, status_info):
         conn = sqlite3.connect(DB_NAME)
         cursor = conn.cursor()
-        status_name = status_info['name'].replace('/', '-')
+        status_name = self.get_table_name(status_info)
 
         cursor.execute(f'INSERT INTO "{status_name}" (timestamp, value) VALUES (?, ?)', (datetime.now().isoformat(), status_info["data"]))
 

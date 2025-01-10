@@ -1,9 +1,26 @@
-<div>
+<div class="main-table-screen">
     <div class="footer-measure">
-        <button mat-icon-button  (click)="getTAble()">
-            Get Table
+        <mat-form-field appearance="fill">
+            <mat-label>Gateway</mat-label>
+            <input matInput [(ngModel)]="gateway" />
+        </mat-form-field>
+        <mat-form-field appearance="fill">
+            <mat-label>Table</mat-label>
+            <input matInput [(ngModel)]="table" />
+        </mat-form-field>
+        <button mat-icon-button  (click)="getTable()">
+            <mat-icon>refresh</mat-icon>
         </button>
     </div>
-    <info-table [fieldsInfo]="headerInfo" [tableInfo]="array"></info-table>
+    <ng-container *ngIf="array.length; else noSize" >
+        <info-table *ngIf="!refreshing" style="width: 100%;" [fieldsInfo]="headerInfo" [tableInfo]="array"></info-table>
+        <div *ngIf="refreshing">
+            Refreshing Info...
+        </div>
+    </ng-container>
+    <ng-template #noSize>
+        No info selected
+    </ng-template>
+    
 </div>
 

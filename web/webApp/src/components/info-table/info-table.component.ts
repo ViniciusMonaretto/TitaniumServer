@@ -8,8 +8,19 @@ import { Component, OnInit, Input } from '@angular/core';
 export class InfoTableComponent {
 
   @Input() tableInfo: Array<any> = []
-  @Input() fieldsInfo: Array<string> = []
+  @Input() fieldsInfo: Array<Array<string>> = []
 
   constructor() { }
+
+  getFieldsInfo()
+  {
+    let array = []
+    for(let field of this.fieldsInfo)
+    {
+      array.push(field[0])
+    }
+
+    return array;
+  }
 
 }
