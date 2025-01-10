@@ -9,6 +9,7 @@ import { SensorTypesEnum } from 'src/enum/sensor-type';
 })
 export class SensorComponent implements OnInit {
   @Input() sensorInfo: SensorModule = new SensorModule()
+  @Output() clickCallback: EventEmitter<any> = new EventEmitter();
   @Output() deleteCallback: EventEmitter<any> = new EventEmitter();
   
   public sensorTypes = Object.values(SensorTypesEnum);
@@ -40,6 +41,11 @@ export class SensorComponent implements OnInit {
   deletePanel()
   {
     this.deleteCallback.emit(this.sensorInfo.id)
+  }
+
+  infoCLick()
+  {
+    this.clickCallback.emit(this.sensorInfo)
   }
 
   getCurrentReading()

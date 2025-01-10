@@ -4,6 +4,7 @@ import {MatDialog} from '@angular/material/dialog';
 import {SensorAddWindowComponent} from '../../components/sensor-add-window/sensor-add-window.component'
 
 import {ServerConectorService} from "../../services/server-conector.service"
+import {UiPanelService} from "../../services/ui-panels.service"
 
 @Component({
   selector: 'group-of-sensors',
@@ -15,7 +16,7 @@ export class GroupOfSensorsComponent implements OnInit {
   @Input() name: string = "";
   @Input() sensorArray: Array<SensorModule> = [];
 
-  constructor(public dialog: MatDialog, private serverConnector: ServerConectorService) { }
+  constructor(public dialog: MatDialog, private serverConnector: ServerConectorService, private UiPanelsService: UiPanelService) { }
 
   ngOnInit(): void {
   }
@@ -35,5 +36,10 @@ export class GroupOfSensorsComponent implements OnInit {
   removeSensorCallback(sensorData: any): void {
     console.log('Sensor removed:', sensorData);
     this.serverConnector.sendCommand("removePanel", sensorData)
+  }
+
+  selectSensor(sensorInfo: any)
+  {
+    this.UiPanelsService.setelectSensor(sensorInfo)
   }
 }

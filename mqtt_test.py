@@ -36,7 +36,7 @@ try:
         timestamp = datetime.utcnow().isoformat() + "Z"  # ISO 8601 UTC format
         # Create a JSON payload
         payload = {
-            "value": "Jalin Habei",
+            "value": "Ana Conda",
             "timestamp": timestamp
         }
         # Convert the payload to a JSON string
@@ -44,7 +44,7 @@ try:
         # Publish the JSON payload to the topic
         client.publish(TOPIC, payload_json)
         print(f"Published: {payload_json} to topic {TOPIC}")
-        time.sleep(5)  # Wait for 5 seconds before sending the next message
+        time.sleep(30)  # Wait for 5 seconds before sending the next message
 except KeyboardInterrupt:
     print("Stopping the client.")
     client.loop_stop()  # Stop the loop

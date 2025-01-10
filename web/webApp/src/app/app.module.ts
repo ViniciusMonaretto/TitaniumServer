@@ -17,6 +17,7 @@ import { SensorComponent } from 'src/components/sensor/sensor.component';
 import { SideNavOptionComponent } from 'src/components/side-nav-option/side-nav-option.component';
 import { GroupOfSensorsComponent } from 'src/components/group-of-sensors/group-of-sensors.component';
 import { InfoTableComponent } from 'src/components/info-table/info-table.component';
+import {SensorInfoComponent} from  'src/components/sensor-info/sensor-info.component'
 
 //Angular Material
 import {MatSidenavModule} from '@angular/material/sidenav';
@@ -29,6 +30,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatInputModule } from '@angular/material/input'; 
 import {MatCardModule} from '@angular/material/card'; 
 import {MatTableModule} from '@angular/material/table'; 
+
 
 
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
@@ -44,7 +46,8 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
     SensorGroupComponent,
     GroupOfSensorsComponent,
     InfoTableComponent,
-    TableViewComponent
+    TableViewComponent,
+    SensorInfoComponent
   ],
   imports: [
     BrowserModule,

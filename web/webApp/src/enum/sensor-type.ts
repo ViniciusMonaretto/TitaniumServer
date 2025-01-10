@@ -1,5 +1,6 @@
 export enum SensorTypesEnum {
     PREASSURE = "Pressure",
     TEMPERATURE = "Temperature",
-    HUMIDITY = "Humidity"
+    HUMIDITY = "Humidity",
+    STRING = "String"
 }

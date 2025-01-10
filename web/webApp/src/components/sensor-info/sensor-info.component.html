@@ -1,0 +1,24 @@
+<mat-card>
+    <mat-card-title>{{sensorInfo.name}}</mat-card-title>
+    <mat-card-content>
+      <div class="main-group-div">
+        <ng-container *ngIf="array.length; else noSize" >
+            <div>
+                {{currentReadingInternal}}
+            </div>
+            <info-table *ngIf="!refreshing" style="width: 100%;" [fieldsInfo]="headerInfo" [tableInfo]="array"></info-table>
+            <div *ngIf="refreshing">
+                Refreshing Info...
+            </div>
+        </ng-container>
+        <ng-template #noSize>
+            No info selected
+        </ng-template>
+      </div>
+        
+    </mat-card-content>
+    <mat-card-actions align="end">
+      <button mat-button (click)="return()">Add Sensor</button>
+    </mat-card-actions>
+</mat-card>
+

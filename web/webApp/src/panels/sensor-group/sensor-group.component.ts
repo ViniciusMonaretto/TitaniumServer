@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { UiPanelService } from "../../services/ui-panels.service"
+import { SensorModule } from 'src/models/sensor-module';
 
 @Component({
   selector: 'sensor-groups',
@@ -23,6 +24,11 @@ export class SensorGroupComponent implements OnInit {
   {
     let info = Object.keys(this.UiPanelsService.GetUiConfig())
     return info
+  }
+
+  getSensorSelected(): any
+  {
+    return this.UiPanelsService.GetSelectedSensor()
   }
 
 }

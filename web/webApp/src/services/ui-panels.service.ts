@@ -9,6 +9,8 @@ export class UiPanelService {
     
     panels: {[id: string]:Panel} = {}
     subscriptioSensornDic: {[id: string]: Array<SensorModule>} = {}
+
+    private selectedSensor: SensorModule|null = null
     
     constructor() 
     { 
@@ -49,6 +51,16 @@ export class UiPanelService {
           sensor.value = value
         }
       }
+    }
+
+    public setelectSensor(model: SensorModule|null)
+    {
+      this.selectedSensor = model
+    }
+  
+    public GetSelectedSensor()
+    {
+      return this.selectedSensor
     }
 
 }

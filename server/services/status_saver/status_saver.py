@@ -45,12 +45,12 @@ class StatusSaver(ServiceInterface):
 
         rows = cursor.fetchall()
 
-        data = {'info': [dict(row) for row in rows]}
+        data_out = {'info': [dict(row) for row in rows], 'tableName': table_name}
 
         conn.commit()
         conn.close()
 
-        self._middleware.send_command_answear( data, command["requestId"])
+        self._middleware.send_command_answear( data_out, command["requestId"])
 
     def initialize_data_bank(self):
         conn = sqlite3.connect(DB_NAME)
