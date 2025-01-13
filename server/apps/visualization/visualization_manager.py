@@ -18,7 +18,7 @@ ui_visualizer_lock = Lock()
 
 class Visualization(tornado.web.RequestHandler):
     def get(self):
-        self.render("../../web/titanium-server/dist/titanium-server/src/index.html")
+        self.render("../../../web/webApp/dist/web-app/index.html")
 
 class VisualizationWebSocketHandler(tornado.websocket.WebSocketHandler):
     _panels_count = 1

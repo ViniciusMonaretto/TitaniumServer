@@ -12,8 +12,8 @@
         },
         {
             "gateway": "*",
-            "topic": "tag",
-            "tableConfig": "CREATE TABLE IF NOT EXISTS 'tag' (id INTEGER PRIMARY KEY AUTOINCREMENT,value TEXT,timestamp TEXT)"
+            "topic": "tag_uuid",
+            "tableConfig": "CREATE TABLE IF NOT EXISTS 'tag_uuid' (id INTEGER PRIMARY KEY AUTOINCREMENT,value TEXT,timestamp TEXT)"
         }
     ]
 }

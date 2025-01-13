@@ -17,7 +17,7 @@
         {
             "name": "Tags",
             "gateway": "*",
-            "topic": "tag",
+            "topic": "tag_uuid",
             "sensorType": "String",
             "id": "587ec1e5-dd83-422b-b7f8-04804cb3109d"
         }

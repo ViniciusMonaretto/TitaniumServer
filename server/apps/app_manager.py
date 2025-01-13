@@ -6,6 +6,7 @@ from .visualization.visualization_manager import Visualization, VisualizationWeb
 from middleware.middleware import ClientMiddleware
 
 import tornado.web
+import os
 
 class AppManager:
     def __init__(self, middleware):
@@ -38,11 +39,13 @@ class AppServer:
         self._middleware.run_middleware_update()
 
     def make_app(self):
+        base_dir = os.path.dirname(__file__)  # Current directory of the server script
+        angular_dist = os.path.join(base_dir, "../../web/webApp/dist/web-app")
         return tornado.web.Application([
             (r"/", Visualization),
             (r"/websocket", VisualizationWebSocketHandler, {'middleware': self._middleware}),
             (r"/test", ServerHandler),
-            (r"/(.*)", tornado.web.StaticFileHandler, {"path": "C:/Titanium/TitaniumServer/web/titanium-server/dist/titanium-server"})
+            (r"/(.*\.(js|css|ico|png|jpg|jpeg|woff|woff2|ttf|svg))", tornado.web.StaticFileHandler, {"path": angular_dist})
         ],
         static_path="C:/Titanium/TitaniumServer/web/titanium-server/dist/titanium-server")
     

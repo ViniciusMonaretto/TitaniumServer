@@ -125,7 +125,7 @@ class ClientMiddleware:
         status_name = new_status["name"]
         data = new_status["data"]
 
-        data_converted = self._data_converter.convert_data(status_name, data)
+        data_converted = self._data_converter.convert_data(status_name.split('/')[1], data)
         for sub_status_name, subscriber in self._subscribers.items():
             if self.check_if_subscribed(sub_status_name, status_name):
                 subscriber.send_status(status_name, data_converted)
