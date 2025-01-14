@@ -1,2 +1,2 @@
 tornado==6.4.1
-paho-mqtt==6.4.1
+paho-mqtt
