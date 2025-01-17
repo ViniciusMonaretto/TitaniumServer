@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import {ServerConectorService} from "../../services/server-conector.service"
+import {UiPanelService} from "../../services/ui-panels.service"
 
 @Component({
   selector: 'table-view',
@@ -8,7 +9,7 @@ import {ServerConectorService} from "../../services/server-conector.service"
 })
 export class TableViewComponent implements OnInit {
 
-  constructor(private serverConnector: ServerConectorService) { 
+  constructor(private serverConnector: ServerConectorService, private uiPanelService: UiPanelService) { 
     //this.getTable()
   }
 
@@ -31,11 +32,13 @@ export class TableViewComponent implements OnInit {
 
   getTable(): void{
     this.refreshing = true
-    this.serverConnector.sendRequestForTableInfo(this.gateway, this.table, (value: any)=>{
-      this.array = value.info
-      this.refreshing = false
-    })
+    this.serverConnector.sendRequestForTableInfo(this.gateway, this.table)
 
+  }
+
+  getTableInfo()
+  {
+    return this.uiPanelService.GetTableInfo(this.gateway, this.table)
   }
 
 }

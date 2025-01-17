@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { UiPanelService } from "../../services/ui-panels.service"
-import { SensorModule } from 'src/models/sensor-module';
+import { ServerConectorService } from "../../services/server-conector.service"
 
 @Component({
   selector: 'sensor-groups',
@@ -9,7 +9,7 @@ import { SensorModule } from 'src/models/sensor-module';
 })
 export class SensorGroupComponent implements OnInit {
 
-  constructor(private UiPanelsService: UiPanelService) { }
+  constructor(private UiPanelsService: UiPanelService, private ServerConectorService: ServerConectorService) { }
 
   ngOnInit(): void {
   }
@@ -29,6 +29,26 @@ export class SensorGroupComponent implements OnInit {
   getSensorSelected(): any
   {
     return this.UiPanelsService.GetSelectedSensor()
+  }
+
+  getSensorTable(): any
+  {
+    let sensor = this.UiPanelsService.GetSelectedSensor()
+    if(!sensor)
+    {
+      return null
+    }
+    return this.UiPanelsService.GetTableInfo(sensor.gateway, sensor.topic)
+  }
+
+  diselectSensor()
+  {
+    this.UiPanelsService.setelectSensor(null)
+  }
+
+  loadInfo(tableInfo:any)
+  {
+    this.ServerConectorService.sendRequestForTableInfo(tableInfo['gateway'], tableInfo['table'])
   }
 
 }

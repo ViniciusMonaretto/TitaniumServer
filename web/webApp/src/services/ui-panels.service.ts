@@ -9,6 +9,7 @@ export class UiPanelService {
     
     panels: {[id: string]:Panel} = {}
     subscriptioSensornDic: {[id: string]: Array<SensorModule>} = {}
+    tablesInfo: {[key: string]: any[]} = {}
 
     private selectedSensor: SensorModule|null = null
     
@@ -50,7 +51,30 @@ export class UiPanelService {
         {
           sensor.value = value
         }
+        let topicInfo = topic.split('/')
+        let tableFullName = this.GetTableName(topicInfo[0], topicInfo[1])
+        if( this.tablesInfo[tableFullName])
+        {
+          this.tablesInfo[tableFullName].push({"value": value, "timestamp":new Date().toISOString()})
+          this.tablesInfo[tableFullName] = JSON.parse(JSON.stringify(this.tablesInfo[tableFullName]));
+        }
       }
+    }
+
+    public OnTableUpdate(data: any)
+    {
+      this.tablesInfo[data.tableName] = data.info
+    }
+
+    GetTableName(gateway:string, table: string)
+    {
+      return gateway == "*"?table:gateway + '-' + table
+    }
+
+    GetTableInfo(gateway:string, table: string)
+    {
+      let tableFullName = this.GetTableName(gateway, table)
+      return this.tablesInfo[tableFullName]
     }
 
     public setelectSensor(model: SensorModule|null)

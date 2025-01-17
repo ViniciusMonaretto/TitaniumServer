@@ -2,11 +2,11 @@
     <mat-card-title>{{sensorInfo.name}}</mat-card-title>
     <mat-card-content>
       <div class="main-group-div">
-        <ng-container *ngIf="array.length; else noSize" >
+        <ng-container *ngIf="tableArray.length; else noSize" >
             <div>
-                {{currentReadingInternal}}
+                {{currentReading}}
             </div>
-            <info-table *ngIf="!refreshing" style="width: 100%;" [fieldsInfo]="headerInfo" [tableInfo]="array"></info-table>
+            <info-table *ngIf="!refreshing" style="width: 100%;" [fieldsInfo]="headerInfo" [tableInfo]="tableArray"></info-table>
             <div *ngIf="refreshing">
                 Refreshing Info...
             </div>

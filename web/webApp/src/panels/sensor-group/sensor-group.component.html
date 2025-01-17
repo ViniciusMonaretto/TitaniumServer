@@ -1,7 +1,10 @@
 <div class="group-div-display">
-    <sensor-info *ngIf="getSensorSelected()" [sensorInfo]="getSensorSelected()" [currentReading]="getSensorSelected().value" >
-
-    </sensor-info>
+    <sensor-info *ngIf="getSensorSelected()" 
+                 [sensorInfo]="getSensorSelected()" 
+                 [currentReading]="getSensorSelected().value"
+                 [tableArray]="getSensorTable()"
+                 (onExit)="diselectSensor()"
+                 (onLoad)="loadInfo($event)" ></sensor-info>
     <div *ngIf="!getSensorSelected()">
         <group-of-sensors 
             *ngFor="let groupName of getGroupSensorUi()" 

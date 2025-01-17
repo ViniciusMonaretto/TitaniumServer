@@ -10,8 +10,6 @@ export class ServerConectorService {
   private socket: WebSocket | null;
   private wsUrl = 'ws://localhost:8888/websocket'
 
-  private tableCallbacks = new Map<string, Array<Function>>()
-
   private reconnectAttempts: number = 0;
   private maxReconnectAttempts: number = 10;
   private reconnectDelay: number = 2000;
@@ -31,8 +29,6 @@ export class ServerConectorService {
     this.socket.onclose = () => {this.onDisconnection()}
 
     this.socket.onerror = (err) => {this.onError(err)}
-
-    this.tableCallbacks =  new Map<string, Array<Function>>()
 
     this.socket.onopen = () => {
       console.log('WebSocket connected successfully!');
@@ -62,20 +58,9 @@ export class ServerConectorService {
     }
   }
 
-  public addCallbackTable(gateway: string| null, table: string, callback: Function)
-  {
-    let tableFullName = gateway == ""?table:gateway + '-' + table
-    if(!this.tableCallbacks.has(tableFullName))
-    {
-      this.tableCallbacks.set(tableFullName, [])
-    }
-    this.tableCallbacks.get(tableFullName)?.push(callback)
-    return 
-  }
 
-  public sendRequestForTableInfo(gateway: string| null, table: string, callback: Function)
+  public sendRequestForTableInfo(gateway: string| null, table: string)
   {
-    this.addCallbackTable(gateway, table, callback)
     this.sendCommand("getStatusHistory", {"gateway": gateway, "table": table})
   }
 
@@ -107,13 +92,7 @@ export class ServerConectorService {
     else if(data["status"] == "statusInfo")
     {
       let message = data["message"]
-      if(this.tableCallbacks.has(message["data"]["tableName"]))
-      { 
-        this.tableCallbacks.get(message["data"]["tableName"])?.forEach(tableCallback => {
-          tableCallback(message["data"])
-        });
-        
-      }
+      this.uiPanelService.OnTableUpdate(message["data"])
     }
   }
 
