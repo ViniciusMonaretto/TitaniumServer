@@ -2,9 +2,9 @@
     <mat-card-title>{{sensorInfo.name}}</mat-card-title>
     <mat-card-content>
       <div class="main-group-div">
-        <ng-container *ngIf="tableArray.length; else noSize" >
-            <div>
-                {{currentReading}}
+        <ng-container  *ngIf="tableArray && tableArray.length; else noSize" >
+            <div class="sensor-info-container">
+                Current Value: {{getCurrentValue()}}
             </div>
             <info-table *ngIf="!refreshing" style="width: 100%;" [fieldsInfo]="headerInfo" [tableInfo]="tableArray"></info-table>
             <div *ngIf="refreshing">

@@ -31,6 +31,11 @@ export class SensorInfoComponent implements OnInit {
     this.onExit.emit()
   }
 
+  getCurrentValue()
+  {
+    return this.currentReading && this.currentReading != "" ? this.currentReading:"???" 
+  }
+
   getStatusHistory()
   {
     let gtw = this.sensorInfo.gateway=="*"?"":this.sensorInfo.gateway 
