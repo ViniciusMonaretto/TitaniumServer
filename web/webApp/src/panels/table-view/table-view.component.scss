@@ -1,9 +1,26 @@
 .main-table-screen
 {
     display: flex;
-    justify-content: center;
+    justify-content: flex-start;
     flex-direction: column;
 
     padding-left: 10%;
     padding-right: 10%;
+
+    height: 100%;
+
+}
+
+.graph-table
+{
+    height: 80%;
+    border-width: 1px;
+    border-style: solid;
+    background-color: #f3f2f3;
+}
+
+.requester {
+    padding-top: 20px;
+    display: flex;
+    align-items: center;
 }

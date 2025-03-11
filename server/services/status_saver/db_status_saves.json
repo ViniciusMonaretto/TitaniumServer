@@ -6,6 +6,16 @@
             "tableConfig": "CREATE TABLE IF NOT EXISTS '1C692031BE04-temperature' (id INTEGER PRIMARY KEY AUTOINCREMENT,value NUMBER,timestamp TEXT)"
         },
         {
+            "gateway": "1C692031BE05",
+            "topic": "temperature",
+            "tableConfig": "CREATE TABLE IF NOT EXISTS '1C692031BE05-temperature' (id INTEGER PRIMARY KEY AUTOINCREMENT,value NUMBER,timestamp TEXT)"
+        },
+        {
+            "gateway": "1C692031BE06",
+            "topic": "temperature",
+            "tableConfig": "CREATE TABLE IF NOT EXISTS '1C692031BE06-temperature' (id INTEGER PRIMARY KEY AUTOINCREMENT,value NUMBER,timestamp TEXT)"
+        },
+        {
             "gateway": "1C692031BE04",
             "topic": "humidity",
             "tableConfig": "CREATE TABLE IF NOT EXISTS '1C692031BE04-humidity' (id INTEGER PRIMARY KEY AUTOINCREMENT,value NUMBER,timestamp TEXT)"

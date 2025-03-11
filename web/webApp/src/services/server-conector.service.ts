@@ -59,9 +59,14 @@ export class ServerConectorService {
   }
 
 
-  public sendRequestForTableInfo(gateway: string| null, table: string)
+  public sendRequestForTableInfo(gateway: string| null, table: string, timestamp?: Date | null)
   {
-    this.sendCommand("getStatusHistory", {"gateway": gateway, "table": table})
+    let obj: any = {"gateway": gateway, "table": table}
+    if(timestamp)
+    {
+      obj["timestamp"] = timestamp
+    }
+    this.sendCommand("getStatusHistory", obj)
   }
 
   public sendCommand(commandName: string, payload: any)
@@ -92,7 +97,7 @@ export class ServerConectorService {
     else if(data["status"] == "statusInfo")
     {
       let message = data["message"]
-      this.uiPanelService.OnTableUpdate(message["data"])
+      this.uiPanelService.OnSubscriptionUpdate(message["data"].tableName, message["data"].info)
     }
   }
 

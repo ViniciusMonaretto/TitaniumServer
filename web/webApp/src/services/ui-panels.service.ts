@@ -8,7 +8,7 @@ type Panel = Array<SensorModule>
 export class UiPanelService {
     
     panels: {[id: string]:Panel} = {}
-    subscriptioSensornDic: {[id: string]: Array<SensorModule>} = {}
+    subscriptioMap: {[id: string]: Array<SensorModule | Function>} = {}
     tablesInfo: {[key: string]: any[]} = {}
 
     private selectedSensor: SensorModule|null = null
@@ -33,37 +33,79 @@ export class UiPanelService {
     {
       for(var sensor of panel)
       {
-        let fullTopic = sensor.gateway + '/' + sensor.topic
-        if(! (fullTopic in this.subscriptioSensornDic) )
-        {
-          this.subscriptioSensornDic[fullTopic] = []
-        }
-
-        this.subscriptioSensornDic[fullTopic].push(sensor)
+        let fullTopic = this.GetTableName(sensor.gateway, sensor.topic)
+        this.AddSubscription(fullTopic, sensor)
       }
     }
 
-    OnSubscriptionUpdate(topic: string, value: number)
+    AddSubscriptionFromGraph(gateway: string, topic: string, callback: Function)
     {
-      if(topic in this.subscriptioSensornDic)
+      let fullTopic = this.GetTableName(gateway, topic)
+      return this.AddSubscription(fullTopic, callback)
+    } 
+
+    AddSubscription(fullTopic: string, callbackObj: Function | SensorModule)
+    {
+      if(! (fullTopic in this.subscriptioMap) )
       {
-        for(let sensor of this.subscriptioSensornDic[topic])
+        this.subscriptioMap[fullTopic] = []
+      }
+
+      this.subscriptioMap[fullTopic].push(callbackObj)
+      if(typeof callbackObj === 'function')
+      {
+        callbackObj(fullTopic)
+      }
+      return this.subscriptioMap[fullTopic].length
+    }
+
+    OnSubscriptionUpdate(topic: string, value: any)
+    {
+      let tableFullName = topic
+      let topicInfo = []
+      if(topic.indexOf('/') != -1)
+      {
+        topicInfo = topic.split('/')
+        
+      }
+      else
+      {
+        topicInfo = topic.split('-')
+      }
+  
+      tableFullName = this.GetTableName(topicInfo[0], topicInfo[1])
+      
+      if(tableFullName in this.subscriptioMap)
+      {
+        
+        if( Array.isArray(value))
         {
-          sensor.value = value
+          this.tablesInfo[tableFullName] = value
         }
-        let topicInfo = topic.split('/')
-        let tableFullName = this.GetTableName(topicInfo[0], topicInfo[1])
-        if( this.tablesInfo[tableFullName])
+        else
         {
+          if( !this.tablesInfo[tableFullName])
+          {
+            this.tablesInfo[tableFullName] = []
+          }
           this.tablesInfo[tableFullName].push({"value": value, "timestamp":new Date().toISOString()})
           this.tablesInfo[tableFullName] = JSON.parse(JSON.stringify(this.tablesInfo[tableFullName]));
         }
-      }
-    }
+        
 
-    public OnTableUpdate(data: any)
-    {
-      this.tablesInfo[data.tableName] = data.info
+        for(let callbackObj of this.subscriptioMap[tableFullName])
+        {
+          if("topic" in callbackObj )
+          {
+            callbackObj.value = value
+          }
+          else
+          {
+            callbackObj(tableFullName)
+          }
+          
+        }
+      }
     }
 
     GetTableName(gateway:string, table: string)
@@ -75,6 +117,13 @@ export class UiPanelService {
     {
       let tableFullName = this.GetTableName(gateway, table)
       return this.tablesInfo[tableFullName]
+    }
+
+    GetTableInfoFromTablename(tableFullName: string)
+    {
+      if(tableFullName in this.tablesInfo)
+        return this.tablesInfo[tableFullName]
+      return []
     }
 
     public setelectSensor(model: SensorModule|null)

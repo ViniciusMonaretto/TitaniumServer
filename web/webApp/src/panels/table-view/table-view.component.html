@@ -1,5 +1,5 @@
 <div class="main-table-screen">
-    <div class="footer-measure">
+    <div class="footer-measure requester">
         <mat-form-field appearance="fill">
             <mat-label>Gateway</mat-label>
             <input matInput [(ngModel)]="gateway" />
@@ -8,19 +8,49 @@
             <mat-label>Table</mat-label>
             <input matInput [(ngModel)]="table" />
         </mat-form-field>
-        <button mat-icon-button  (click)="getTable()">
-            <mat-icon>refresh</mat-icon>
-        </button>
+        
+        <mat-form-field appearance="outline">
+            <mat-label>Select Date</mat-label>
+            <input matInput [matDatepicker]="picker" [(ngModel)]="selectedDate">
+            <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+            <mat-datepicker #picker></mat-datepicker>
+          </mat-form-field>
+          
+          <mat-form-field appearance="outline">
+            <mat-label>Select Time</mat-label>
+            <input matInput type="time" (change)="setTime($event, selectedDate)">
+          </mat-form-field>
+
+          <button mat-icon-button  (click)="getTable()">
+            <mat-icon>add</mat-icon>
+            </button>
+            <button mat-icon-button  (click)="getTable()">
+                <mat-icon>refresh</mat-icon>
+            </button>
     </div>
-    <ng-container *ngIf="array.length; else noSize" >
-        <info-table *ngIf="!refreshing" style="width: 100%;" [fieldsInfo]="headerInfo" [tableInfo]="array"></info-table>
-        <div *ngIf="refreshing">
-            Refreshing Info...
+    <ng-container *ngIf="lineChartData.length; else noSize" >
+        <div class="graph-table">   
+            <div style="padding: 10px; height: 90%;">
+                <ngx-charts-line-chart
+                    [results]="lineChartData"
+                    [scheme]="'vivid'"
+                    [xAxis]="true"
+                    [yAxis]="true"
+                    [yScaleMin]="marginMinY"
+                    [yScaleMax]="marginMaxY"
+                    [legend]="true"
+                    [showGridLines]="true"
+                    [autoScale]="true">
+                </ngx-charts-line-chart>
+            </div>
+            
         </div>
+        
     </ng-container>
     <ng-template #noSize>
         No info selected
     </ng-template>
+    
     
 </div>
 
