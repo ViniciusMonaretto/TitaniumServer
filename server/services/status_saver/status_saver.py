@@ -34,6 +34,7 @@ class StatusSaver(ServiceInterface):
 
         table_name = data["table"]
         gateway = data["gateway"]
+        timestamp = data['timestamp']
         
         conn = sqlite3.connect(DB_NAME)
         conn.row_factory = sqlite3.Row
@@ -41,7 +42,14 @@ class StatusSaver(ServiceInterface):
         if(gateway):
             table_name = gateway + '-' + table_name
 
-        cursor.execute(f'SELECT * FROM "{table_name}"')
+        table_command = f'SELECT * FROM "{table_name}"'
+
+        values = None
+        if(timestamp):
+            table_command += " WHERE timestamp >= ?"
+            values = (timestamp,)
+
+        cursor.execute(table_command, values)
 
         rows = cursor.fetchall()
 
