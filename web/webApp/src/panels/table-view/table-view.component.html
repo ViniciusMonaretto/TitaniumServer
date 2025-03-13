@@ -8,49 +8,57 @@
             <mat-label>Table</mat-label>
             <input matInput [(ngModel)]="table" />
         </mat-form-field>
-        
+
         <mat-form-field appearance="outline">
             <mat-label>Select Date</mat-label>
             <input matInput [matDatepicker]="picker" [(ngModel)]="selectedDate">
             <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
             <mat-datepicker #picker></mat-datepicker>
-          </mat-form-field>
-          
-          <mat-form-field appearance="outline">
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
             <mat-label>Select Time</mat-label>
             <input matInput type="time" (change)="setTime($event, selectedDate)">
-          </mat-form-field>
+        </mat-form-field>
 
-          <button mat-icon-button  (click)="getTable()">
+        <button mat-icon-button (click)="getTable()">
             <mat-icon>add</mat-icon>
-            </button>
-            <button mat-icon-button  (click)="getTable()">
-                <mat-icon>refresh</mat-icon>
-            </button>
+        </button>
+        <button mat-icon-button *ngIf="lineChartData.length;" (click)="removeAllLines()">
+            <mat-icon>refresh</mat-icon>
+        </button>
+        <button mat-icon-button *ngIf="lineChartData.length;" (click)="fitAllGraph()">
+            <mat-icon>fullscreen</mat-icon>
+        </button>
+
+        
     </div>
-    <ng-container *ngIf="lineChartData.length; else noSize" >
-        <div class="graph-table">   
-            <div style="padding: 10px; height: 90%;">
-                <ngx-charts-line-chart
-                    [results]="lineChartData"
-                    [scheme]="'vivid'"
-                    [xAxis]="true"
+    <ng-container *ngIf="lineChartData.length; else noSize">
+        <div class="graph-table">
+            <div style="padding: 10px; height: 90%;" (wheel)="onMouseWheel($event)" (mousedown)="onMouseDown($event)"
+                (mousemove)="onMouseMove($event)" (mouseup)="onMouseUp($event)">
+                <ngx-charts-line-chart 
+                    [results]="filteredData" 
+                    [scheme]="'vivid'" 
+                    [xAxis]="true" 
                     [yAxis]="true"
-                    [yScaleMin]="marginMinY"
-                    [yScaleMax]="marginMaxY"
-                    [legend]="true"
-                    [showGridLines]="true"
-                    [autoScale]="true">
+                    [xScaleMin]="xScaleMin" 
+                    [xScaleMax]="xScaleMax" 
+                    [yScaleMin]="yScaleMin" 
+                    [yScaleMax]="yScaleMax"
+                    [legend]="true" 
+                    [showGridLines]="true" 
+                    [autoScale]="true" 
+                    [animations]="false">
                 </ngx-charts-line-chart>
             </div>
-            
+
         </div>
-        
+
     </ng-container>
     <ng-template #noSize>
         No info selected
     </ng-template>
-    
-    
-</div>
 
+
+</div>

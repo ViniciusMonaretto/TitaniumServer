@@ -38,6 +38,11 @@ export class UiPanelService {
       }
     }
 
+    RemoveGraphSubscription(tableName: string, indexToRemove: number)
+    {
+      this.subscriptioMap[tableName].splice(indexToRemove, 1);
+    }
+
     AddSubscriptionFromGraph(gateway: string, topic: string, callback: Function)
     {
       let fullTopic = this.GetTableName(gateway, topic)
@@ -56,7 +61,7 @@ export class UiPanelService {
       {
         callbackObj(fullTopic)
       }
-      return this.subscriptioMap[fullTopic].length
+      return this.subscriptioMap[fullTopic].length - 1
     }
 
     OnSubscriptionUpdate(topic: string, value: any)

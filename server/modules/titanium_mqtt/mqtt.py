@@ -67,7 +67,7 @@ class TitaniumMqtt:
     def on_message(self, client, userdata, msg):
         msg_split = msg.topic.split('/')
 
-        if not len(msg_split) == 4:
+        if not len(msg_split) == 5:
             print(f"TitaniumMqtt::on_message: mqtt topic {msg.topic} not valid")
             return
 

@@ -24,3 +24,8 @@
     display: flex;
     align-items: center;
 }
+
+ngx-charts-legend-entry {
+    cursor: pointer;
+    pointer-events: all; /* Ensures clicks are registered */
+}
