@@ -1,1 +1,1 @@
-{"panels": [{"name": "Temperature 1", "gateway": "1C692031BE04", "topic": "temperature", "sensorType": "Temperature", "id": "e22fe919-ed02-40aa-961b-60b049ef5979"}]}
+{"panels": [{"name": "Temperature 1", "gateway": "1C692031BE04", "topic": "temperature", "sensorType": "Temperature", "id": "e22fe919-ed02-40aa-961b-60b049ef5979"}, {"name": "Temp2", "gateway": "1C692031BE05", "topic": "temperature", "sensorType": "Temperature", "id": "f860279c-d5a0-41aa-8e31-1973309754ee"}]}

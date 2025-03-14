@@ -20,6 +20,8 @@ export class TableViewComponent implements OnInit {
   xScaleMax: any = new Date()
   refreshing: boolean = false
 
+  moved= false
+
   first: boolean = true
 
   lastMouseX = 0
@@ -111,6 +113,7 @@ export class TableViewComponent implements OnInit {
 
   fitAllGraph() {
     if (this.lineChartData.length > 0) {
+      
       let infos = this.lineChartData[0]
       let minYaxis = Number.MAX_SAFE_INTEGER
       let maxYaxis = Number.MIN_SAFE_INTEGER
@@ -152,8 +155,14 @@ export class TableViewComponent implements OnInit {
       this.xScaleMin = minXaxis
 
       this.xScaleMax.setMinutes(maxXaxis.getMinutes() + 2)
+      this.moved = false
     }
 
+  }
+
+  getXLimits(limit: any)
+  {
+    return this.moved? limit:null
   }
 
   remakeLineFilter()
@@ -223,6 +232,7 @@ export class TableViewComponent implements OnInit {
   }
 
   onMouseWheel(event: WheelEvent) {
+    this.moved = true
     event.preventDefault(); // Prevent default scroll behavior
 
     const zoomFactor = 0.1; // Adjust zoom intensity
@@ -269,6 +279,7 @@ export class TableViewComponent implements OnInit {
   }
 
   onMouseMove(event: MouseEvent) {
+    this.moved = true
     if (!this.isDragging) return;
 
     const deltaX = event.clientX - this.lastMouseX;
