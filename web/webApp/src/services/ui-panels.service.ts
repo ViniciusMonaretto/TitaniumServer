@@ -93,7 +93,7 @@ export class UiPanelService {
           {
             this.tablesInfo[tableFullName] = []
           }
-          this.tablesInfo[tableFullName].push({"value": value, "timestamp":new Date().toISOString()})
+          this.tablesInfo[tableFullName].push({"value": value.data, "timestamp":new Date(value.timestamp).toISOString()})
           this.tablesInfo[tableFullName] = JSON.parse(JSON.stringify(this.tablesInfo[tableFullName]));
         }
         
@@ -102,7 +102,7 @@ export class UiPanelService {
         {
           if("topic" in callbackObj )
           {
-            callbackObj.value = value
+            callbackObj.value = value.data
           }
           else
           {

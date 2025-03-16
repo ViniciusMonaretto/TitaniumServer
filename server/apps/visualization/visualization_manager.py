@@ -4,6 +4,7 @@ import tornado.websocket
 import os
 import json
 import uuid
+from support.logger import Logger 
 
 from threading import Thread
 from threading import Lock
@@ -27,6 +28,7 @@ class VisualizationWebSocketHandler(tornado.websocket.WebSocketHandler):
         return True
 
     def initialize(self, middleware):
+        self._logger = Logger()
         self.id = str(uuid.uuid4())
         self._middleware:ClientMiddleware  = middleware
         self._status_subscribers: dict[str, SubscriberInterface] = {}
@@ -43,9 +45,9 @@ class VisualizationWebSocketHandler(tornado.websocket.WebSocketHandler):
                 self.add_panels(data)
                 self._ui_config = data
 
-                print(f"Processing file: {json_directory}")
+                self._logger.info(f"Processing file: {json_directory}")
             except json.JSONDecodeError as e:
-                print(f"Error processing file {json_directory}: {e}")
+                self._logger.error(f"VisualizationWebSocketHandler:: Error processing file {json_directory}: {e}")
         ui_visualizer_lock.release()
     
     def open(self):
@@ -65,7 +67,7 @@ class VisualizationWebSocketHandler(tornado.websocket.WebSocketHandler):
             elif "getStatusHistory" in messageObj["commandName"]:
                 self.request_status(payload)
             else:
-                print("unknown command: " + messageObj["commandName"])
+                self._logger.error("VisualizationWebSocketHandler:: unknown command: " + messageObj["commandName"])
         except Exception as e:
             print(f"Exception occured on panel message: {e}")
 
