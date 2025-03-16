@@ -1,6 +1,10 @@
 import paho.mqtt.client as mqtt
 import os
-import json
+import threading
+
+import queue
+
+from support.logger import Logger
 
 from .gateway_object import GatewayObject
 from .translators.protobus.gateway_protobuf_factory import GatewayProtobufFactory
@@ -21,66 +25,28 @@ MQTT_PORT = 1883
 
 class TitaniumMqtt:
     def __init__(self, middleware):
+        self._logger = Logger()
         self._subscribe_topic_list = SUBSCRIBE_TOPIC_LIST
         self._publish_topics_list = PUBLISH_TOPIC_LIST
 
+        self._end_thread = False
+
         self._gateways = {}
-
         self._middleware = middleware
-
         self._translator: PayloadTranslator = DirectTranslator()
-
         self._translator.initialize()
 
-   # def register_gateways(self):
-   #     script_directory = os.path.dirname(os.path.abspath(__file__))
-   #     json_directory = os.path.join(script_directory, GATEWAY_CONFIG_DIR)
-   #     for filename in os.listdir(json_directory):
-   #         if filename.endswith('_pb2.py'):  # Check if the file is a valid profibuf file
-   #             gateway = filename.removesuffix("_pb2.py")
-   #             self._gateways[gateway] = GatewayProtobufFactory.create_protobuf_fact(gateway, GATEWAY_CONFIG_DIR)
+        self._read_queue = queue.Queue()
 
-#######
-    def register_gateways(self):
-         script_directory = os.path.dirname(os.path.abspath(__file__))
-         json_directory = os.path.join(script_directory, GATEWAY_CONFIG_DIR)
-         for filename in os.listdir(json_directory):
-             if filename.endswith('.json'):  # Check if the file is a JSON file
-                # Construct the full path to the file
-                file_path = os.path.join(json_directory, filename)
-
-                # Open the JSON file and load its content
-                with open(file_path, 'r') as json_file:
-                    try:
-                        data = json.load(json_file)  # Load the JSON data
-                        # Process the JSON data (replace this with your logic)
-                        self._gateways[data["firmware"]["name"]] = GatewayObject(data["firmware"]["memory_areas"])
-
-                        print(f"Processing file: {filename}")
-                    except json.JSONDecodeError as e:
-                        print(f"Error processing file {filename}: {e}")
+        self._messages_handler = threading.Thread(target=self.handle_incoming_messages, daemon=True)
 
     def on_connect(self, client, userdata, flags, rc):
-        print(f"MqqtServer: Connected with result code {rc}")
+        self._logger.info(f"MqqtServer: Connected with result code {rc}")
         client.subscribe(userdata['subscribe_topics'])
             
     def on_message(self, client, userdata, msg):
-        msg_split = msg.topic.split('/')
-
-        if not len(msg_split) == 5:
-            print(f"TitaniumMqtt::on_message: mqtt topic {msg.topic} not valid")
-            return
-
-        id = str(msg_split[2])
-        #if not id in self._gateways:
-        #    print("TitaniumMqtt::on_message: gateway id not registered")
-        #    return
-        cls = self._translator.translate_payload(msg_split[3], msg.payload, id)
-
-        print(f"Received message: {msg.topic} {cls}")
-
-        topic_name = TitaniumMqtt.get_topic_from_mosquitto_obj(id, cls)
-        self._middleware.send_status(topic_name, cls['data'])
+        self._logger.debug(f"Received message: {msg.topic} {msg.payload}")
+        self._read_queue.put(msg)
 
     def run(self):
         self.client = mqtt.Client()
@@ -95,17 +61,43 @@ class TitaniumMqtt:
         try:
 
             self.client.connect(MQTT_SERVER, MQTT_PORT, 60)
+            self._messages_handler.start()
             self.client.loop_start()
         except Exception as e:
-            print(f"Error Connecting to Mqtt: {e}")
+            self._logger.error(f"Error Connecting to Mqtt: {e}")
     
     def execute(self, command):
         topic = self.get_topic_from_command(command.name)
         self.client.publish(topic, command.message)
     
+    def handle_incoming_messages(self):
+        while(not self._end_thread):
+            try:
+                msg = self._read_queue.get_nowait()
+
+                msg_split = msg.topic.split('/')
+
+                if not len(msg_split) == 5:
+                    self._logger.error(f"TitaniumMqtt::on_message: mqtt topic {msg.topic} not valid")
+                    return
+
+                id = str(msg_split[2])
+                cls = self._translator.translate_payload(msg_split[3], msg.payload, id)
+
+                self._logger.debug(f"Received message: {msg.topic} {cls}")
+
+                topic_name = TitaniumMqtt.get_topic_from_mosquitto_obj(id, cls)
+                self._middleware.send_status(topic_name, {'data': cls['data'], 'timestamp':cls['timestamp']})
+            except queue.Empty as exc:
+                pass
+        
+        
+    
     def stop(self):
+        self._end_thread = True
         self.client.loop_stop()
         self.client.disconnect()
+        self._messages_handler.join()
 
     def get_topic_from_command(self, command):
         if command in  self._publish_topics_list:

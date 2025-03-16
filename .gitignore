@@ -6,6 +6,8 @@ tmp/
 out-tsc/
 bazel-out/
 
+app.log
+
 # Node
 node_modules
 npm-debug.log

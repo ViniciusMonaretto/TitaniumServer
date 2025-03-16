@@ -57,7 +57,7 @@ try:
         payload_json = json.dumps(payload)
         client.publish(TOPIC3, payload_json)
         print(f"Published: {payload_json} to topic {TOPIC}")
-        time.sleep(5)  # Wait for 5 seconds before sending the next message
+        time.sleep(10)  # Wait for 5 seconds before sending the next message
 except KeyboardInterrupt:
     print("Stopping the client.")
     client.loop_stop()  # Stop the loop

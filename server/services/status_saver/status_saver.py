@@ -5,6 +5,8 @@ from datetime import datetime
 from middleware.status_subscriber import StatuSubscribers
 from middleware.middleware import ClientMiddleware
 import uuid
+
+from support.logger import Logger
 from ..service_interface import ServiceInterface
 from .status_saver_commands import Commands
 
@@ -13,6 +15,7 @@ DB_NAME = "titanium_server_db.db"
 
 class StatusSaver(ServiceInterface):
     def __init__(self, middleware: ClientMiddleware):
+        self._logger = Logger()
         self.id = str(uuid.uuid4())
         self._subscriptions_add = 0
         self._status_subscribers = {}
@@ -20,6 +23,8 @@ class StatusSaver(ServiceInterface):
 
         self.initialize_commands()
         self.initialize_data_bank()
+
+        self._logger.info("StatusSaver initialized")
         
     def get_panel_topic(self, gateway, status_name):
         return gateway + "/" + status_name
@@ -78,7 +83,7 @@ class StatusSaver(ServiceInterface):
                 conn.commit()
                 conn.close()
             except json.JSONDecodeError as e:
-                print(f"Error processing file {filename}: {e}")
+                self._logger.error(f"Error processing file {filename}: {e}")
     
     def subscribe_to_status(self, gateway, status_name):
         topic = self.get_panel_topic(gateway, status_name)
@@ -100,7 +105,10 @@ class StatusSaver(ServiceInterface):
         cursor = conn.cursor()
         status_name = self.get_table_name(status_info)
 
-        cursor.execute(f'INSERT INTO "{status_name}" (timestamp, value) VALUES (?, ?)', (datetime.now().isoformat(), status_info["data"]))
+        status_obj = status_info['data']
+
+        cursor.execute(f'INSERT INTO "{status_name}" (timestamp, value) VALUES (?, ?)', 
+                      (datetime.fromisoformat(status_obj["timestamp"]), status_obj["data"]))
 
         conn.commit()
         conn.close()

@@ -1,3 +1,4 @@
+from support.logger import Logger
 from .data_converter.data_converter import DataConverter
 from .subscriber_interface import SubscriberInterface
 import threading
@@ -30,6 +31,7 @@ class SubscriberManager:
 
 class Middleware:
     def __init__(self):
+        self._logger = Logger()
         self._subscriber_queues = []
         self._request_queues = []
 
@@ -60,6 +62,7 @@ class Middleware:
 
 class ClientMiddleware:
     def __init__(self, middleware: Middleware):
+        self._logger = Logger()
         self._lock = threading.Lock()
         self._data_converter = DataConverter()
         self._subscribers = {}
@@ -83,7 +86,7 @@ class ClientMiddleware:
         self._lock.acquire()
         id = subscriber.get_id()
         if(not (status_name in self._subscribers)):
-            print("Middleware::add_subscribe_from_status-> Error, subscriber {id} non existant")
+            self._logger.info("Middleware::add_subscribe_from_status-> Error, subscriber {id} non existant")
             return
         
         self._subscribers[status_name].remove_subscriber(id)
