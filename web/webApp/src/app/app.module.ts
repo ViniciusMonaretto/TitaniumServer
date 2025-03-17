@@ -38,6 +38,7 @@ import { NgxChartsModule } from '@swimlane/ngx-charts'
 
 
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { ErrorDialogComponent } from 'src/components/error-dialog/error-dialog.component';
 
 @NgModule({
   declarations: [
@@ -51,7 +52,8 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
     GroupOfSensorsComponent,
     InfoTableComponent,
     TableViewComponent,
-    SensorInfoComponent
+    SensorInfoComponent,
+    ErrorDialogComponent
   ],
   imports: [
     BrowserModule,

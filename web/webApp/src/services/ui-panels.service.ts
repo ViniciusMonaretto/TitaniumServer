@@ -7,7 +7,7 @@ type Panel = Array<SensorModule>
 })
 export class UiPanelService {
     
-    panels: {[id: string]:Panel} = {}
+    panels: {[id: string]: Panel} = {}
     subscriptioMap: {[id: string]: Array<SensorModule | Function>} = {}
     tablesInfo: {[key: string]: any[]} = {}
 
@@ -18,9 +18,9 @@ export class UiPanelService {
         
     }
 
-    SetNewUiConfig(uiConfig: {'panels': Panel} )
+    SetNewUiConfig(uiConfig: Panel )
     {
-        this.panels["base"] = uiConfig['panels']
+        this.panels["base"] = uiConfig
         this.CreateSensorSubscriptionFromPanel(this.panels["base"])
     }
 

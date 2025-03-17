@@ -2,6 +2,8 @@ import { Injectable } from '@angular/core';
 import {UiPanelService} from './ui-panels.service'
 import { webSocket, WebSocketSubject } from 'rxjs/webSocket';
 import { SensorModule } from 'src/models/sensor-module';
+import { MatDialog } from '@angular/material/dialog';
+import { ErrorDialogComponent } from 'src/components/error-dialog/error-dialog.component';
 
 @Injectable({
   providedIn: 'root'
@@ -13,7 +15,7 @@ export class ServerConectorService {
   private reconnectAttempts: number = 0;
   private maxReconnectAttempts: number = 10;
   private reconnectDelay: number = 2000;
-  constructor(private uiPanelService: UiPanelService) { 
+  constructor(private uiPanelService: UiPanelService, private dialog: MatDialog) { 
     this.socket = null
     setTimeout(()=>{
       this.connectToServer();
@@ -56,6 +58,13 @@ export class ServerConectorService {
     } else {
       console.error('Max reconnection attempts reached.');
     }
+  }
+
+  private openErrorDialog(message: string): void {
+    this.dialog.open(ErrorDialogComponent, {
+      width: '400px',
+      data: { message },
+    });
   }
 
   public formatLocalDateToCustomString(date: Date) {
@@ -116,11 +125,20 @@ export class ServerConectorService {
       let message = data["message"]
       this.uiPanelService.OnSubscriptionUpdate(message["data"].tableName, message["data"].info)
     }
+    else if(data["status"] == "error")
+    {
+      this.openErrorDialog(data["message"])
+    }
+    else
+    {
+      console.log("Status " + data["status"] + " not found")
+    }
   }
 
   // Handle WebSocket errors
   private onError(err: any): void {
     console.error('WebSocket error:', err);
+    this.openErrorDialog('WebSocket error: ' + err)
     // You could reconnect here if necessary
   }
 }

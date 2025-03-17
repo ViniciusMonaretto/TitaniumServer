@@ -14,6 +14,9 @@ class StatuSubscribers(SubscriberInterface):
     def add_count(self):
         self._count+=1
 
+    def has_subscribers(self):
+        return self._count > 0
+
     def get_id(self):
         return self._id
 

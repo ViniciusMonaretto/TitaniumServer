@@ -2,6 +2,7 @@ from threading import Thread
 from time import sleep
 import asyncio
 
+from .config_handler.config_handler import ConfigHandler
 from support.logger import Logger
 
 from middleware.middleware import ClientMiddleware
@@ -14,6 +15,7 @@ class ServiceManager:
         self._middleware = ClientMiddleware(middleware)
 
         self._status_saver = StatusSaver(self._middleware)
+        self._config_handler = ConfigHandler(self._middleware, self._status_saver)
         self._status_saver_thread = Thread(target = self.threaded_function, args = (10, ))
     
     def run(self):

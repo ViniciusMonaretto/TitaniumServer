@@ -35,7 +35,7 @@ try:
         # Generate a random temperature value
         temperature = round(random.uniform(20.0, 30.0), 2)  # Random float between 20.0 and 30.0
         # Get the current timestamp
-        timestamp = datetime.utcnow().isoformat() + "Z"  # ISO 8601 UTC format
+        timestamp = datetime.utcnow().isoformat()  # ISO 8601 UTC format
         # Create a JSON payload
         payload = {
             "value":   round(random.uniform(22.0, 23.5), 2),

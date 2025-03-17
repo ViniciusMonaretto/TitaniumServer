@@ -2,6 +2,7 @@ import sqlite3
 import json
 import os
 from datetime import datetime
+from typing import Union
 from middleware.status_subscriber import StatuSubscribers
 from middleware.middleware import ClientMiddleware
 import uuid
@@ -22,7 +23,6 @@ class StatusSaver(ServiceInterface):
         self._middleware = middleware
 
         self.initialize_commands()
-        self.initialize_data_bank()
 
         self._logger.info("StatusSaver initialized")
         
@@ -30,9 +30,69 @@ class StatusSaver(ServiceInterface):
         return gateway + "/" + status_name
     
     def initialize_commands(self):
-        commands = {Commands.GET_TABLE_INFO: self.get_table_info_command}
+        commands = {
+            Commands.GET_TABLE_INFO: self.get_table_info_command,
+            Commands.ADD_NEW_TABLE: self.add_new_table_command,
+            Commands.DROP_TABLE: self.drop_table_command
+            }
         self._middleware.add_commands(commands)
+
+    def drop_table(self, table_name) ->  Union[bool, str]: 
+        conn = sqlite3.connect(DB_NAME) 
+        cursor = conn.cursor()
+
+        result = False
+        message = ""
+
+        cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name=?", (table_name,))
+        if cursor.fetchone():
+            quoted_table_name = f'"{table_name}"'
+            cursor.execute(f"DROP TABLE {quoted_table_name}")
+            conn.commit()
+            self._logger.info(f"Table '{table_name}' has been dropped.")
+            result = True
+        else:
+            message = f"Table '{table_name}' does not exist."
+            self._logger.error(message)
+
+        conn.close()
+        return result, message
+
+    def add_new_table(self, table_name) ->  Union[bool, str]:
+        try:
+            conn = sqlite3.connect(DB_NAME) 
+            cursor = conn.cursor()
+
+            cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name=?", (table_name,))
+            exists = cursor.fetchone() is not None
+
+            if not exists:
+                cursor.execute(f"CREATE TABLE IF NOT EXISTS '{table_name}' (id INTEGER PRIMARY KEY AUTOINCREMENT,value NUMBER,timestamp DATE)")
+                conn.commit()
+            
+            conn.close()
+            return True, ""
+        except Exception as e:
+            message = f"StatusSaver::add_new_table: Exceptio creating new table {e}"
+            self._logger.error(message)
+            return False, message
     
+    def drop_table_command(self, command):
+        table_name = command["data"]["gateway"] + '-' + command["data"]["topic"]
+        result, message = self.drop_table(table_name)
+        self._middleware.send_command_answear( result, message, command["requestId"])
+    
+    def add_new_table_command(self, command):
+        data = command["data"]
+        
+        gateway = data["gateway"]
+        topic_name = data["topic"]
+
+        table_name = gateway + '-' + topic_name
+
+        result, message = self.add_new_table(table_name)
+
+        self._middleware.send_command_answear( result, message, command["requestId"])
 
     def get_table_info_command(self, command):
         data = command["data"]
@@ -40,30 +100,40 @@ class StatusSaver(ServiceInterface):
         table_name = data["table"]
         gateway = data["gateway"]
         timestamp = data['timestamp']
-        
-        conn = sqlite3.connect(DB_NAME)
-        conn.row_factory = sqlite3.Row
-        cursor = conn.cursor()
         if(gateway):
             table_name = gateway + '-' + table_name
 
-        table_command = f'SELECT * FROM "{table_name}"'
+        data_out = {'info': [], 'tableName': table_name}
 
-        values = None
-        if(timestamp):
-            table_command += " WHERE timestamp >= ?"
-            values = (timestamp,)
+        result = True
 
-        cursor.execute(table_command, values)
+        try:
+            conn = sqlite3.connect(DB_NAME)
+            conn.row_factory = sqlite3.Row
+            cursor = conn.cursor()
+            
 
-        rows = cursor.fetchall()
+            table_command = f'SELECT * FROM "{table_name}"'
 
-        data_out = {'info': [dict(row) for row in rows], 'tableName': table_name}
+            values = None
+            if(timestamp):
+                table_command += " WHERE timestamp >= ?"
+                values = (timestamp,)
 
-        conn.commit()
-        conn.close()
+            cursor.execute(table_command, values)
 
-        self._middleware.send_command_answear( data_out, command["requestId"])
+            rows = cursor.fetchall()
+
+            data_out['info']=[dict(row) for row in rows]
+
+            conn.commit()
+        except Exception as e:
+            self._logger.error(f"StatusSaver::get_table_info_command: Error trying to fetch info from table {e}")
+            result = False
+        finally:
+            conn.close()
+
+        self._middleware.send_command_answear( result, data_out, command["requestId"])
 
     def initialize_data_bank(self):
         conn = sqlite3.connect(DB_NAME)

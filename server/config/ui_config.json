@@ -1,0 +1,1 @@
+{"panels": [{"id": "4c445da7-0e2d-485b-865a-9f457507d01a", "name": "Temp1", "gateway": "1C692031BE04", "topic": "temperature", "group": "c\u00e2mera 1", "sensorType": "Temperature"}, {"id": "a03910ef-1197-4f8c-a1f7-e80ba50b5f07", "name": "Temp2", "gateway": "1C692031BE05", "topic": "temperature", "group": "c\u00e2mera 1", "sensorType": "Temperature"}]}

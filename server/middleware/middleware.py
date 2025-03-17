@@ -56,18 +56,18 @@ class Middleware:
         
         return request_id
     
-    def send_command_answear(self, command_name, data, request_id):
+    def send_command_answear(self, command_name, result, data, request_id):
         for queue in self._subscriber_queues:
-            queue.put({"name": command_name, "data": data, "requestId": request_id, "isCommand": True})
+            queue.put({"name": command_name, "result": result, "data": data, "requestId": request_id, "isCommand": True})
 
 class ClientMiddleware:
     def __init__(self, middleware: Middleware):
         self._logger = Logger()
         self._lock = threading.Lock()
         self._data_converter = DataConverter()
-        self._subscribers = {}
+        self._subscribers: dict[str, SubscriberManager] = {}
         self._transfer_queue:  multiprocessing.Queue = middleware.add_new_middleware_listener()
-        self._request_queue: dict[str, Callable] = {}
+        self._request_queue: dict[str, tuple[Callable, Callable]] = {}
         self._middleware = middleware
         self._commands_available: dict[str, Callable] = {}
     
@@ -92,19 +92,24 @@ class ClientMiddleware:
         self._subscribers[status_name].remove_subscriber(id)
         self._lock.release()
 
-    def send_command(self, command_name, data, callback_handler):
-        self._request_queue[self._middleware.send_command(command_name, data)] = callback_handler
+    def send_command(self, command_name, data, callback_handler = None, error_handler = None):
+        self._request_queue[self._middleware.send_command(command_name, data)] = (callback_handler, error_handler)
 
-    def send_command_answear(self, data, request_id):
-        self._middleware.send_command_answear("", data, request_id)
+    def send_command_answear(self, result, data, request_id):
+        self._middleware.send_command_answear("", result, data, request_id)
     
     def run_middleware_update(self):
         while(not self._transfer_queue.empty()):
             new_info = self._transfer_queue.get()
             if new_info["isCommand"]:
                 if new_info["requestId"] in self._request_queue and new_info["name"] == "":
-                    if self._request_queue[new_info["requestId"]]:
-                        self._request_queue[new_info["requestId"]](new_info)
+                    callbacks = self._request_queue[new_info["requestId"]]
+                    if new_info["result"]:
+                        if callbacks[0]:
+                            callbacks[0](new_info)
+                    else:
+                        if callbacks[1]:
+                            callbacks[1](new_info)
                     del self._request_queue[new_info["requestId"]]
                 else:
                     self.command_update(new_info)

@@ -1,6 +1,5 @@
 from threading import Thread
 from time import sleep
-from .server.server_handler import ServerHandler
 from .visualization.visualization_manager import Visualization, VisualizationWebSocketHandler
 
 from middleware.middleware import ClientMiddleware
@@ -42,10 +41,10 @@ class AppServer:
         base_dir = os.path.dirname(__file__)  # Current directory of the server script
         angular_dist = os.path.join(base_dir, "../webApp")
         return tornado.web.Application([
-            (r"/", Visualization),
             (r"/websocket", VisualizationWebSocketHandler, {'middleware': self._middleware}),
-            (r"/test", ServerHandler),
-            (r"/(.*\.(js|css|ico|png|jpg|jpeg|woff|woff2|ttf|svg))", tornado.web.StaticFileHandler, {"path": angular_dist})
+            (r"/(.*\.(js|css|ico|png|jpg|jpeg|woff|woff2|ttf|svg))", tornado.web.StaticFileHandler, {"path": angular_dist}),
+            (r"/", Visualization),
+            (r"/main", Visualization)
         ],
         static_path="C:/Titanium/TitaniumServer/web/titanium-server/dist/titanium-server")
     
