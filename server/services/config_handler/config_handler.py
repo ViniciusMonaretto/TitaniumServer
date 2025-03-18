@@ -59,7 +59,7 @@ class ConfigHandler(ServiceInterface):
     def add_panel(self, panel_info) -> Union[bool, str]:
         panel = Panel(panel_info)
 
-        result, message = self._status_saver.add_new_table(panel.get_full_name())
+        result, message = self._status_saver.add_new_table(panel._topic, panel._gateway)
 
         if result:
             self._panels.append(panel)
@@ -81,7 +81,7 @@ class ConfigHandler(ServiceInterface):
     def remove_panel(self, panel_id) -> Union[bool, str]:
         for idx, panel in enumerate(self._panels):
             if panel._id == panel_id:
-                result, message = self._status_saver.drop_table(panel.get_full_name())
+                result, message = self._status_saver.drop_table(panel._topic, panel._gateway)
                 if result:
                     del self._panels[idx]
                     self.update_ui_file()

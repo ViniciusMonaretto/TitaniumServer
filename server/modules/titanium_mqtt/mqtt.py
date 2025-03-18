@@ -22,8 +22,11 @@ MQTT_SERVER = "mqtt.eclipseprojects.io"
 
 MQTT_PORT = 1883
 
-
 class TitaniumMqtt:
+    world_count = 0
+    world_count_rev = 0
+    world_count2 = 0
+    world_count2_rev = 0
     def __init__(self, middleware):
         self._logger = Logger()
         self._subscribe_topic_list = SUBSCRIBE_TOPIC_LIST
@@ -46,9 +49,18 @@ class TitaniumMqtt:
             
     def on_message(self, client, userdata, msg):
         self._logger.debug(f"Received message: {msg.topic} {msg.payload}")
+        self.world_count+=1
+        if(self.world_count == 40):
+            print(f"batch completed 1 " + str(self.world_count_rev))
+            self.world_count_rev+=1
+            if(self.world_count_rev==3):
+                self.world_count_rev = 0
+            self.world_count = 0
         self._read_queue.put(msg)
 
     def run(self):
+        self.world_count = 0
+        self.world_count2 = 0
         self.client = mqtt.Client()
 
         user_data = {}
@@ -87,6 +99,14 @@ class TitaniumMqtt:
                 self._logger.debug(f"Received message: {msg.topic} {cls}")
 
                 topic_name = TitaniumMqtt.get_topic_from_mosquitto_obj(id, cls)
+                self.world_count2 += 1
+                if(self.world_count2 == 40):
+                    print(f"batch completed 2 " + str(self.world_count2_rev))
+                    self.world_count2_rev+=1
+                    if(self.world_count2_rev==3):
+                        self.world_count2_rev = 0
+                        print("----\n\n\n")
+                    self.world_count2 = 0
                 self._middleware.send_status(topic_name, {'data': cls['data'], 'timestamp':cls['timestamp']})
             except queue.Empty as exc:
                 pass

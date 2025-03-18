@@ -37,9 +37,11 @@ class StatusSaver(ServiceInterface):
             }
         self._middleware.add_commands(commands)
 
-    def drop_table(self, table_name) ->  Union[bool, str]: 
+    def drop_table(self, topic, gateway) ->  Union[bool, str]: 
         conn = sqlite3.connect(DB_NAME) 
         cursor = conn.cursor()
+
+        table_name = gateway + '-' + topic
 
         result = False
         message = ""
@@ -49,6 +51,9 @@ class StatusSaver(ServiceInterface):
             quoted_table_name = f'"{table_name}"'
             cursor.execute(f"DROP TABLE {quoted_table_name}")
             conn.commit()
+
+            self.remove_subscription_to_status(gateway, topic)
+
             self._logger.info(f"Table '{table_name}' has been dropped.")
             result = True
         else:
@@ -58,8 +63,9 @@ class StatusSaver(ServiceInterface):
         conn.close()
         return result, message
 
-    def add_new_table(self, table_name) ->  Union[bool, str]:
+    def add_new_table(self, topic: str, gateway: str) ->  Union[bool, str]:
         try:
+            table_name = gateway + '-' + topic
             conn = sqlite3.connect(DB_NAME) 
             cursor = conn.cursor()
 
@@ -69,6 +75,7 @@ class StatusSaver(ServiceInterface):
             if not exists:
                 cursor.execute(f"CREATE TABLE IF NOT EXISTS '{table_name}' (id INTEGER PRIMARY KEY AUTOINCREMENT,value NUMBER,timestamp DATE)")
                 conn.commit()
+            self.subscribe_to_status(gateway, topic)
             
             conn.close()
             return True, ""
@@ -78,19 +85,13 @@ class StatusSaver(ServiceInterface):
             return False, message
     
     def drop_table_command(self, command):
-        table_name = command["data"]["gateway"] + '-' + command["data"]["topic"]
-        result, message = self.drop_table(table_name)
+        result, message = self.drop_table(command["data"]["topic"], command["data"]["gateway"])
         self._middleware.send_command_answear( result, message, command["requestId"])
     
     def add_new_table_command(self, command):
         data = command["data"]
-        
-        gateway = data["gateway"]
-        topic_name = data["topic"]
 
-        table_name = gateway + '-' + topic_name
-
-        result, message = self.add_new_table(table_name)
+        result, message = self.add_new_table(data["topic"], data["gateway"])
 
         self._middleware.send_command_answear( result, message, command["requestId"])
 
@@ -134,32 +135,19 @@ class StatusSaver(ServiceInterface):
             conn.close()
 
         self._middleware.send_command_answear( result, data_out, command["requestId"])
-
-    def initialize_data_bank(self):
-        conn = sqlite3.connect(DB_NAME)
-        cursor = conn.cursor()
-
-        script_directory = os.path.dirname(os.path.abspath(__file__))
-        filename = os.path.join(script_directory, DB_CONFIG)
-            
-        with open(filename, 'r') as json_file:
-            try:
-                data = json.load(json_file) 
-                
-                for configs in data["dbCOnfig"]:
-                    cursor.execute(configs["tableConfig"]) 
-                    self.subscribe_to_status(configs["gateway"], configs["topic"]) 
-
-                conn.commit()
-                conn.close()
-            except json.JSONDecodeError as e:
-                self._logger.error(f"Error processing file {filename}: {e}")
     
     def subscribe_to_status(self, gateway, status_name):
         topic = self.get_panel_topic(gateway, status_name)
-        self._status_subscribers[topic] = StatuSubscribers(self.save_status_on_db, topic, self.id + str(self._subscriptions_add))
-        self._middleware.add_subscribe_to_status(self._status_subscribers[topic], topic)
-        self._subscriptions_add+=1
+        if(not topic in self._status_subscribers):
+            self._status_subscribers[topic] = StatuSubscribers(self.save_status_on_db, topic, self.id + str(self._subscriptions_add))
+            self._middleware.add_subscribe_to_status(self._status_subscribers[topic], topic)
+            self._subscriptions_add+=1
+
+    def remove_subscription_to_status(self, gateway, status_name):
+        topic = self.get_panel_topic(gateway, status_name)
+        if(topic in self._status_subscribers):
+            self._middleware.remove_subscribe_from_status(self._status_subscribers[topic], topic)
+            del self._status_subscribers[topic]
     
     def get_table_name(self, status_info):
         stat_info = status_info['name'].split('/')

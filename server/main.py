@@ -9,7 +9,7 @@ import logging
 
 if __name__ == "__main__":
 
-    logger = Logger("app.log", logging.DEBUG)
+    logger = Logger("app.log", logging.INFO)
     logger.info("Starting IoCloud Datalogger system")
     middleware = Middleware()
 

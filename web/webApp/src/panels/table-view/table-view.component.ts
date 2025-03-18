@@ -151,8 +151,8 @@ export class TableViewComponent implements OnInit {
         this.yScaleMin -= 1
       }
 
-      this.xScaleMax = maxXaxis
-      this.xScaleMin = minXaxis
+      this.xScaleMax = new Date(maxXaxis)
+      this.xScaleMin = new Date(minXaxis)
 
       this.xScaleMax.setMinutes(maxXaxis.getMinutes() + 2)
       this.moved = false
@@ -279,9 +279,9 @@ export class TableViewComponent implements OnInit {
   }
 
   onMouseMove(event: MouseEvent) {
-    this.moved = true
+   
     if (!this.isDragging) return;
-
+    this.moved = true
     const deltaX = event.clientX - this.lastMouseX;
     const deltaY = event.clientY - this.lastMouseY;
 

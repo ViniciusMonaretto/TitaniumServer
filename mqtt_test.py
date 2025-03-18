@@ -49,13 +49,13 @@ try:
         #     "timestamp": timestamp
         # }
         # payload_json = json.dumps(payload)
-        client.publish(TOPIC2, payload_json)
+        client.publish(TOPIC, payload_json)
         payload = {
             "value":   round(random.uniform(22.0, 23.5), 2),
             "timestamp": timestamp
         }
         payload_json = json.dumps(payload)
-        client.publish(TOPIC3, payload_json)
+        client.publish(TOPIC2, payload_json)
         print(f"Published: {payload_json} to topic {TOPIC}")
         time.sleep(10)  # Wait for 5 seconds before sending the next message
 except KeyboardInterrupt:
