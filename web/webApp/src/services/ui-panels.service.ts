@@ -11,6 +11,8 @@ export class UiPanelService {
     subscriptioMap: {[id: string]: Array<SensorModule | Function>} = {}
     subscriptionInfoArrayMap: {[id: string]: {"callback": Function, "tableName": string}} = {}
 
+    sensorCachedCurrentInfo: {[id: string]: any[]} = {}
+
     private selectedSensor: SensorModule|null = null
     
     constructor() 
@@ -43,9 +45,31 @@ export class UiPanelService {
       this.subscriptioMap[tableName].splice(indexToRemove, 1);
     }
 
-    AddGraphRequest(gateway: string, topic: string, requestId: any, callback: Function)
+    GetCachedSelectedSensorInfo(topic: string, gateway: string)
     {
-      this.subscriptionInfoArrayMap[requestId] = {"callback": callback, "tableName": this.GetTableName(gateway,topic)}
+      let tableName = this.GetTableName(gateway, topic)
+      if(tableName in this.sensorCachedCurrentInfo)
+      {
+        return this.sensorCachedCurrentInfo[tableName]
+      }
+      return []
+    }
+
+    SensorInfoCallback = (tableName: string, infoArr: any[]) => {
+      this.sensorCachedCurrentInfo[tableName] = infoArr
+    }
+
+    AddGraphRequest(gateway: string, topic: string, requestId: any, callback?: Function)
+    {
+      if(callback)
+      {
+        this.subscriptionInfoArrayMap[requestId] = {"callback": callback, "tableName": this.GetTableName(gateway,topic)}
+      }
+      else
+      {
+        this.subscriptionInfoArrayMap[requestId] = {"callback": this.SensorInfoCallback, "tableName": this.GetTableName(gateway,topic)}
+      }
+       
     } 
 
     AddSubscription(fullTopic: string, callbackObj: Function | SensorModule)
@@ -86,6 +110,13 @@ export class UiPanelService {
           if("topic" in callbackObj )
           {
             callbackObj.value = value.data
+            if(tableFullName in this.sensorCachedCurrentInfo)
+            {
+              this.sensorCachedCurrentInfo[tableFullName].push(value)
+              let filterDate = new Date()
+              filterDate.setHours(filterDate.getHours() - 1)
+              this.sensorCachedCurrentInfo[tableFullName] = this.sensorCachedCurrentInfo[tableFullName].filter(x=> x.timestamp >= filterDate)
+            }
           }
           else
           {

@@ -31,6 +31,17 @@ export class SensorGroupComponent implements OnInit {
     return this.UiPanelsService.GetSelectedSensor()
   }
 
+  getSelectedSensorTableInfo()
+  {
+    let sensor = this.getSensorSelected()
+    if(sensor)
+    {
+      return this.UiPanelsService.GetCachedSelectedSensorInfo(sensor.topic, sensor.gateway)
+    }
+    return []
+    
+  }
+
 
   diselectSensor()
   {
@@ -39,7 +50,7 @@ export class SensorGroupComponent implements OnInit {
 
   loadInfo(tableInfo:any)
   {
-    this.ServerConectorService.sendRequestForTableInfo(tableInfo['gateway'], tableInfo['table'], ()=>{})
+    this.ServerConectorService.sendRequestForTableInfo(tableInfo['gateway'], tableInfo['table'])
   }
 
 }

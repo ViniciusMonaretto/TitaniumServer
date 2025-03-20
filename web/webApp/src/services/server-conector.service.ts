@@ -84,7 +84,7 @@ export class ServerConectorService {
   }
 
 
-  public sendRequestForTableInfo(gateway: string, table: string, callback: Function, timestamp?: Date | null)
+  public sendRequestForTableInfo(gateway: string, table: string, callback?: Function, timestamp?: Date | null)
   {
     const requestId = uuidv4();
     let obj: any = {"gateway": gateway, "table": table, "requestId": requestId}
