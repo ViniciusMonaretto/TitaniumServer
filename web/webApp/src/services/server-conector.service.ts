@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import {UiPanelService} from './ui-panels.service'
-import { webSocket, WebSocketSubject } from 'rxjs/webSocket';
-import { SensorModule } from 'src/models/sensor-module';
+import { v4 as uuidv4 } from 'uuid';
 import { MatDialog } from '@angular/material/dialog';
 import { ErrorDialogComponent } from 'src/components/error-dialog/error-dialog.component';
 
@@ -85,13 +84,16 @@ export class ServerConectorService {
   }
 
 
-  public sendRequestForTableInfo(gateway: string| null, table: string, timestamp?: Date | null)
+  public sendRequestForTableInfo(gateway: string, table: string, callback: Function, timestamp?: Date | null)
   {
-    let obj: any = {"gateway": gateway, "table": table}
+    const requestId = uuidv4();
+    let obj: any = {"gateway": gateway, "table": table, "requestId": requestId}
     if(timestamp)
     {
       obj["timestamp"] = this.formatLocalDateToCustomString(timestamp)
     }
+
+    this.uiPanelService.AddGraphRequest(gateway, table, requestId, callback)
     this.sendCommand("getStatusHistory", obj)
   }
 
@@ -123,7 +125,7 @@ export class ServerConectorService {
     else if(data["status"] == "statusInfo")
     {
       let message = data["message"]
-      this.uiPanelService.OnSubscriptionUpdate(message["data"].tableName, message["data"].info)
+      this.uiPanelService.OnStatusInfoUpdate(message["data"].requestId, message["data"].info)
     }
     else if(data["status"] == "error")
     {
@@ -138,7 +140,6 @@ export class ServerConectorService {
   // Handle WebSocket errors
   private onError(err: any): void {
     console.error('WebSocket error:', err);
-    this.openErrorDialog('WebSocket error: ' + err)
     // You could reconnect here if necessary
   }
 }

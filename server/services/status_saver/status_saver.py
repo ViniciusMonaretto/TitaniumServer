@@ -100,7 +100,10 @@ class StatusSaver(ServiceInterface):
 
         table_name = data["table"]
         gateway = data["gateway"]
-        timestamp = data['timestamp']
+        timestamp = None
+        if("timestamp" in data):
+            timestamp = data["timestamp"]
+
         if(gateway):
             table_name = gateway + '-' + table_name
 
@@ -116,16 +119,18 @@ class StatusSaver(ServiceInterface):
 
             table_command = f'SELECT * FROM "{table_name}"'
 
-            values = None
             if(timestamp):
                 table_command += " WHERE timestamp >= ?"
                 values = (timestamp,)
-
+            else:
+                values = ()
+                
             cursor.execute(table_command, values)
 
             rows = cursor.fetchall()
 
             data_out['info']=[dict(row) for row in rows]
+            data_out['requestId'] = data['websocketId']
 
             conn.commit()
         except Exception as e:

@@ -2,7 +2,6 @@
     <sensor-info *ngIf="getSensorSelected()" 
                  [sensorInfo]="getSensorSelected()" 
                  [currentReading]="getSensorSelected().value"
-                 [tableArray]="getSensorTable()"
                  (onExit)="diselectSensor()"
                  (onLoad)="loadInfo($event)" ></sensor-info>
     <div *ngIf="!getSensorSelected()">

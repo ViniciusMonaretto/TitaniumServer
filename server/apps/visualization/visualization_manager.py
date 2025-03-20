@@ -61,7 +61,14 @@ class VisualizationWebSocketHandler(tornado.websocket.WebSocketHandler):
             self._logger.error(f"Exception occured on panel message: {e}")
 
     def request_status(self, request):
-        data = {'table':request["table"], 'gateway': request["gateway"], 'timestamp': request["timestamp"]}
+        data = {
+                'table':request["table"], 
+                'gateway': request["gateway"], 
+                'websocketId': request['requestId'], 
+            }
+        if("timestamp" in data):
+            data['timestamp'] = request["timestamp"]
+    
         self._middleware.send_command(StatusSaverCommands.GET_TABLE_INFO, data, self.send_status_history)                                    
     
     def send_status_history(self, data):

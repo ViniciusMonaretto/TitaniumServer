@@ -56,7 +56,7 @@ export class TableViewComponent implements OnInit {
 
   ngOnInit(): void { }
 
-  onGraphUpdate: Function = (tableName: string) => {
+  onGraphUpdate: Function = (tableName: string, infoArr: Array<any>) => {
     let chartId = this.lineChartData.findIndex(x => x.name == tableName);
 
     if (chartId == -1) {
@@ -68,9 +68,8 @@ export class TableViewComponent implements OnInit {
     }
 
     let newSeries: { name: Date, value: number }[] = [];
-    let infos = this.uiPanelService.GetTableInfoFromTablename(tableName) || []; // Ensure it's not null
 
-    for (let info of infos) {
+    for (let info of infoArr) {
       let timestamp = info['timestamp'];
       if (timestamp && !isNaN(new Date(timestamp).getTime())) {
         let dt = new Date(timestamp);
@@ -180,24 +179,9 @@ export class TableViewComponent implements OnInit {
     }
   }
 
-  removeLineTable(tableName: string)
-  {
-    if(tableName in this.mapLinesGraph)
-    {
-      this.uiPanelService.RemoveGraphSubscription(tableName, this.mapLinesGraph[tableName][0])
-      this.lineChartData.splice(this.mapLinesGraph[tableName][1], 1)
-
-      delete this.mapLinesGraph[tableName]
-    }
-  }
-
   removeAllLines()
   {
-    var lineNames = this.lineChartData.map(data => data.name)
-    for(var line of lineNames)
-    {
-      this.removeLineTable(line)
-    }
+    this.lineChartData = []
 
     this.filteredNames = {}
     this.filteredData = []
@@ -205,23 +189,8 @@ export class TableViewComponent implements OnInit {
 
   getTable(): void {
     this.refreshing = true
-    var tableName = this.uiPanelService.GetTableName(this.gateway, this.table)
-    if(!(tableName in this.mapLinesGraph))
-    {
-      var index = this.uiPanelService.AddSubscriptionFromGraph(this.gateway, this.table, this.onGraphUpdate)
-
-      var tableName = this.uiPanelService.GetTableName(this.gateway, this.table)
-
-      var chartIndex = this.lineChartData.findIndex(x=>x.name == tableName)
-
-      if(chartIndex != -1)
-      {
-        this.mapLinesGraph[tableName] = [index, chartIndex]
-      }
-    }
     
-    this.serverConnector.sendRequestForTableInfo(this.gateway, this.table, this.selectedDate)
-
+    this.serverConnector.sendRequestForTableInfo(this.gateway, this.table, this.onGraphUpdate, this.selectedDate)
   }
 
   setTime(event: any, selectedDateTime: Date | null) {
@@ -306,10 +275,6 @@ export class TableViewComponent implements OnInit {
   /** 📌 Mouse Drag End **/
   onMouseUp(event: MouseEvent) {
     this.isDragging = false;
-  }
-
-  getTableInfo() {
-    return this.uiPanelService.GetTableInfo(this.gateway, this.table)
   }
 
 }

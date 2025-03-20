@@ -9,7 +9,7 @@ export class UiPanelService {
     
     panels: {[id: string]: Panel} = {}
     subscriptioMap: {[id: string]: Array<SensorModule | Function>} = {}
-    tablesInfo: {[key: string]: any[]} = {}
+    subscriptionInfoArrayMap: {[id: string]: {"callback": Function, "tableName": string}} = {}
 
     private selectedSensor: SensorModule|null = null
     
@@ -43,10 +43,9 @@ export class UiPanelService {
       this.subscriptioMap[tableName].splice(indexToRemove, 1);
     }
 
-    AddSubscriptionFromGraph(gateway: string, topic: string, callback: Function)
+    AddGraphRequest(gateway: string, topic: string, requestId: any, callback: Function)
     {
-      let fullTopic = this.GetTableName(gateway, topic)
-      return this.AddSubscription(fullTopic, callback)
+      this.subscriptionInfoArrayMap[requestId] = {"callback": callback, "tableName": this.GetTableName(gateway,topic)}
     } 
 
     AddSubscription(fullTopic: string, callbackObj: Function | SensorModule)
@@ -64,40 +63,24 @@ export class UiPanelService {
       return this.subscriptioMap[fullTopic].length - 1
     }
 
+    OnStatusInfoUpdate(requestId: any, infoArray:any)
+    {
+      if(requestId in this.subscriptionInfoArrayMap)
+      {
+        let obj = this.subscriptionInfoArrayMap[requestId]
+        obj.callback(obj.tableName, infoArray);
+
+        delete this.subscriptionInfoArrayMap[requestId]
+      }
+    }
+
     OnSubscriptionUpdate(topic: string, value: any)
     {
-      let tableFullName = topic
-      let topicInfo = []
-      if(topic.indexOf('/') != -1)
-      {
-        topicInfo = topic.split('/')
-        
-      }
-      else
-      {
-        topicInfo = topic.split('-')
-      }
-  
-      tableFullName = this.GetTableName(topicInfo[0], topicInfo[1])
+      let topicInfo = topic.split('/')
+      let tableFullName = this.GetTableName(topicInfo[0], topicInfo[1])
       
       if(tableFullName in this.subscriptioMap)
       {
-        
-        if( Array.isArray(value))
-        {
-          this.tablesInfo[tableFullName] = value
-        }
-        else
-        {
-          if( !this.tablesInfo[tableFullName])
-          {
-            this.tablesInfo[tableFullName] = []
-          }
-          this.tablesInfo[tableFullName].push({"value": value.data, "timestamp":new Date(value.timestamp).toISOString()})
-          this.tablesInfo[tableFullName] = JSON.parse(JSON.stringify(this.tablesInfo[tableFullName]));
-        }
-        
-
         for(let callbackObj of this.subscriptioMap[tableFullName])
         {
           if("topic" in callbackObj )
@@ -106,7 +89,7 @@ export class UiPanelService {
           }
           else
           {
-            callbackObj(tableFullName)
+            callbackObj(tableFullName, value)
           }
           
         }
@@ -116,19 +99,6 @@ export class UiPanelService {
     GetTableName(gateway:string, table: string)
     {
       return gateway == "*"?table:gateway + '-' + table
-    }
-
-    GetTableInfo(gateway:string, table: string)
-    {
-      let tableFullName = this.GetTableName(gateway, table)
-      return this.tablesInfo[tableFullName]
-    }
-
-    GetTableInfoFromTablename(tableFullName: string)
-    {
-      if(tableFullName in this.tablesInfo)
-        return this.tablesInfo[tableFullName]
-      return []
     }
 
     public setelectSensor(model: SensorModule|null)
