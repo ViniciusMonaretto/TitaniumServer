@@ -19,7 +19,6 @@ class Panel:
     _name = ""
     _gateway = ""
     _topic = ""
-    _group = ""
     _sensor_type = SensorTypes.Unknow
     def __init__(self, obj):
         if("id" in obj):
@@ -29,8 +28,6 @@ class Panel:
         self._name = obj["name"]
         self._gateway = obj["gateway"]
         self._topic = obj["topic"]
-        if ("group" in obj):
-            self._group = obj["group"]
         self._sensor_type = SensorTypes.GetType(obj["sensorType"])
     
     def get_full_name(self):
@@ -42,6 +39,5 @@ class Panel:
             "name": self._name,
             "gateway": self._gateway,
             "topic": self._topic,
-            "group": self._group,
             "sensorType": self._sensor_type,
         }

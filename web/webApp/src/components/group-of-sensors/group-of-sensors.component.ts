@@ -21,10 +21,13 @@ export class GroupOfSensorsComponent implements OnInit {
   ngOnInit(): void {
   }
 
-  addSensor(): void {
+  addSensor(groupName: string): void {
     const dialogRef = this.dialog.open(SensorAddWindowComponent, {
       width: '250px',
-      data: {callback: this.addNewSensorCallback.bind(this)}
+      data: {callback: (sensorData: any)=>{
+        sensorData["group"] = groupName
+        this.addNewSensorCallback(sensorData)
+      }}
     });
   }
 

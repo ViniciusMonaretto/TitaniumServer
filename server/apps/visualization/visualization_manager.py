@@ -102,9 +102,10 @@ class VisualizationWebSocketHandler(tornado.websocket.WebSocketHandler):
     def get_panel_topic(self, topic: Panel, gateway):
         return  gateway + "/" + topic
     
-    def add_subscribers(self, panels: list[object]):
-        for panel in panels:
-            self.add_panel_subscriber(panel["topic"], panel["gateway"], panel["id"])
+    def add_subscribers(self, panels_info: dict[str: list[object]]):
+        for panels in panels_info.values():
+            for panel in panels:
+                self.add_panel_subscriber(panel["topic"], panel["gateway"], panel["id"])
         
         self.send_panel_info()
 

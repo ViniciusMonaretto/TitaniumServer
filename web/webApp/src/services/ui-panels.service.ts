@@ -20,10 +20,14 @@ export class UiPanelService {
         
     }
 
-    SetNewUiConfig(uiConfig: Panel )
+    SetNewUiConfig(uiConfig: {[id: string]: Panel} )
     {
-        this.panels["base"] = uiConfig
-        this.CreateSensorSubscriptionFromPanel(this.panels["base"])
+        this.panels = uiConfig
+        for(let groupName in this.panels)
+        {
+          this.CreateSensorSubscriptionFromPanel(this.panels[groupName])
+        }
+        
     }
 
     GetUiConfig()
