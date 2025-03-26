@@ -9,7 +9,7 @@ import { AppComponent } from './app.component';
 import { MainScreenComponent } from 'src/panels/main-screen/main-screen.component';
 import { SensorGroupComponent } from 'src/panels/sensor-group/sensor-group.component';
 import { NavbarComponent } from 'src/panels/navbar/navbar.component';
-import { TableViewComponent } from 'src/panels/table-view/table-view.component'
+import { GraphViewComponent } from 'src/panels/graph-view/graph-view.component'
 
 //Project Components
 import { SensorAddWindowComponent } from 'src/components/sensor-add-window/sensor-add-window.component';
@@ -51,7 +51,7 @@ import { ErrorDialogComponent } from 'src/components/error-dialog/error-dialog.c
     SensorGroupComponent,
     GroupOfSensorsComponent,
     InfoTableComponent,
-    TableViewComponent,
+    GraphViewComponent,
     SensorInfoComponent,
     ErrorDialogComponent
   ],

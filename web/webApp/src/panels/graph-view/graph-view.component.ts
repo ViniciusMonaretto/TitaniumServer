@@ -3,11 +3,11 @@ import { ServerConectorService } from "../../services/server-conector.service"
 import { UiPanelService } from "../../services/ui-panels.service"
 
 @Component({
-  selector: 'table-view',
-  templateUrl: './table-view.component.html',
-  styleUrls: ['./table-view.component.scss']
+  selector: 'graph-view',
+  templateUrl: './graph-view.component.html',
+  styleUrls: ['./graph-view.component.scss']
 })
-export class TableViewComponent implements OnInit {
+export class GraphViewComponent implements OnInit {
 
   constructor(private serverConnector: ServerConectorService, private uiPanelService: UiPanelService) {
     //this.getTable()
