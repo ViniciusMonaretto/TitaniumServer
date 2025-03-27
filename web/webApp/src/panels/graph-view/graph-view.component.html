@@ -1,5 +1,5 @@
 <div class="main-table-screen">
-    <!--
+    <!--    
     <div class="footer-measure requester">
         <mat-form-field appearance="fill">
             <mat-label>Gateway</mat-label>
@@ -17,22 +17,15 @@
             <mat-datepicker #picker></mat-datepicker>
         </mat-form-field>
 
-        <mat-form-field appearance="outline">
-            <mat-label>Select Time</mat-label>
-            <input matInput type="time" (change)="setTime($event, selectedDate)">
-        </mat-form-field>
-
         <button mat-icon-button (click)="getTable()">
             <mat-icon>add</mat-icon>
         </button>
         <button mat-icon-button *ngIf="lineChartData.length;" (click)="removeAllLines()">
             <mat-icon>refresh</mat-icon>
         </button>
-        <button mat-icon-button *ngIf="lineChartData.length;" (click)="fitAllGraph()">
-            <mat-icon>fullscreen</mat-icon>
-        </button>
     </div>
     -->
+    
     <div class="graph-options-header">
         <button mat-icon-button class="example-icon" aria-label="Example icon-button with menu icon" (click)="''">
             <mat-icon>insert_drive_file</mat-icon>
@@ -46,21 +39,14 @@
         <button mat-icon-button class="example-icon" aria-label="Example icon-button with menu icon" (click)="''">
             <mat-icon>search</mat-icon>
         </button>
-        <button mat-icon-button class="example-icon" aria-label="Example icon-button with menu icon" (click)="''">
+        <button mat-icon-button class="example-icon" aria-label="Example icon-button with menu icon" (click)="openAddWindow()">
             <mat-icon>add</mat-icon>
         </button>
     </div>
 
     <div class="graph-table">
         <ng-container *ngIf="lineChartData.length; else noSize">
-            <div style="padding: 10px; height: 90%;" (wheel)="onMouseWheel($event)" (mousedown)="onMouseDown($event)"
-                (mousemove)="onMouseMove($event)" (mouseup)="onMouseUp($event)">
-                <ngx-charts-line-chart [results]="filteredData" [scheme]="'vivid'" [xAxis]="true" [yAxis]="true"
-                    [xScaleMin]="getXLimits(xScaleMin)" [xScaleMax]="getXLimits(xScaleMax)" [yScaleMin]="yScaleMin"
-                    [yScaleMax]="yScaleMax" [legend]="true" [showGridLines]="true" [autoScale]="true"
-                    [animations]="false">
-                </ngx-charts-line-chart>
-            </div>
+            <graph style="height: 100%;" [inputInfo]="lineChartData"></graph>
         </ng-container>
     </div>
 

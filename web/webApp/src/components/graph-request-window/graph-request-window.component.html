@@ -1,0 +1,43 @@
+<h2 mat-dialog-title>Opções Gráfico</h2>
+<mat-dialog-content>
+    <mat-form-field style="width: 100%;" appearance="fill">
+        <mat-label>Selecionar Grupo</mat-label>
+        <mat-select [(ngModel)]="selectedGroup">
+            <mat-option *ngFor="let group of getGroups()" [value]="group">{{group}}</mat-option>
+        </mat-select>
+    </mat-form-field>
+    <mat-form-field style="width: 100%;" appearance="fill" *ngIf="selectedGroup!=''">
+        <mat-label>Selecionar Sensores</mat-label>
+        <mat-select [(ngModel)]="selectedSensors" multiple>
+            <mat-option *ngFor="let panel of uiConfig[selectedGroup]" [value]="panel">{{panel.name}}</mat-option>
+        </mat-select>
+    </mat-form-field>
+    <div>
+        <mat-form-field appearance="outline">
+            <mat-label>Data de Início</mat-label>
+            <input matInput [matDatepicker]="pickerStart" [(ngModel)]="startDate">
+            <mat-datepicker-toggle matSuffix [for]="pickerStart"></mat-datepicker-toggle>
+            <mat-datepicker #pickerStart></mat-datepicker>
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+            <mat-label></mat-label>
+            <input matInput type="time" (change)="setTime($event, startDate)">
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+            <mat-label>Data de Fim</mat-label>
+            <input matInput [matDatepicker]="pickerEnd" [(ngModel)]="endDate">
+            <mat-datepicker-toggle matSuffix [for]="pickerEnd"></mat-datepicker-toggle>
+            <mat-datepicker #pickerEnd></mat-datepicker>
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+            <mat-label></mat-label>
+            <input matInput type="time" (change)="setTime($event, endDate)">
+        </mat-form-field>
+    </div>
+
+</mat-dialog-content>
+<mat-dialog-actions>
+    <button mat-button (click)="onNoClick()">Cancel</button>
+    <button mat-button [disabled]="!validForm()" (click)="onAddCLick()" cdkFocusInitial>Add</button>
+</mat-dialog-actions>

@@ -39,6 +39,8 @@ import { NgxChartsModule } from '@swimlane/ngx-charts'
 
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { ErrorDialogComponent } from 'src/components/error-dialog/error-dialog.component';
+import { GraphRequestWindowComponent } from '../components/graph-request-window/graph-request-window.component';
+import { GraphComponent } from 'src/components/graph/graph.component';
 
 @NgModule({
   declarations: [
@@ -53,7 +55,9 @@ import { ErrorDialogComponent } from 'src/components/error-dialog/error-dialog.c
     InfoTableComponent,
     GraphViewComponent,
     SensorInfoComponent,
-    ErrorDialogComponent
+    ErrorDialogComponent,
+    GraphRequestWindowComponent,
+    GraphComponent
   ],
   imports: [
     BrowserModule,
