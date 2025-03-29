@@ -84,16 +84,20 @@ export class ServerConectorService {
   }
 
 
-  public sendRequestForTableInfo(gateway: string, table: string, callback?: Function, timestamp?: Date | null)
+  public sendRequestForTableInfo(sensorInfos: Array<any>, callback?: Function, beginDate?: Date|null, endDate?: Date|null)
   {
     const requestId = uuidv4();
-    let obj: any = {"gateway": gateway, "table": table, "requestId": requestId}
-    if(timestamp)
+    let obj: any = {"sensorInfos": sensorInfos, "requestId": requestId}
+    if(beginDate)
     {
-      obj["timestamp"] = this.formatLocalDateToCustomString(timestamp)
+      obj["beginDate"] = this.formatLocalDateToCustomString(beginDate)
+      if(endDate)
+      {
+        obj["endDate"] = this.formatLocalDateToCustomString(endDate)
+      }
     }
 
-    this.uiPanelService.AddGraphRequest(gateway, table, requestId, callback)
+    this.uiPanelService.AddGraphRequest(sensorInfos, requestId, callback)
     this.sendCommand("getStatusHistory", obj)
   }
 

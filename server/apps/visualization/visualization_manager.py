@@ -62,9 +62,8 @@ class VisualizationWebSocketHandler(tornado.websocket.WebSocketHandler):
 
     def request_status(self, request):
         data = {
-                'table':request["table"], 
-                'gateway': request["gateway"], 
-                'websocketId': request['requestId'], 
+                'sensorInfos': request['sensorInfos'], 
+                'websocketId': request['requestId']
             }
         if("timestamp" in data):
             data['timestamp'] = request["timestamp"]

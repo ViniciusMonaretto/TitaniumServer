@@ -53,7 +53,7 @@ export class GraphViewComponent implements OnInit {
       data: {
         "uiConfig": this.uiPanelService.GetUiConfig(),
         callback: (sensorData: any)=>{
-          this.getTable()
+          this.getTable(sensorData)
         }
       }
     });
@@ -64,8 +64,8 @@ export class GraphViewComponent implements OnInit {
     this.lineChartData = []
   }
 
-  getTable(): void {
-    this.serverConnector.sendRequestForTableInfo("1C692031BE04", "temperature", this.onGraphUpdate, null)
+  getTable(sensorData: any): void {
+    this.serverConnector.sendRequestForTableInfo(sensorData['selectedSensors'], this.onGraphUpdate,)
   }
 
 }

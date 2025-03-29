@@ -120,7 +120,6 @@ export class GraphComponent {
       this.xScaleMax = new Date(maxXaxis)
       this.xScaleMin = new Date(minXaxis)
 
-      this.xScaleMax.setMinutes(maxXaxis.getMinutes() + 2)
       this.moved = false
     }
 

@@ -98,16 +98,22 @@ class StatusSaver(ServiceInterface):
     def get_table_info_command(self, command):
         data = command["data"]
 
-        table_name = data["table"]
-        gateway = data["gateway"]
-        timestamp = None
-        if("timestamp" in data):
-            timestamp = data["timestamp"]
+        sensor_infos = data["sensorInfos"]
 
-        if(gateway):
-            table_name = gateway + '-' + table_name
+        date_command = ""
 
-        data_out = {'info': [], 'tableName': table_name}
+        values = ()
+        
+        if("beginDate" in data):
+            date_command += " WHERE timestamp >= ?"
+            values = values + (data["beginDate"])
+
+            if("endDate" in data):
+                date_command += " AND timestamp <= ?"
+                values = values + (data["endDAte"])
+
+
+        data_out = {'info': {}}
 
         result = True
 
@@ -115,21 +121,21 @@ class StatusSaver(ServiceInterface):
             conn = sqlite3.connect(DB_NAME)
             conn.row_factory = sqlite3.Row
             cursor = conn.cursor()
-            
 
-            table_command = f'SELECT * FROM "{table_name}"'
+            for info in sensor_infos:
+                table_name = info["topic"]
+                gateway = info["gateway"]
 
-            if(timestamp):
-                table_command += " WHERE timestamp >= ?"
-                values = (timestamp,)
-            else:
-                values = ()
-                
-            cursor.execute(table_command, values)
+                if(gateway):
+                    table_name = gateway + '-' + table_name
 
-            rows = cursor.fetchall()
+                table_command = f'SELECT * FROM "{table_name}"' + date_command
+               
+                cursor.execute(table_command, values)
 
-            data_out['info']=[dict(row) for row in rows]
+                rows = cursor.fetchall()
+
+                data_out['info'][table_name]=[dict(row) for row in rows]
             data_out['requestId'] = data['websocketId']
 
             conn.commit()

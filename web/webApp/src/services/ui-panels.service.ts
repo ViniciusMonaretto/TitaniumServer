@@ -9,7 +9,7 @@ export class UiPanelService {
     
     panels: {[id: string]: Panel} = {}
     subscriptioMap: {[id: string]: Array<SensorModule | Function>} = {}
-    subscriptionInfoArrayMap: {[id: string]: {"callback": Function, "tableName": string}} = {}
+    subscriptionInfoArrayMap: {[id: string]: {"callback": Function, "tableNames": Array<string>}} = {}
 
     sensorCachedCurrentInfo: {[id: string]: any[]} = {}
 
@@ -63,15 +63,21 @@ export class UiPanelService {
       this.sensorCachedCurrentInfo[tableName] = infoArr
     }
 
-    AddGraphRequest(gateway: string, topic: string, requestId: any, callback?: Function)
+    AddGraphRequest(sensorInfos: Array<any>, requestId: any, callback?: Function)
     {
+      let arr = []
+      for(let sensorInfo of sensorInfos)
+      {
+        let graphName = this.GetTableName(sensorInfo["gateway"], sensorInfo["topic"])
+        arr.push(graphName)
+      }
       if(callback)
       {
-        this.subscriptionInfoArrayMap[requestId] = {"callback": callback, "tableName": this.GetTableName(gateway,topic)}
+        this.subscriptionInfoArrayMap[requestId] = {"callback": callback, "tableNames": arr}
       }
       else
       {
-        this.subscriptionInfoArrayMap[requestId] = {"callback": this.SensorInfoCallback, "tableName": this.GetTableName(gateway,topic)}
+        this.subscriptionInfoArrayMap[requestId] = {"callback": this.SensorInfoCallback, "tableNames": arr}
       }
        
     } 
@@ -96,7 +102,10 @@ export class UiPanelService {
       if(requestId in this.subscriptionInfoArrayMap)
       {
         let obj = this.subscriptionInfoArrayMap[requestId]
-        obj.callback(obj.tableName, infoArray);
+        for(let tableName in infoArray)
+        {
+          obj.callback(tableName, infoArray[tableName]);
+        }
 
         delete this.subscriptionInfoArrayMap[requestId]
       }
