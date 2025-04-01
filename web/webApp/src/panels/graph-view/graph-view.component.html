@@ -36,7 +36,7 @@
         <button mat-icon-button class="example-icon" aria-label="Example icon-button with menu icon" (click)="''">
             <mat-icon>zoom_out_map</mat-icon>
         </button>
-        <button mat-icon-button class="example-icon" aria-label="Example icon-button with menu icon" (click)="''">
+        <button mat-icon-button class="example-icon" aria-label="Example icon-button with menu icon" (click)="toggleZoomWindowActivate()">
             <mat-icon>search</mat-icon>
         </button>
         <button mat-icon-button class="example-icon" aria-label="Example icon-button with menu icon" (click)="openAddWindow()">
@@ -46,7 +46,7 @@
 
     <div class="graph-table">
         <ng-container *ngIf="lineChartData.length; else noSize">
-            <graph style="height: 100%;" [inputInfo]="lineChartData"></graph>
+            <graph style="height: 100%;" [inputInfo]="lineChartData" [zoomEnabled]="zoomWindowActivate"></graph>
         </ng-container>
     </div>
 

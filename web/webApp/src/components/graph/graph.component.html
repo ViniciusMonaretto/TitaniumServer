@@ -1,8 +1,9 @@
 <div style="padding: 10px; height: 90%;" (wheel)="onMouseWheel($event)" (mousedown)="onMouseDown($event)"
-    (mousemove)="onMouseMove($event)" (mouseup)="onMouseUp($event)">
-    <ngx-charts-line-chart [results]="filteredData" [scheme]="'vivid'" [xAxis]="true" [yAxis]="true"
+    (mousemove)="onMouseMove($event)" (mouseup)="onMouseUp($event)" #chartContainer>
+    <ngx-charts-line-chart  [results]="filteredData" [scheme]="'vivid'" [xAxis]="true" [yAxis]="true"
         [xScaleMin]="getXLimits(xScaleMin)" [xScaleMax]="getXLimits(xScaleMax)" [yScaleMin]="yScaleMin"
         [yScaleMax]="yScaleMax" [legend]="true" [showGridLines]="true" [autoScale]="true"
         [animations]="false">
     </ngx-charts-line-chart>
+    <div class="overlay" #overlay></div>
 </div>

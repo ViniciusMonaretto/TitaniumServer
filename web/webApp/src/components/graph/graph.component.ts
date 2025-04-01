@@ -1,4 +1,5 @@
-import { Component, Input } from '@angular/core';
+import { Component, ElementRef, Input, ViewChild } from '@angular/core';
+import * as d3 from 'd3'
 
 @Component({
   selector: 'graph',
@@ -6,6 +7,8 @@ import { Component, Input } from '@angular/core';
   styleUrls: ['./graph.component.scss']
 })
 export class GraphComponent {
+  @ViewChild('overlay') overlayRef!: ElementRef;
+  @ViewChild('chartContainer') chartContainerRef!: ElementRef;
 
   yAdjust = 0
   yScaleMin = 0
@@ -27,6 +30,8 @@ export class GraphComponent {
   lineChartData: Array<{ name: string, series: Array<any> }> = [];
   filteredData: Array<{ name: string, series: Array<any> }> = [];
 
+  @Input() zoomEnabled: boolean = false
+
   @Input() set inputInfo(newValue: Array<{ name: string, series: Array<any> }> ) {
     console.log('Novo info de gráfico recebido:');
 
@@ -41,6 +46,63 @@ export class GraphComponent {
   }
 
   constructor() { }
+
+  ngAfterViewInit() {
+    const svg = d3.select(this.chartContainerRef.nativeElement);
+    const overlay = d3.select(this.overlayRef.nativeElement);
+    let startX: number, startY: number, endX: number, endY: number;
+
+    svg.on('mousedown', (event: MouseEvent) => {
+      if (!this.zoomEnabled) return;
+      startX = event.offsetX;
+      startY = event.offsetY;
+      overlay.style('display', 'block')
+             .style('left', `${startX}px`)
+             .style('top', `${startY}px`)
+             .style('width', '0px')
+             .style('height', '0px');
+    });
+
+    svg.on('mousemove', (event: MouseEvent) => {
+      if (!this.zoomEnabled || startX === undefined) return;
+      endX = event.offsetX;
+      endY = event.offsetY;
+      overlay.style('width', `${Math.abs(endX - startX)}px`)
+             .style('height', `${Math.abs(endY - startY)}px`)
+             .style('left', `${Math.min(startX, endX)}px`)
+             .style('top', `${Math.min(startY, endY)}px`)
+             .style('display', 'block');
+    });
+
+    svg.on('mouseup', () => {
+      if (!this.zoomEnabled || startX === undefined || endX === undefined || startY === undefined || endY === undefined) return;
+      this.zoomToSelection(startX, endX, startY, endY);
+      overlay.style('display', 'none');
+      startX = startY = endX = endY = <any>undefined;
+    });
+  }
+
+  zoomToSelection(startX: number, endX: number, startY: number, endY: number) {
+    const minX = Math.min(startX, endX);
+    const maxX = Math.max(startX, endX);
+    const minY = Math.min(startY, endY);
+    const maxY = Math.max(startY, endY);
+    
+    // Convert pixel values to date range
+    const dateScale = d3.scaleTime()
+      .domain([this.xScaleMin, this.xScaleMax])
+      .range([0, this.chartContainerRef.nativeElement.clientWidth]);
+
+    const valueScale = d3.scaleLinear()
+      .domain([this.yScaleMin, this.yScaleMax])
+      .range([this.chartContainerRef.nativeElement.clientHeight, 0]);
+    
+    this.xScaleMin = dateScale.invert(minX);
+    this.xScaleMax = dateScale.invert(maxX);
+
+    this.yScaleMax = valueScale.invert(maxY)
+    this.yScaleMin = valueScale.invert(minY)
+  }
 
   remakeLineFilter()
   {
@@ -75,7 +137,7 @@ export class GraphComponent {
       }
     }
     this.filteredData = [...this.filteredData]; // Force change detection
-  }
+  } 
 
   fitAllGraph() {
     if (this.lineChartData.length > 0) {
@@ -172,13 +234,14 @@ export class GraphComponent {
   }
 
   onMouseDown(event: MouseEvent) {
+    if(this.zoomEnabled) return;
     this.isDragging = true;
     this.lastMouseX = event.clientX;
     this.lastMouseY = event.clientY;
   }
 
   onMouseMove(event: MouseEvent) {
-   
+    if (this.zoomEnabled) return;
     if (!this.isDragging) return;
     this.moved = true
     const deltaX = event.clientX - this.lastMouseX;

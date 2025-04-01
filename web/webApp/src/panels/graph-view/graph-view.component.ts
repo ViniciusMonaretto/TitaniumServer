@@ -15,6 +15,7 @@ export class GraphViewComponent implements OnInit {
     //this.getTable()
   }
 
+  zoomWindowActivate: boolean = false
   lineChartData: Array<{ name: string, series: Array<any> }> = [];
 
   ngOnInit(): void { }
@@ -45,6 +46,11 @@ export class GraphViewComponent implements OnInit {
     // Update chart data and trigger Angular change detection
     this.lineChartData[chartId].series = newSeries;
   };
+
+  toggleZoomWindowActivate()
+  {
+    this.zoomWindowActivate = !this.zoomWindowActivate
+  }
 
   openAddWindow()
   {
