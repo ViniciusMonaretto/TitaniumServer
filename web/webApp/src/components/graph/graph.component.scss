@@ -1,0 +1,23 @@
+.overlay {
+    position: absolute;
+    background: rgba(0, 0, 255, 0.3);
+    border: 1px solid blue;
+    pointer-events: none;
+    display: none;
+}
+
+.chart-container {
+    position: relative;
+}
+
+.tooltip {
+    position: absolute;
+    background-color: rgba(0, 0, 0, 0.75);
+    color: white;
+    padding: 5px;
+    font-size: 12px;
+    border-radius: 4px;
+    pointer-events: none;
+    display: none;
+    white-space: nowrap;
+}
