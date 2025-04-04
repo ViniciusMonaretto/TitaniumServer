@@ -1,42 +1,27 @@
 <div class="main-table-screen">
-    <!--    
-    <div class="footer-measure requester">
-        <mat-form-field appearance="fill">
-            <mat-label>Gateway</mat-label>
-            <input matInput [(ngModel)]="gateway" />
-        </mat-form-field>
-        <mat-form-field appearance="fill">
-            <mat-label>Table</mat-label>
-            <input matInput [(ngModel)]="table" />
-        </mat-form-field>
-
-        <mat-form-field appearance="outline">
-            <mat-label>Select Date</mat-label>
-            <input matInput [matDatepicker]="picker" [(ngModel)]="selectedDate">
-            <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
-            <mat-datepicker #picker></mat-datepicker>
-        </mat-form-field>
-
-        <button mat-icon-button (click)="getTable()">
-            <mat-icon>add</mat-icon>
-        </button>
-        <button mat-icon-button *ngIf="lineChartData.length;" (click)="removeAllLines()">
-            <mat-icon>refresh</mat-icon>
-        </button>
-    </div>
-    -->
-    
     <div class="graph-options-header">
-        <button mat-icon-button class="example-icon" aria-label="Example icon-button with menu icon" (click)="''">
+        <button mat-icon-button 
+                class="example-icon" 
+                aria-label="Example icon-button with menu icon" 
+                (click)="''">
             <mat-icon>insert_drive_file</mat-icon>
         </button>
-        <button mat-icon-button class="example-icon" aria-label="Example icon-button with menu icon" (click)="''">
+        <button mat-icon-button 
+                class="example-icon" 
+                aria-label="Example icon-button with menu icon" 
+                (click)="''">
             <mat-icon>settings</mat-icon>
         </button>
-        <button mat-icon-button class="example-icon" aria-label="Example icon-button with menu icon" (click)="''">
+        <button mat-icon-button 
+                class="example-icon"
+                aria-label="Example icon-button with menu icon" 
+                (click)="resizeTrigger = !resizeTrigger">
             <mat-icon>zoom_out_map</mat-icon>
         </button>
-        <button mat-icon-button class="example-icon" aria-label="Example icon-button with menu icon" (click)="toggleZoomWindowActivate()">
+        <button mat-icon-button 
+                [ngClass]="{'example-icon icon-pressed': zoomWindowActivate, 'example-icon': !zoomWindowActivate}"
+                aria-label="Example icon-button with menu icon" 
+                (click)="toggleZoomWindowActivate()">
             <mat-icon>search</mat-icon>
         </button>
         <button mat-icon-button class="example-icon" aria-label="Example icon-button with menu icon" (click)="openAddWindow()">
@@ -46,7 +31,10 @@
 
     <div class="graph-table">
         <ng-container *ngIf="lineChartData.length; else noSize">
-            <graph style="height: 100%;" [inputInfo]="lineChartData" [zoomEnabled]="zoomWindowActivate"></graph>
+            <graph style="height: 100%;" 
+                   [inputInfo]="lineChartData" 
+                   [zoomEnabled]="zoomWindowActivate"
+                   [resize]="resizeTrigger"></graph>
         </ng-container>
     </div>
 

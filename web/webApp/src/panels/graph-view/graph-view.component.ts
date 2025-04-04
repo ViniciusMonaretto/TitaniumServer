@@ -15,6 +15,7 @@ export class GraphViewComponent implements OnInit {
     //this.getTable()
   }
 
+  resizeTrigger: boolean = false
   zoomWindowActivate: boolean = false
   lineChartData: Array<{ name: string, series: Array<any> }> = [];
 

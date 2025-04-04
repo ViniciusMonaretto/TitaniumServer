@@ -18,8 +18,6 @@ export class GraphComponent {
   xScaleMax: any = new Date()
   refreshing: boolean = false
 
-  moved= false
-
   first: boolean = true
 
   lastMouseX = 0
@@ -31,6 +29,9 @@ export class GraphComponent {
   lineChartData: Array<{ name: string, series: Array<any> }> = [];
   filteredData: Array<{ name: string, series: Array<any> }> = [];
 
+  @Input() set resize(trigger: boolean) {
+    this.fitAllGraph()
+  }
   @Input() zoomEnabled: boolean = false
 
   @Input() set inputInfo(newValue: Array<{ name: string, series: Array<any> }> ) {
@@ -165,33 +166,34 @@ export class GraphComponent {
 
   fitAllGraph() {
     if (this.lineChartData.length > 0) {
-      
-      let infos = this.lineChartData[0]
       let minYaxis = Number.MAX_SAFE_INTEGER
       let maxYaxis = Number.MIN_SAFE_INTEGER
 
       let minXaxis = new Date(8640000000000000);
       let maxXaxis = new Date(-8640000000000000)
+      for(var infos of this.lineChartData)
+      {
+        for (let info of infos.series) {
 
-      for (let info of infos.series) {
+          let dt = info["name"];
+          let value = info["value"]
 
-        let dt = info["name"];
-        let value = info["value"]
+          if (minXaxis > dt) {
+            minXaxis = dt
+          }
+          if (maxXaxis < dt) {
+            maxXaxis = dt
+          }
 
-        if (minXaxis > dt) {
-          minXaxis = dt
-        }
-        if (maxXaxis < dt) {
-          maxXaxis = dt
-        }
-
-        if (minYaxis > value) {
-          minYaxis = value
-        }
-        if (maxYaxis < value) {
-          maxYaxis = value
+          if (minYaxis > value) {
+            minYaxis = value
+          }
+          if (maxYaxis < value) {
+            maxYaxis = value
+          }
         }
       }
+      
       let marginY = (maxYaxis - minYaxis)*0.2
       
       this.yScaleMax = maxYaxis + marginY
@@ -206,18 +208,16 @@ export class GraphComponent {
       this.xScaleMax = new Date(maxXaxis)
       this.xScaleMin = new Date(minXaxis)
 
-      this.moved = false
     }
 
   }
 
   getXLimits(limit: any)
   {
-    return this.moved? limit:null
+    return limit
   }
 
   onMouseWheel(event: WheelEvent) {
-    this.moved = true
     event.preventDefault(); // Prevent default scroll behavior
 
     const zoomFactor = 0.1; // Adjust zoom intensity
@@ -267,7 +267,6 @@ export class GraphComponent {
   onMouseMove(event: MouseEvent) {
     if (this.zoomEnabled) return;
     if (!this.isDragging) return;
-    this.moved = true
     const deltaX = event.clientX - this.lastMouseX;
     const deltaY = event.clientY - this.lastMouseY;
 
