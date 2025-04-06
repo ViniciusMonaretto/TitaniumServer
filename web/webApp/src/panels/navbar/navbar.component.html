@@ -1,4 +1,8 @@
 <div style="height: 100%;">
-    <side-nav-option [icon]="'timelapse'" [componentText]="'Sensor'" (buttonCallback)="setSensor()"></side-nav-option>
-    <side-nav-option [icon]="'storage'" [componentText]="'Status Logs'" (buttonCallback)="setStatusLOg()"></side-nav-option>
+    <side-nav-option *ngFor="let group of getGroupSensorUi()"
+                    [icon]="'timelapse'" 
+                    [componentText]="group + ' - Display'" 
+                    (buttonCallback)="setSensor(group)">
+    </side-nav-option>
+    <side-nav-option [icon]="'storage'" [componentText]="'Gráficos'" (buttonCallback)="setStatusLOg()"></side-nav-option>
 </div>

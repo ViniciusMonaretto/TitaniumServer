@@ -14,10 +14,15 @@ export class SensorGroupComponent implements OnInit {
   ngOnInit(): void {
   }
 
-  getInfoOfGroup(groupName: string)
+  getInfoOfGroup()
   {
-    let info = this.UiPanelsService.GetUiConfig()[groupName]
+    let info = this.UiPanelsService.GetUiConfig()[this.getGroupSelected()]
     return info
+  }
+
+  getGroupSelected()
+  {
+    return this.UiPanelsService.GetGroup()
   }
 
   getGroupSensorUi()
@@ -45,7 +50,7 @@ export class SensorGroupComponent implements OnInit {
 
   diselectSensor()
   {
-    this.UiPanelsService.setelectSensor(null)
+    this.UiPanelsService.setSelectSensor(null)
   }
 
   loadInfo(tableInfo:any)

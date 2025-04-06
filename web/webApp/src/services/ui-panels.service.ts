@@ -11,6 +11,8 @@ export class UiPanelService {
     subscriptioMap: {[id: string]: Array<SensorModule | Function>} = {}
     subscriptionInfoArrayMap: {[id: string]: {"callback": Function, "tableNames": Array<string>}} = {}
 
+    groupSelected: string = ""
+
     sensorCachedCurrentInfo: {[id: string]: any[]} = {}
 
     private selectedSensor: SensorModule|null = null
@@ -26,7 +28,12 @@ export class UiPanelService {
         for(let groupName in this.panels)
         {
           this.CreateSensorSubscriptionFromPanel(this.panels[groupName])
+          if(this.groupSelected == "")
+          {
+            this.groupSelected = groupName
+          }
         }
+        
         
     }
 
@@ -97,6 +104,16 @@ export class UiPanelService {
       return this.subscriptioMap[fullTopic].length - 1
     }
 
+    SelectGroup(group: string)
+    {
+      this.groupSelected = group;
+    }
+
+    GetGroup()
+    {
+      return this.groupSelected
+    }
+
     OnStatusInfoUpdate(requestId: any, infoArray:any)
     {
       if(requestId in this.subscriptionInfoArrayMap)
@@ -145,7 +162,7 @@ export class UiPanelService {
       return gateway == "*"?table:gateway + '-' + table
     }
 
-    public setelectSensor(model: SensorModule|null)
+    public setSelectSensor(model: SensorModule|null)
     {
       this.selectedSensor = model
     }

@@ -8,16 +8,18 @@ type Panel = Array<SensorModule>
 })
 export class MainScreenSelector {
     
-    screenOption: MainScreenOptions = MainScreenOptions.STATUS_LOG
+    screenOption: MainScreenOptions = MainScreenOptions.SENSORS
+    selectedGroup: string|null = ""
     
     constructor() 
     { 
         
     }
 
-    SelectScreen(option: MainScreenOptions)
+    SelectScreen(option: MainScreenOptions, group: string|null)
     {
       this.screenOption = option
+      this.selectedGroup = group
     }
 
     GetScreen()

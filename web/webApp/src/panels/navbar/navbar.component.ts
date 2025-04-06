@@ -3,6 +3,7 @@ import {MatDialog} from '@angular/material/dialog';
 import {SensorAddWindowComponent} from '../../components/sensor-add-window/sensor-add-window.component'
 import {MainScreenSelector} from "../../services/main-screen-selector.service"
 import {MainScreenOptions} from "../../enum/screen-type"
+import { UiPanelService } from 'src/services/ui-panels.service';
 
 @Component({
   selector: 'app-navbar',
@@ -11,7 +12,7 @@ import {MainScreenOptions} from "../../enum/screen-type"
 })
 export class NavbarComponent implements OnInit {
 
-  constructor(public dialog: MatDialog, private mainScreenService: MainScreenSelector) { }
+  constructor(public dialog: MatDialog, private mainScreenService: MainScreenSelector, private UiPanelsService: UiPanelService) { }
 
   ngOnInit(): void {
   }
@@ -28,14 +29,20 @@ export class NavbarComponent implements OnInit {
     });
   }
 
-  setSensor()
+  getGroupSensorUi()
   {
-    this.mainScreenService.SelectScreen(MainScreenOptions.SENSORS)
+    let info = Object.keys(this.UiPanelsService.GetUiConfig())
+    return info
+  }
+
+  setSensor(group: string)
+  {
+    this.mainScreenService.SelectScreen(MainScreenOptions.SENSORS, group)
   }
 
   setStatusLOg()
   {
-    this.mainScreenService.SelectScreen(MainScreenOptions.STATUS_LOG)
-  }
+    this.mainScreenService.SelectScreen(MainScreenOptions.STATUS_LOG, null)
+  } 
 
 }

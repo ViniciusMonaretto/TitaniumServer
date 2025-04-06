@@ -18,6 +18,8 @@ import { SideNavOptionComponent } from 'src/components/side-nav-option/side-nav-
 import { GroupOfSensorsComponent } from 'src/components/group-of-sensors/group-of-sensors.component';
 import { InfoTableComponent } from 'src/components/info-table/info-table.component';
 import {SensorInfoComponent} from  'src/components/sensor-info/sensor-info.component'
+import { LoadingComponent } from '../components/loading/loading.component';
+
 
 //Angular Material
 import {MatSidenavModule} from '@angular/material/sidenav';
@@ -57,7 +59,8 @@ import { GraphComponent } from 'src/components/graph/graph.component';
     SensorInfoComponent,
     ErrorDialogComponent,
     GraphRequestWindowComponent,
-    GraphComponent
+    GraphComponent,
+    LoadingComponent
   ],
   imports: [
     BrowserModule,

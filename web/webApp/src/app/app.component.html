@@ -1,19 +1,6 @@
 <div class="window-class">
-    <mat-toolbar style="height: 5%;" color="primary">
-        <button mat-icon-button class="example-icon" aria-label="Example icon-button with menu icon" (click)="drawer.toggle()">
-            <mat-icon>menu</mat-icon>
-        </button>
-        <span>Titanium Dashboard</span>
-        <span class="example-spacer"></span>
-        <button mat-icon-button class="example-icon favorite-icon" aria-label="Example icon-button with heart icon">
-            <mat-icon>favorite</mat-icon>
-        </button>
-        <button mat-icon-button class="example-icon" aria-label="Example icon-button with share icon">
-            <mat-icon>share</mat-icon>
-        </button>
-    </mat-toolbar>
     <mat-drawer-container class="window-container">
-        <mat-drawer #drawer mode="side">
+        <mat-drawer #drawer mode="side" opened>
           <app-navbar></app-navbar>
         </mat-drawer>
 

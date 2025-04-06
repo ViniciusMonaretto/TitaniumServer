@@ -43,6 +43,6 @@ export class GroupOfSensorsComponent implements OnInit {
 
   selectSensor(sensorInfo: any)
   {
-    this.UiPanelsService.setelectSensor(sensorInfo)
+    this.UiPanelsService.setSelectSensor(sensorInfo)
   }
 }

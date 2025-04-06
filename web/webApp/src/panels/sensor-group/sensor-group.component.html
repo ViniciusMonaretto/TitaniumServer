@@ -7,9 +7,8 @@
                  (onLoad)="loadInfo($event)" ></sensor-info>
     <div *ngIf="!getSensorSelected()">
         <group-of-sensors 
-            *ngFor="let groupName of getGroupSensorUi()" 
-            [name]="groupName" 
-            [sensorArray]="getInfoOfGroup(groupName)">
+            [name]="getGroupSelected()" 
+            [sensorArray]="getInfoOfGroup()">
 
         </group-of-sensors>
     </div>
