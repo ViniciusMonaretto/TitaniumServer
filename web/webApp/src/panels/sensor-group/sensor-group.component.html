@@ -1,17 +1,21 @@
 <div class="group-div-display">
-    <sensor-info *ngIf="getSensorSelected()" 
-                 [sensorInfo]="getSensorSelected()" 
-                 [currentReading]="getSensorSelected().value"
-                 [tableArray]="getSelectedSensorTableInfo()"
-                 (onExit)="diselectSensor()"
-                 (onLoad)="loadInfo($event)" ></sensor-info>
-    <div *ngIf="!getSensorSelected()">
-        <group-of-sensors 
-            [name]="getGroupSelected()" 
-            [sensorArray]="getInfoOfGroup()">
-
-        </group-of-sensors>
+    <sensor-info *ngIf="getSensorSelected()" [sensorInfo]="getSensorSelected()"
+        [currentReading]="getSensorSelected().value" [tableArray]="getSelectedSensorTableInfo()"
+        (onExit)="diselectSensor()" (onLoad)="loadInfo($event)"></sensor-info>
+    <div style="height: 100%;" *ngIf="!getSensorSelected()">
+        <div class="group-header">{{getGroupSelected()}}</div>
+        <mat-card style="height: calc(100% - 90px);">
+            <mat-card-content style="height: 100%;">
+                <div style="height: calc(100%);">
+                    <div style="height: 78%;">
+                        <group-of-sensors [name]="'Temperatura'" [sensorArray]="getInfoOfGroup()"></group-of-sensors>
+                    </div>
+                    <div style="display: flex; height: 22%;">
+                        <group-of-sensors class="info-bellow-display" [name]="'Potência'" [sensorArray]="getInfoOfGroup()"></group-of-sensors>
+                        <group-of-sensors class="info-bellow-display" [name]="'Pressão'" [sensorArray]="getInfoOfGroup()"></group-of-sensors>
+                    </div>
+                </div>
+            </mat-card-content>
+        </mat-card>
     </div>
-   
 </div>
-

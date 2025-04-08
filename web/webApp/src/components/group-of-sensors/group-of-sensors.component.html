@@ -1,15 +1,15 @@
-<mat-card>
-    <mat-card-title>{{name}}</mat-card-title>
-    <mat-card-content>
-      <div class="main-group-div">
-        <sensor *ngFor="let sensor of sensorArray" 
-                [sensorInfo]="sensor" 
-                (clickCallback)="selectSensor($event)" 
-                (deleteCallback)="removeSensorCallback($event)"></sensor>
-      </div>
-        
-    </mat-card-content>
-    <mat-card-actions align="end">
+<div style="    height: 100%;">
+  <div class="group-header">{{name}}</div>
+  <div style="height: calc(100% - 56px); overflow-y: auto;">
+    <div class="main-group-div">
+      <sensor class="flex-item"
+             *ngFor="let sensor of sensorArray" 
+              [sensorInfo]="sensor" 
+              (clickCallback)="selectSensor($event)" 
+              (deleteCallback)="removeSensorCallback($event)">
+      </sensor>
       <button mat-button (click)="addSensor(name)">Add Sensor</button>
-    </mat-card-actions>
-</mat-card>
+    </div>
+  </div>
+  
+</div>

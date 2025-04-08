@@ -1,14 +1,11 @@
 <div class="sensor">
-    <div class="header-sensor">
-        {{sensorInfo.name + " (" + getMeasureIcon() + ")"}} 
-    </div>
     <div class="measure-display" (click)="infoCLick()">
         <div class="border-measure"></div>
         <div class="middle-measure">
             {{getCurrentReading()}}
         </div>
         <div class="border-measure">
-            
+            {{getMeasureIcon()}}
         </div>
         
     </div>
@@ -17,4 +14,7 @@
             <mat-icon>delete</mat-icon>
         </button>
     </div>
+</div>
+<div class="header-sensor">
+    {{sensorInfo.name }}
 </div>

@@ -24,7 +24,7 @@ export class SensorComponent implements OnInit {
     }
     if(this.sensorInfo.sensorType == SensorTypesEnum.TEMPERATURE)
     {
-        return "C"
+        return "ºC"
     }
     if(this.sensorInfo.sensorType == SensorTypesEnum.HUMIDITY)
     {

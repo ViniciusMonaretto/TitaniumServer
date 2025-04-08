@@ -1,3 +1,23 @@
-.main-group-div{
-    display: flex;
+.main-group-div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px; /* space between items */
+  justify-content: flex-start; /* or space-between / center / start */
 }
+
+.flex-item {
+  padding: 20px;
+  width: 260px;
+  //flex: 1 1 200px; /* Grow, shrink, base width */
+  max-width: 300px;
+  box-sizing: border-box;
+  text-align: center;
+}
+
+.group-header{
+  width: 100%;
+  font-size: xx-large;
+  padding-bottom: 20px;
+  font-weight: bold;
+}
+  

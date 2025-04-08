@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { UiPanelService } from "../../services/ui-panels.service"
 import { ServerConectorService } from "../../services/server-conector.service"
+import { SensorModule } from 'src/models/sensor-module';
 
 @Component({
   selector: 'sensor-groups',

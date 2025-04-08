@@ -1,6 +1,18 @@
 .group-div-display{
     display: flex;
-    width: calc(100% - 20px);
+    height: calc(100% - 30px);
+    width: calc(100% - 30px);
     flex-direction: column;
-    margin: 15px;
+    padding: 15px;
+}
+
+.group-header{
+    width: 100%;
+    font-size: xx-large;
+    padding-bottom: 20px;
+    font-weight: bold;
+}
+
+.info-bellow-display{
+    width: 50%;
 }
