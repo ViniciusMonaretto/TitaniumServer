@@ -1,7 +1,8 @@
 import { Component, OnInit } from '@angular/core';
-import { UiPanelService } from "../../services/ui-panels.service"
+import { PanelInfo, UiPanelService } from "../../services/ui-panels.service"
 import { ServerConectorService } from "../../services/server-conector.service"
 import { SensorModule } from 'src/models/sensor-module';
+import { SensorTypesEnum } from 'src/enum/sensor-type';
 
 @Component({
   selector: 'sensor-groups',
@@ -18,6 +19,10 @@ export class SensorGroupComponent implements OnInit {
   getInfoOfGroup()
   {
     let info = this.UiPanelsService.GetUiConfig()[this.getGroupSelected()]
+    if(!info)
+    {
+      return new PanelInfo()
+    }
     return info
   }
 

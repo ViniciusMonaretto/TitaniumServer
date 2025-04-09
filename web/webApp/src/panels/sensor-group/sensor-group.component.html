@@ -7,12 +7,12 @@
         <mat-card style="height: calc(100% - 90px);">
             <mat-card-content style="height: 100%;">
                 <div style="height: calc(100%);">
-                    <div style="height: 78%;">
-                        <group-of-sensors [name]="'Temperatura'" [sensorArray]="getInfoOfGroup()"></group-of-sensors>
+                    <div style="height: 75%;">
+                        <group-of-sensors [name]="'Temperatura'" [sensorArray]="getInfoOfGroup().temperature"></group-of-sensors>
                     </div>
-                    <div style="display: flex; height: 22%;">
-                        <group-of-sensors class="info-bellow-display" [name]="'Potência'" [sensorArray]="getInfoOfGroup()"></group-of-sensors>
-                        <group-of-sensors class="info-bellow-display" [name]="'Pressão'" [sensorArray]="getInfoOfGroup()"></group-of-sensors>
+                    <div style="display: flex; height: 25%;">
+                        <group-of-sensors class="info-bellow-display" [name]="'Potência'" [sensorArray]="getInfoOfGroup().potency"></group-of-sensors>
+                        <group-of-sensors class="info-bellow-display" [name]="'Pressão'" [sensorArray]="getInfoOfGroup().pressure"></group-of-sensors>
                     </div>
                 </div>
             </mat-card-content>

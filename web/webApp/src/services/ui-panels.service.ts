@@ -1,13 +1,19 @@
 import { Injectable } from '@angular/core';
 import {SensorModule} from "../models/sensor-module"
-type Panel = Array<SensorModule> 
+import { SensorTypesEnum } from 'src/enum/sensor-type';
+
+export class PanelInfo {
+  public temperature: Array<SensorModule> = [];
+  public pressure: Array<SensorModule>  = [];
+  public potency: Array<SensorModule> = [];
+}
 
 @Injectable({
   providedIn: 'root'
 })
 export class UiPanelService {
     
-    panels: {[id: string]: Panel} = {}
+    panels: {[id: string]:  PanelInfo} = {}
     subscriptioMap: {[id: string]: Array<SensorModule | Function>} = {}
     subscriptionInfoArrayMap: {[id: string]: {"callback": Function, "tableNames": Array<string>}} = {}
 
@@ -22,12 +28,12 @@ export class UiPanelService {
         
     }
 
-    SetNewUiConfig(uiConfig: {[id: string]: Panel} )
+    SetNewUiConfig(uiConfig: {[id: string]: SensorModule[]} )
     {
-        this.panels = uiConfig
-        for(let groupName in this.panels)
+        for(let groupName in uiConfig)
         {
-          this.CreateSensorSubscriptionFromPanel(this.panels[groupName])
+          this.panels[groupName] = new PanelInfo()
+          this.CreateSensorSubscriptionFromPanel(uiConfig[groupName], groupName)
           if(this.groupSelected == "")
           {
             this.groupSelected = groupName
@@ -42,10 +48,27 @@ export class UiPanelService {
       return this.panels
     }
 
-    CreateSensorSubscriptionFromPanel(panel: Panel)
+    AddSensorToPanel(sensor: SensorModule, groupName: string)
+    {
+      switch(sensor.sensorType)
+      {
+        case SensorTypesEnum.TEMPERATURE:
+          this.panels[groupName].temperature.push(sensor)
+          break
+        case SensorTypesEnum.PREASSURE:
+          this.panels[groupName]["pressure"].push(sensor)
+          break
+        case SensorTypesEnum.POTENCY:
+          this.panels[groupName]["potency"].push(sensor)
+          break
+      }
+    }
+
+    CreateSensorSubscriptionFromPanel(panel: SensorModule[], groupName: string)
     {
       for(var sensor of panel)
       {
+        this.AddSensorToPanel(sensor, groupName);
         let fullTopic = this.GetTableName(sensor.gateway, sensor.topic)
         this.AddSubscription(fullTopic, sensor)
       }
