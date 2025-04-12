@@ -38,7 +38,7 @@ try:
         timestamp = datetime.utcnow().isoformat()  # ISO 8601 UTC format
         # Create a JSON payload
         payload = {
-            "value":   round(random.uniform(22.0, 23.5), 2),
+            "value":   round(random.uniform(22.0, 22.5), 2),
             "timestamp": timestamp
         }
         payload_json = json.dumps(payload)
@@ -51,13 +51,13 @@ try:
         # payload_json = json.dumps(payload)
         client.publish(TOPIC, payload_json)
         payload = {
-            "value":   round(random.uniform(22.0, 23.5), 2),
+            "value":   round(random.uniform(22.0, 22.5), 2),
             "timestamp": timestamp
         }
         payload_json = json.dumps(payload)
         client.publish(TOPIC2, payload_json)
         print(f"Published: {payload_json} to topic {TOPIC}")
-        time.sleep(10)  # Wait for 5 seconds before sending the next message
+        time.sleep(30)  # Wait for 5 seconds before sending the next message
 except KeyboardInterrupt:
     print("Stopping the client.")
     client.loop_stop()  # Stop the loop

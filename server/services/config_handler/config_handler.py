@@ -71,7 +71,7 @@ class ConfigHandler(ServiceInterface):
         if group_name not in self._panels_info:
             return False, "Add panel error, no group to add"
 
-        result, message = self._status_saver.add_new_table(panel._topic, panel._gateway)
+        result, message = self._status_saver.add_new_reading(panel._topic, panel._gateway)
 
         if result:
             self._panels_info[group_name].append(panel)
@@ -94,7 +94,7 @@ class ConfigHandler(ServiceInterface):
         for panels in self._panels_info.values():
             for idx, panel in enumerate(panels):
                 if panel._id == panel_id:
-                    result, message = self._status_saver.drop_table(panel._topic, panel._gateway)
+                    result, message = self._status_saver.drop_reading_command(panel._topic, panel._gateway)
                     if result:
                         del panels[idx]
                         self.update_ui_file()

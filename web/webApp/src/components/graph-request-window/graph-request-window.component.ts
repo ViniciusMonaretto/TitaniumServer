@@ -10,7 +10,7 @@ import { SensorModule } from 'src/models/sensor-module';
 })
 export class GraphRequestWindowComponent implements OnInit {
 
-  uiConfig: {[id: string]: Array<SensorModule> } = {}
+  uiConfig: {[id: string]: any } = {}
 
   selectedSensors: Array<SensorModule> = []
   selectedGroup: string = ""
@@ -36,6 +36,11 @@ export class GraphRequestWindowComponent implements OnInit {
       const [hours, minutes] = event.target.value.split(':');
       selectedDateTime.setHours(parseInt(hours, 10), parseInt(minutes, 10));
     }
+  }
+
+  getTemperatureSensors()
+  {
+    return this.uiConfig[this.selectedGroup].temperature
   }
 
   validForm()
