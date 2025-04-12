@@ -46,6 +46,8 @@ export class GraphViewComponent implements OnInit {
 
     // Update chart data and trigger Angular change detection
     this.lineChartData[chartId].series = newSeries;
+
+    this.lineChartData = [...this.lineChartData ]
   };
 
   toggleZoomWindowActivate()

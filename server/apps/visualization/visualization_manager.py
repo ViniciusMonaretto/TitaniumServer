@@ -61,6 +61,7 @@ class VisualizationWebSocketHandler(tornado.websocket.WebSocketHandler):
             self._logger.error(f"Exception occured on panel message: {e}")
 
     def request_status(self, request):
+        self._logger.info("Visualization.request_status: Incoming graph request")
         data = {
                 'sensorInfos': request['sensorInfos'], 
                 'websocketId': request['requestId']
@@ -71,6 +72,7 @@ class VisualizationWebSocketHandler(tornado.websocket.WebSocketHandler):
         self._middleware.send_command(StatusSaverCommands.GET_TABLE_INFO, data, self.send_status_history)                                    
     
     def send_status_history(self, data):
+        self._logger.info("Visualization.send_status_history: graph send")
         self.send_message_to_ui("statusInfo", data)  
 
     def add_panel_request(self, panel_info):

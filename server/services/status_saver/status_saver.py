@@ -1,6 +1,5 @@
 import sqlite3
-import json
-import os
+import pytz
 from datetime import datetime
 from typing import Union
 from middleware.status_subscriber import StatuSubscribers
@@ -175,10 +174,13 @@ class StatusSaver(ServiceInterface):
 
             conn.commit()
 
+            local_tz = pytz.timezone("America/Sao_Paulo")
+
             for sensor_name, timestamp, value in rows:
                 if sensor_name not in data_out['info']:
                     data_out['info'][sensor_name] = []
-                data_out['info'][sensor_name].append({'timestamp': datetime.fromtimestamp(timestamp).isoformat(), 'value': value})
+                tm = datetime.fromtimestamp(timestamp, local_tz)
+                data_out['info'][sensor_name].append({'timestamp': tm.isoformat(), 'value': value})
             data_out['requestId'] = data['websocketId']
         except Exception as e:
             self._logger.error(f"StatusSaver::get_table_info_command: Error trying to fetch info from table {e}")
