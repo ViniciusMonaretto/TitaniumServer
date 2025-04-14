@@ -15,6 +15,14 @@ Steps to use the Titanium Server system:
 
 5. Run the server using the file server/main.py
 
+Use Docker:
+1. Run the command:
+    - sudo ./scripts/run.sh
+2. Open the browser and go to:
+    - http://localhost:8888
+3. To stop the server:
+    - sudo ./scripts/stopDocker.sh
+
 Ps:
 How to install docker: 
 1.
