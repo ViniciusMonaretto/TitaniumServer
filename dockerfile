@@ -12,11 +12,10 @@ COPY ./requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy Angular build files into the container
-# COPY web/webApp/dist/web-app /app/dist/webApp
+COPY web/webApp/dist/web-app ./webApp
 
 # Expose the port the server runs on
 EXPOSE 8888
-EXPOSE 3000
 
 # Command to run the Tornado server
 CMD ["python3", "main.py"]
