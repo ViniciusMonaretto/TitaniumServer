@@ -5,6 +5,8 @@ from typing import Union
 from middleware.status_subscriber import StatuSubscribers
 from middleware.middleware import ClientMiddleware
 import uuid
+import threading
+import queue
 
 from support.logger import Logger
 from ..service_interface import ServiceInterface
@@ -24,6 +26,11 @@ class StatusSaver(ServiceInterface):
         self.initialize_commands()
 
         self.create_db()
+        
+        self._write_queue = queue.Queue()
+        
+        self._info_wrything_thread = threading.Thread(target=self.write_sensor_data_loop, daemon=True)
+        self._info_wrything_thread.start()
 
         self._logger.info("StatusSaver initialized")
         
@@ -193,7 +200,7 @@ class StatusSaver(ServiceInterface):
     def subscribe_to_status(self, gateway, status_name):
         topic = self.get_panel_topic(gateway, status_name)
         if(not topic in self._status_subscribers):
-            self._status_subscribers[topic] = StatuSubscribers(self.save_sensor_data_on_db, topic, self.id + str(self._subscriptions_add))
+            self._status_subscribers[topic] = StatuSubscribers(self.add_sensor_data_to_queue, topic, self.id + str(self._subscriptions_add))
             self._middleware.add_subscribe_to_status(self._status_subscribers[topic], topic)
             self._subscriptions_add+=1
 
@@ -211,18 +218,46 @@ class StatusSaver(ServiceInterface):
             return stat_info[1]
         else:
             return stat_info[0] + '-' + stat_info[1]
+        
+    def add_sensor_data_to_queue(self, status_info):
+        try:
+            self._write_queue.put(status_info)
+        except Exception as e:
+            self._logger.error(f"StatusSaver::add_sensor_data_to_queue: Error adding data to queue {e}")
 
-    def save_sensor_data_on_db(self, status_info):
-        conn = sqlite3.connect(DB_NAME)
-        cursor = conn.cursor()
-        status_name = self.get_sensor_full_name(status_info)
+    def write_sensor_data_loop(self):
+        while True:
+            sensor_infos = []
+            while not self._write_queue.empty():
+                try:
+                    sensor_info = self._write_queue.get(timeout=1)
+                    info = sensor_info['data']
+                    status_name = self.get_sensor_full_name(sensor_info)
+                    timestamp = datetime.fromisoformat(info["timestamp"])
+                    
+                    sensor_infos.append((timestamp.timestamp(), status_name, info["data"]))
+                except KeyboardInterrupt:
+                    break
+                except Exception as e:
+                    self._logger.error(f"StatusSaver::write_sensor_data_loop: Error getting data from write queue {e}")
+                    break
+            
+            if len(sensor_infos) > 0:
+                self.save_sensor_data_on_db(sensor_infos)
+            threading.Event().wait(1)
+            
+            
 
-        status_obj = status_info['data']
+    
+    def save_sensor_data_on_db(self, status_infos):
+        try:
+            conn = sqlite3.connect(DB_NAME)
+            cursor = conn.cursor()
 
-        timestamp = datetime.fromisoformat(status_obj["timestamp"])
+            cursor.executemany(f'INSERT INTO "SensorData" (timestamp, name, value) VALUES (?, ?, ?)', status_infos)
 
-        cursor.execute(f'INSERT INTO "SensorData" (timestamp, name, value) VALUES (?, ?, ?)', 
-                      (timestamp.timestamp(), status_name, status_obj["data"]))
-
-        conn.commit()
-        conn.close()
+            conn.commit()
+        except Exception as e:
+            self._logger.error(f"StatusSaver::save_sensor_data_on_db: Error saving data on db {e}")
+        finally:
+            conn.close()
