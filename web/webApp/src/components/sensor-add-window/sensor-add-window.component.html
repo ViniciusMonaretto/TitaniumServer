@@ -1,7 +1,7 @@
 <h2 mat-dialog-title>Add new Sensor</h2>
 <mat-dialog-content>
   <mat-form-field appearance="fill">
-    <mat-label>Name</mat-label>
+    <mat-label>Nome</mat-label>
     <input matInput [(ngModel)]="sensorModule.name" />
   </mat-form-field>
   <mat-form-field appearance="fill">
@@ -9,11 +9,11 @@
     <input matInput [(ngModel)]="sensorModule.gateway" />
   </mat-form-field>
   <mat-form-field appearance="fill">
-    <mat-label>Topic</mat-label>
+    <mat-label>Tópico</mat-label>
     <input matInput [(ngModel)]="sensorModule.topic" />
   </mat-form-field>
-  <mat-form-field appearance="fill">
-    <mat-label>Type</mat-label>
+  <mat-form-field appearance="fill" *ngIf="!this.settedType">
+    <mat-label>Tipo</mat-label>
     <mat-select  [(ngModel)]="sensorModule.sensorType">
       <mat-option  *ngFor="let typeSensor of sensorTypes" [value]="typeSensor">{{typeSensor}}</mat-option>
     </mat-select>

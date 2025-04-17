@@ -5,6 +5,7 @@ import {SensorAddWindowComponent} from '../../components/sensor-add-window/senso
 
 import {ServerConectorService} from "../../services/server-conector.service"
 import {UiPanelService} from "../../services/ui-panels.service"
+import { SensorTypesEnum } from 'src/enum/sensor-type';
 
 @Component({
   selector: 'group-of-sensors',
@@ -14,6 +15,7 @@ import {UiPanelService} from "../../services/ui-panels.service"
 export class GroupOfSensorsComponent implements OnInit {
 
   @Input() name: string = "";
+  @Input() group: string = "";
   @Input() sensorArray: Array<SensorModule> = [];
 
   constructor(public dialog: MatDialog, private serverConnector: ServerConectorService, private UiPanelsService: UiPanelService) { }
@@ -23,11 +25,13 @@ export class GroupOfSensorsComponent implements OnInit {
 
   addSensor(groupName: string): void {
     const dialogRef = this.dialog.open(SensorAddWindowComponent, {
-      width: '250px',
+      width: '300px',
       data: {callback: (sensorData: any)=>{
         sensorData["group"] = groupName
         this.addNewSensorCallback(sensorData)
-      }}
+      },
+      sensorType: SensorTypesEnum.TEMPERATURE
+    }
     });
   }
 

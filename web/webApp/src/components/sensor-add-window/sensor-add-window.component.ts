@@ -14,10 +14,14 @@ export class SensorAddWindowComponent {
 
   public sensorTypes = Object.values(SensorTypesEnum);
 
+  settedType?: SensorTypesEnum
+  group: string = ""
+
   constructor(public dialogRef: MatDialogRef<SensorAddWindowComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any
   ) {
-    
+    this.settedType = data.sensorType
+    this.group = data.group
   }
 
   onNoClick(): void {
@@ -26,11 +30,14 @@ export class SensorAddWindowComponent {
 
   getSensorData()
   {
+    if(this.settedType != undefined)
+      this.sensorModule.sensorType = this.settedType
     return {
       "name": this.sensorModule.name,
       "gateway": this.sensorModule.gateway,
       "topic": this.sensorModule.topic,
       "sensorType": this.sensorModule.sensorType,
+      "group": this.group
     }
   }
 
