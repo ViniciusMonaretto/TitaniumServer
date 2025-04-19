@@ -45,7 +45,7 @@ export class GraphRequestWindowComponent implements OnInit {
 
   validForm()
   {
-    return this.selectedSensors.length > 0 && 
+    return this.selectedGroup != "" && 
           ((this.startDate == null && this.endDate == null) ||
           (this.startDate != null && this.endDate == null)  ||
           (this.startDate != null && this.endDate != null && this.startDate?.getTime() < this.endDate.getTime() ))
@@ -58,6 +58,11 @@ export class GraphRequestWindowComponent implements OnInit {
   onAddCLick()
   {
     let selectedPanels = []
+    if(this.selectedSensors.length == 0)
+    {
+      this.selectedSensors = this.getTemperatureSensors()
+    }
+
     for(let panel of this.selectedSensors)
     {
       selectedPanels.push({

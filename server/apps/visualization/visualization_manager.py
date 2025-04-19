@@ -66,8 +66,10 @@ class VisualizationWebSocketHandler(tornado.websocket.WebSocketHandler):
                 'sensorInfos': request['sensorInfos'], 
                 'websocketId': request['requestId']
             }
-        if("timestamp" in data):
-            data['timestamp'] = request["timestamp"]
+        if("beginDate" in request):
+            data['beginDate'] = request["beginDate"]
+        if("endDate" in request):
+            data['endDate'] = request["endDate"]
     
         self._middleware.send_command(StatusSaverCommands.GET_TABLE_INFO, data, self.send_status_history)                                    
     

@@ -1,12 +1,11 @@
 .main-group-div {
   display: flex;
   flex-wrap: wrap;
-  gap: 16px; /* space between items */
+  gap: 20px; /* space between items */
   justify-content: flex-start; /* or space-between / center / start */
 }
 
 .flex-item {
-  padding: 20px;
   width: 260px;
   //flex: 1 1 200px; /* Grow, shrink, base width */
   max-width: 300px;

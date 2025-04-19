@@ -7,6 +7,7 @@
     border-radius: 10px;
     background-color: black;
     color: white;
+    font-family: 'LCD', sans-serif;
 }
 
 .header-sensor
@@ -15,14 +16,14 @@
     display: flex;
     align-items: center;
     padding-left: 10px;
-    font-size: 25px;
+    font-size: 20px;
     padding-top: 10px;
 }
 
 .measure-display
 {
     display: flex;
-    height: 70%;
+    height: 100%;
     align-items: center;
     justify-content: space-around;
 }
@@ -33,7 +34,7 @@
     display: flex;
     align-items: center;
     justify-content: space-around;
-    font-size: 50px;
+    font-size: 60px;
 }
 
 .border-measure

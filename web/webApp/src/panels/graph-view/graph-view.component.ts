@@ -74,7 +74,10 @@ export class GraphViewComponent implements OnInit {
   }
 
   getTable(sensorData: any): void {
-    this.serverConnector.sendRequestForTableInfo(sensorData['selectedSensors'], this.onGraphUpdate,)
+    this.serverConnector.sendRequestForTableInfo(sensorData['selectedSensors'], 
+                                                   this.onGraphUpdate,
+                                                   sensorData['startDate'],
+                                                   sensorData['endDate'])
   }
 
 }

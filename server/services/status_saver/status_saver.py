@@ -155,8 +155,9 @@ class StatusSaver(ServiceInterface):
                 placeholders += ', '
         
         if("beginDate" in data):
-            date_command += " WHERE timestamp >= ?"
-            values = values + [data["beginDate"]]
+            dt = datetime.strptime( data["beginDate"][:26], '%Y-%m-%dT%H:%M:%S.%f')
+            date_command += " AND timestamp >= ?"
+            values = values + [dt.timestamp()]
 
             if("endDate" in data):
                 date_command += " AND timestamp <= ?"

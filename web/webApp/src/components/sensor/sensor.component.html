@@ -5,14 +5,17 @@
             {{getCurrentReading()}}
         </div>
         <div class="border-measure">
-            {{getMeasureIcon()}}
+            <div>
+                {{getMeasureIcon()}}
+            </div>
+            <div>
+                <button mat-icon-button  (click)="deletePanel()">
+                    <mat-icon>delete</mat-icon>
+                </button>
+            </div>
+           
         </div>
         
-    </div>
-    <div class="footer-measure">
-        <button mat-icon-button  (click)="deletePanel()">
-            <mat-icon>delete</mat-icon>
-        </button>
     </div>
 </div>
 <div class="header-sensor">
