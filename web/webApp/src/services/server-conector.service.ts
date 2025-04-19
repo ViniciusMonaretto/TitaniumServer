@@ -11,9 +11,11 @@ export class ServerConectorService {
   private socket: WebSocket | null;
   private wsUrl = 'ws://localhost:8888/websocket'
 
-  private reconnectAttempts: number = 0;
+  //private reconnectAttempts: number = 0;
   private maxReconnectAttempts: number = 10;
   private reconnectDelay: number = 2000;
+  private isReconnecting: boolean = false;
+
   constructor(private uiPanelService: UiPanelService, private dialog: MatDialog) { 
     this.socket = null
     setTimeout(()=>{
@@ -23,6 +25,7 @@ export class ServerConectorService {
   }
 
   private connectToServer(): void {
+    this.isReconnecting = true;
     this.socket = new WebSocket(this.wsUrl);
 
     this.socket.onmessage = (message) => {this.onMessage(message)}
@@ -33,7 +36,7 @@ export class ServerConectorService {
 
     this.socket.onopen = () => {
       console.log('WebSocket connected successfully!');
-      this.reconnectAttempts = 0;  // Reset reconnect attempts on successful connection
+      //this.reconnectAttempts = 0;  // Reset reconnect attempts on successful connection
     };
   }
 
@@ -46,17 +49,17 @@ export class ServerConectorService {
       
   }
 
+  public getIsReconnecting(): boolean {
+    return this.isReconnecting;
+  }
+
   private handleReconnection() {
-    if (this.reconnectAttempts < this.maxReconnectAttempts) {
-      setTimeout(() => {
-        console.log(`Attempting reconnection (${this.reconnectAttempts + 1}/${this.maxReconnectAttempts})...`);
-        this.reconnectAttempts++;
-        this.connectToServer();
-      }, this.reconnectDelay);
-      this.reconnectDelay *= 2; // Exponential backoff
-    } else {
-      console.error('Max reconnection attempts reached.');
-    }
+    setTimeout(() => {
+      //console.log(`Attempting reconnection (${this.reconnectAttempts + 1}/${this.maxReconnectAttempts})...`);
+      //this.reconnectAttempts++;
+      this.connectToServer();
+    }, this.reconnectDelay);
+    this.reconnectDelay *= 2; // Exponential backoff
   }
 
   private openErrorDialog(message: string): void {
@@ -120,6 +123,7 @@ export class ServerConectorService {
     if(data["status"] == "uiConfig")
     {
       this.uiPanelService.SetNewUiConfig(data["message"])
+      this.isReconnecting = false;
     }
     else if(data["status"] == "sensorUpdate")
     {

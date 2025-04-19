@@ -25,4 +25,9 @@ export class MainScreenComponent implements OnInit {
     return this.mainScreenSelectorServce.GetScreen() === MainScreenOptions.STATUS_LOG
   }
 
+  getIsReconnecting()
+  {
+    return this.serverConnector.getIsReconnecting()
+  }
+
 }
