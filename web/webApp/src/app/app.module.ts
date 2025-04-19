@@ -34,6 +34,7 @@ import {MatCardModule} from '@angular/material/card';
 import {MatTableModule} from '@angular/material/table'; 
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
+import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 
 import { NgxChartsModule } from '@swimlane/ngx-charts'
 
@@ -43,6 +44,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { ErrorDialogComponent } from 'src/components/error-dialog/error-dialog.component';
 import { GraphRequestWindowComponent } from '../components/graph-request-window/graph-request-window.component';
 import { GraphComponent } from 'src/components/graph/graph.component';
+import { SpinnerComponent } from '../components/spinner/spinner.component';
 
 @NgModule({
   declarations: [
@@ -60,7 +62,8 @@ import { GraphComponent } from 'src/components/graph/graph.component';
     ErrorDialogComponent,
     GraphRequestWindowComponent,
     GraphComponent,
-    LoadingComponent
+    LoadingComponent,
+    SpinnerComponent
   ],
   imports: [
     BrowserModule,
@@ -80,6 +83,7 @@ import { GraphComponent } from 'src/components/graph/graph.component';
     MatTableModule,
     MatDatepickerModule,
     MatNativeDateModule,
+    MatProgressSpinnerModule,
     NgxChartsModule
   ],
   entryComponents: [SensorAddWindowComponent],

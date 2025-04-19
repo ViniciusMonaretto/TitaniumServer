@@ -1,8 +1,9 @@
 import { Injectable } from '@angular/core';
 import {UiPanelService} from './ui-panels.service'
 import { v4 as uuidv4 } from 'uuid';
-import { MatDialog } from '@angular/material/dialog';
+import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { ErrorDialogComponent } from 'src/components/error-dialog/error-dialog.component';
+import { SpinnerComponent } from 'src/components/spinner/spinner.component';
 
 @Injectable({
   providedIn: 'root'
@@ -12,9 +13,9 @@ export class ServerConectorService {
   private wsUrl = 'ws://localhost:8888/websocket'
 
   //private reconnectAttempts: number = 0;
-  private maxReconnectAttempts: number = 10;
   private reconnectDelay: number = 2000;
-  private isReconnecting: boolean = false;
+
+  private dialogRef: MatDialogRef<SpinnerComponent> | null = null;
 
   constructor(private uiPanelService: UiPanelService, private dialog: MatDialog) { 
     this.socket = null
@@ -25,7 +26,7 @@ export class ServerConectorService {
   }
 
   private connectToServer(): void {
-    this.isReconnecting = true;
+    this.showSpinnerDialog();
     this.socket = new WebSocket(this.wsUrl);
 
     this.socket.onmessage = (message) => {this.onMessage(message)}
@@ -40,6 +41,22 @@ export class ServerConectorService {
     };
   }
 
+  private showSpinnerDialog(): void {
+    if(!this.dialogRef) {
+      this.dialogRef = this.dialog.open(SpinnerComponent, {
+        disableClose: true,
+        panelClass: 'transparent-dialog',
+        backdropClass: 'dark-backdrop',
+      });
+    }
+   
+  }
+
+  private hideSpinnerDialog(): void {
+    this.dialogRef?.close();
+    this.dialogRef = null;
+  }
+
   private onDisconnection()
   {
     if(this.handleReconnection)
@@ -47,10 +64,6 @@ export class ServerConectorService {
       this.handleReconnection();
     }
       
-  }
-
-  public getIsReconnecting(): boolean {
-    return this.isReconnecting;
   }
 
   private handleReconnection() {
@@ -123,7 +136,7 @@ export class ServerConectorService {
     if(data["status"] == "uiConfig")
     {
       this.uiPanelService.SetNewUiConfig(data["message"])
-      this.isReconnecting = false;
+      this.hideSpinnerDialog();
     }
     else if(data["status"] == "sensorUpdate")
     {
