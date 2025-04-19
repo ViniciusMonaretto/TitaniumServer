@@ -46,7 +46,7 @@ export class ServerConectorService {
       this.dialogRef = this.dialog.open(SpinnerComponent, {
         disableClose: true,
         panelClass: 'transparent-dialog',
-        backdropClass: 'dark-backdrop',
+        backdropClass: 'dimmed-backdrop',
       });
     }
    

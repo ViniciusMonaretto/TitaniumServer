@@ -19,3 +19,14 @@
 .example-spacer {
     flex: 1 1 auto;
   }
+
+  ::ng-deep .dimmed-backdrop {
+    background-color: rgba(0, 0, 0, 0.4) !important; // dark but see-through
+  }
+  
+  
+  ::ng-deep .transparent-dialog .mat-dialog-container {
+    background: transparent !important;
+    box-shadow: none !important;
+    overflow: visible !important;
+  }
