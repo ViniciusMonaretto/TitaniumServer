@@ -1,12 +1,16 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
-import { SensorModule } from 'src/models/sensor-module';
-import { SensorTypesEnum } from 'src/enum/sensor-type';
+import { SensorModule } from '../../models/sensor-module';
+import { SensorTypesEnum } from '../../enum/sensor-type';
+
+import { CommonModule } from '@angular/common';
+import { MatIconModule } from '@angular/material/icon';
 
 @Component({
     selector: 'sensor',
     templateUrl: './sensor.component.html',
     styleUrls: ['./sensor.component.scss'],
-    standalone: false
+    imports: [CommonModule, MatIconModule],
+    standalone: true
 })
 export class SensorComponent implements OnInit {
   @Input() sensorInfo: SensorModule = new SensorModule()

@@ -3,13 +3,17 @@ import {MatDialog} from '@angular/material/dialog';
 import {SensorAddWindowComponent} from '../../components/sensor-add-window/sensor-add-window.component'
 import {MainScreenSelector} from "../../services/main-screen-selector.service"
 import {MainScreenOptions} from "../../enum/screen-type"
-import { UiPanelService } from 'src/services/ui-panels.service';
+import { UiPanelService } from '../../services/ui-panels.service';
+
+import { CommonModule } from '@angular/common';
+import { SideNavOptionComponent } from '../../components/side-nav-option/side-nav-option.component';
 
 @Component({
     selector: 'app-navbar',
     templateUrl: './navbar.component.html',
     styleUrls: ['./navbar.component.scss'],
-    standalone: false
+    imports: [CommonModule, SideNavOptionComponent],
+    standalone: true
 })
 export class NavbarComponent implements OnInit {
 

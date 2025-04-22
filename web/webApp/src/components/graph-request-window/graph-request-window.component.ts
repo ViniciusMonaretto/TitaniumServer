@@ -1,17 +1,30 @@
 import { Component, Inject, OnInit } from '@angular/core';
-import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogRef, MatDialogModule } from '@angular/material/dialog';
+import { CommonModule } from '@angular/common';
 import { SensorAddWindowComponent } from '../sensor-add-window/sensor-add-window.component';
-import { SensorModule } from 'src/models/sensor-module';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatSelectModule } from '@angular/material/select';
+import { MatInputModule } from '@angular/material/input';
+import { FormsModule } from '@angular/forms';
+import { SensorModule } from '../../models/sensor-module';
 
 @Component({
-    selector: 'app-graph-request',
-    templateUrl: './graph-request-window.component.html',
-    styleUrls: ['./graph-request-window.component.scss'],
-    standalone: false
+  selector: 'app-graph-request',
+  templateUrl: './graph-request-window.component.html',
+  styleUrls: ['./graph-request-window.component.scss'],
+  imports: [CommonModule,
+    MatDialogModule,
+    MatFormFieldModule,
+    MatSelectModule,
+    MatInputModule,
+    FormsModule,
+    MatDatepickerModule],
+  standalone: true
 })
 export class GraphRequestWindowComponent implements OnInit {
 
-  uiConfig: {[id: string]: any } = {}
+  uiConfig: { [id: string]: any } = {}
 
   selectedSensors: Array<SensorModule> = []
   selectedGroup: string = ""
@@ -39,33 +52,28 @@ export class GraphRequestWindowComponent implements OnInit {
     }
   }
 
-  getTemperatureSensors()
-  {
+  getTemperatureSensors() {
     return this.uiConfig[this.selectedGroup].temperature
   }
 
-  validForm()
-  {
-    return this.selectedGroup != "" && 
-          ((this.startDate == null && this.endDate == null) ||
-          (this.startDate != null && this.endDate == null)  ||
-          (this.startDate != null && this.endDate != null && this.startDate?.getTime() < this.endDate.getTime() ))
+  validForm() {
+    return this.selectedGroup != "" &&
+      ((this.startDate == null && this.endDate == null) ||
+        (this.startDate != null && this.endDate == null) ||
+        (this.startDate != null && this.endDate != null && this.startDate?.getTime() < this.endDate.getTime()))
   }
 
   onNoClick(): void {
     this.dialogRef.close();
   }
 
-  onAddCLick()
-  {
+  onAddCLick() {
     let selectedPanels = []
-    if(this.selectedSensors.length == 0)
-    {
+    if (this.selectedSensors.length == 0) {
       this.selectedSensors = this.getTemperatureSensors()
     }
 
-    for(let panel of this.selectedSensors)
-    {
+    for (let panel of this.selectedSensors) {
       selectedPanels.push({
         "gateway": panel.gateway,
         "topic": panel.topic

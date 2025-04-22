@@ -94,7 +94,7 @@ class ConfigHandler(ServiceInterface):
         for panels in self._panels_info.values():
             for idx, panel in enumerate(panels):
                 if panel._id == panel_id:
-                    result, message = self._status_saver.drop_reading_command(panel._topic, panel._gateway)
+                    result, message = self._status_saver.drop_reading(panel._topic, panel._gateway)
                     if result:
                         del panels[idx]
                         self.update_ui_file()

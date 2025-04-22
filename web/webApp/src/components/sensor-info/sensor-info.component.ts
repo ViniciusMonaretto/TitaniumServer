@@ -1,13 +1,16 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
-import {ServerConectorService} from "../../services/server-conector.service"
-import {UiPanelService} from "../../services/ui-panels.service"
-import { SensorModule } from 'src/models/sensor-module';
+import { MatCardModule } from '@angular/material/card'; 
+import { CommonModule } from '@angular/common';
+
+import { SensorModule } from '../../models/sensor-module';
+import { InfoTableComponent } from '../info-table/info-table.component';
 
 @Component({
     selector: 'sensor-info',
     templateUrl: './sensor-info.component.html',
     styleUrls: ['./sensor-info.component.scss'],
-    standalone: false
+    imports: [MatCardModule, InfoTableComponent, CommonModule ], // Add MatCardModule to imports
+    standalone: true
 })
 export class SensorInfoComponent implements OnInit {
 

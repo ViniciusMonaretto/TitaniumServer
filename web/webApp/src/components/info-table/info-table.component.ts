@@ -1,10 +1,13 @@
 import { Component, OnInit, Input } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { MatTableModule } from '@angular/material/table';
 
 @Component({
     selector: 'info-table',
     templateUrl: './info-table.component.html',
     styleUrls: ['./info-table.component.scss'],
-    standalone: false
+    imports: [CommonModule, MatTableModule],
+    standalone: true
 })
 export class InfoTableComponent {
 

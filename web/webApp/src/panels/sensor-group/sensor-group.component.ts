@@ -1,14 +1,18 @@
 import { Component, OnInit } from '@angular/core';
 import { PanelInfo, UiPanelService } from "../../services/ui-panels.service"
 import { ServerConectorService } from "../../services/server-conector.service"
-import { SensorModule } from 'src/models/sensor-module';
-import { SensorTypesEnum } from 'src/enum/sensor-type';
+import { MatCardModule } from '@angular/material/card';
+
+import { CommonModule } from '@angular/common';
+import { SensorInfoComponent } from '../../components/sensor-info/sensor-info.component';
+import { GroupOfSensorsComponent } from '../../components/group-of-sensors/group-of-sensors.component';
 
 @Component({
     selector: 'sensor-groups',
     templateUrl: './sensor-group.component.html',
     styleUrls: ['./sensor-group.component.scss'],
-    standalone: false
+    imports: [MatCardModule, CommonModule, SensorInfoComponent, GroupOfSensorsComponent],
+    standalone: true
 })
 export class SensorGroupComponent implements OnInit {
 

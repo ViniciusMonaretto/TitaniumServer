@@ -46,29 +46,10 @@ class StatusSaver(ServiceInterface):
         self._middleware.add_commands(commands)
 
     def drop_reading(self, topic, gateway) ->  Union[bool, str]: 
-        conn = sqlite3.connect(DB_NAME) 
-        cursor = conn.cursor()
-
-        table_name = gateway + '-' + topic
-
-        result = False
+        result = True
         message = ""
 
-        cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name=?", (table_name,))
-        if cursor.fetchone():
-            quoted_table_name = f'"{table_name}"'
-            cursor.execute(f"DROP TABLE {quoted_table_name}")
-            conn.commit()
-
-            self.remove_subscription_to_status(gateway, topic)
-
-            self._logger.info(f"Table '{table_name}' has been dropped.")
-            result = True
-        else:
-            message = f"Table '{table_name}' does not exist."
-            self._logger.error(message)
-
-        conn.close()
+        self.remove_subscription_to_status(gateway, topic)
         return result, message
 
     def create_db(self):

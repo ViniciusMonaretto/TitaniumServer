@@ -1,23 +1,33 @@
 <div class="sensor">
-    <div class="measure-display" (click)="infoCLick()">
-        <div class="border-measure"></div>
-        <div class="middle-measure">
-            {{getCurrentReading()}}
-        </div>
-        <div class="border-measure">
-            <div>
-                {{getMeasureIcon()}}
-            </div>
-            <div>
-                <button mat-icon-button  (click)="deletePanel()">
-                    <mat-icon>delete</mat-icon>
-                </button>
-            </div>
-           
-        </div>
-        
+  <div class="measure-display" (click)="infoCLick()">
+    <div class="border-measure"></div>
+    <div class="middle-measure">
+      {{ getCurrentReading() }}
     </div>
+    <div
+      class="border-measure"
+      style="
+        display: flex;
+        height: 100%;
+        flex-direction: column;
+        justify-content: space-around;
+      "
+    >
+      <div>
+        {{ getMeasureIcon() }}
+      </div>
+      <div>
+        <button
+          mat-icon-button
+          style="background-color: transparent; border: transparent"
+          (click)="deletePanel()"
+        >
+          <mat-icon>delete</mat-icon>
+        </button>
+      </div>
+    </div>
+  </div>
 </div>
 <div class="header-sensor">
-    {{sensorInfo.name }}
+  {{ sensorInfo.name }}
 </div>

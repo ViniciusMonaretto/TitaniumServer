@@ -3,15 +3,19 @@ import { SensorModule } from "../../models/sensor-module"
 import {MatDialog} from '@angular/material/dialog';
 import {SensorAddWindowComponent} from '../../components/sensor-add-window/sensor-add-window.component'
 
+import { CommonModule } from '@angular/common';
+import { SensorComponent } from '../sensor/sensor.component';
+
 import {ServerConectorService} from "../../services/server-conector.service"
 import {UiPanelService} from "../../services/ui-panels.service"
-import { SensorTypesEnum } from 'src/enum/sensor-type';
+import { SensorTypesEnum } from '../../enum/sensor-type';
 
 @Component({
     selector: 'group-of-sensors',
     templateUrl: './group-of-sensors.component.html',
     styleUrls: ['./group-of-sensors.component.scss'],
-    standalone: false
+    imports: [CommonModule, SensorComponent],
+    standalone: true
 })
 export class GroupOfSensorsComponent implements OnInit {
 

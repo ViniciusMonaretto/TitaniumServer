@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import {SensorModule} from "../models/sensor-module"
-import { SensorTypesEnum } from 'src/enum/sensor-type';
+import { SensorTypesEnum } from '../enum/sensor-type';
 
 export class PanelInfo {
   public temperature: Array<SensorModule> = [];

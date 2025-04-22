@@ -10,7 +10,7 @@ export class MainScreenSelector {
     
     screenOption: MainScreenOptions = MainScreenOptions.SENSORS
     selectedGroup: string|null = ""
-    
+     
     constructor() 
     { 
         

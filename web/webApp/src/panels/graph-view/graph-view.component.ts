@@ -2,13 +2,20 @@ import { Component, OnInit } from '@angular/core';
 import { ServerConectorService } from "../../services/server-conector.service"
 import { UiPanelService } from "../../services/ui-panels.service"
 import { MatDialog } from '@angular/material/dialog';
-import { GraphRequestWindowComponent } from 'src/components/graph-request-window/graph-request-window.component';
+
+import { CommonModule } from '@angular/common';
+import { MatIconModule } from '@angular/material/icon';
+
+import { GraphComponent } from '../../components/graph/graph.component';
+
+import { GraphRequestWindowComponent } from '../../components/graph-request-window/graph-request-window.component';
 
 @Component({
     selector: 'graph-view',
     templateUrl: './graph-view.component.html',
     styleUrls: ['./graph-view.component.scss'],
-    standalone: false
+    imports: [CommonModule, MatIconModule, GraphComponent],
+    standalone: true
 })
 export class GraphViewComponent implements OnInit {
 

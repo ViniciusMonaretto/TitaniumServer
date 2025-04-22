@@ -2,8 +2,8 @@ import { Injectable } from '@angular/core';
 import {UiPanelService} from './ui-panels.service'
 import { v4 as uuidv4 } from 'uuid';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
-import { ErrorDialogComponent } from 'src/components/error-dialog/error-dialog.component';
-import { SpinnerComponent } from 'src/components/spinner/spinner.component';
+import { ErrorDialogComponent } from '../components/error-dialog/error-dialog.component';
+import { SpinnerComponent } from '../components/spinner/spinner.component';
 
 @Injectable({
   providedIn: 'root'

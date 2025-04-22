@@ -1,11 +1,12 @@
 import { Component, ElementRef, Input, ViewChild } from '@angular/core';
-import * as d3 from 'd3'
+import { CommonModule } from '@angular/common';
 
 @Component({
     selector: 'graph',
     templateUrl: './graph.component.html',
     styleUrls: ['./graph.component.scss'],
-    standalone: false
+    imports: [CommonModule],
+    standalone: true
 })
 export class GraphComponent {
   @ViewChild('overlay') overlayRef!: ElementRef;
@@ -50,65 +51,7 @@ export class GraphComponent {
 
   constructor() { }
 
-  ngAfterViewInit() {
-    const svg = d3.select(this.chartContainerRef.nativeElement);
-    const overlay = d3.select(this.overlayRef.nativeElement);
-    const tooltip = d3.select(this.tooltipRef.nativeElement);
-    let startX: number, startY: number, endX: number, endY: number;
-
-    let dateScale: d3.ScaleTime<number, number, never>;
-
-    let valueScale: d3.ScaleLinear<number, number, never>;
-
-    svg.on('mousedown', (event: MouseEvent) => {
-      if (!this.zoomEnabled) return;
-      const graphWidth = this.chartContainerRef.nativeElement.querySelector('svg').clientWidth; 
-      const graphHeight = this.chartContainerRef.nativeElement.querySelector('svg').clientHeight; // Get actual SVG width
-      dateScale = d3.scaleTime()
-                    .domain([this.xScaleMin, this.xScaleMax])
-                    .range([0, graphWidth]);
-      valueScale = d3.scaleLinear()
-                     .domain([this.yScaleMin, this.yScaleMax])
-                     .range([graphHeight, 0])
-
-      const rect = this.chartContainerRef.nativeElement.getBoundingClientRect()
-      startX = event.clientX - rect.left
-      startY = event.clientY - rect.top
-      overlay.style('display', 'block')
-             .style('left', `${startX}px`)
-             .style('top', `${startY}px`)
-             .style('width', '0px')
-             .style('height', '0px');
-      tooltip.style('display', 'block')
-             .style('left', `${startX}px`)
-             .style('top', `${startY - 20}px`)
-             .text(`Start: (${dateScale.invert(startX).toISOString()}, ${valueScale.invert(startY).toFixed(2)})`);
-    });
-
-    svg.on('mousemove', (event: MouseEvent) => {
-      if (!this.zoomEnabled || startX === undefined) return;
-      const rect = this.chartContainerRef.nativeElement.getBoundingClientRect()
-      endX = event.clientX - rect.left
-      endY = event.clientY - rect.top
-      overlay.style('width', `${Math.abs(endX - startX)}px`)
-             .style('height', `${Math.abs(endY - startY)}px`)
-             .style('left', `${Math.min(startX, endX)}px`)
-             .style('top', `${Math.min(startY, endY)}px`)
-             .style('display', 'block');
-      tooltip.style('display', 'block')
-             .style('left', `${endX}px`)
-             .style('top', `${endY - 20}px`)
-             .text(`Start: (${dateScale.invert(endX).toISOString()}, ${valueScale.invert(endY).toFixed(2)})`);
-    });
-
-    svg.on('mouseup', () => {
-      if (!this.zoomEnabled || startX === undefined || endX === undefined || startY === undefined || endY === undefined) return;
-      this.zoomToSelection(startX, endX, startY, endY, valueScale, dateScale);
-      overlay.style('display', 'none');
-      tooltip.style('display', 'none');
-      startX = startY = endX = endY = <any>undefined;
-    });
-  }
+  ngAfterViewInit() {}
 
   zoomToSelection(startX: number, endX: number, startY: number, endY: number, valueScale: any, dateScale: any) {
     if (Math.abs(startX-endX) < 30 || Math.abs(startY-endY) < 30 ) return; 
