@@ -5,9 +5,10 @@ import {SensorModule} from "../../models/sensor-module"
 
 
 @Component({
-  selector: 'app-sensor-add-window',
-  templateUrl: './sensor-add-window.component.html',
-  styleUrls: ['./sensor-add-window.component.scss']
+    selector: 'app-sensor-add-window',
+    templateUrl: './sensor-add-window.component.html',
+    styleUrls: ['./sensor-add-window.component.scss'],
+    standalone: false
 })
 export class SensorAddWindowComponent {
   public sensorModule: SensorModule = new SensorModule()

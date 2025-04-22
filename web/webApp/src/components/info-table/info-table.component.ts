@@ -1,9 +1,10 @@
 import { Component, OnInit, Input } from '@angular/core';
 
 @Component({
-  selector: 'info-table',
-  templateUrl: './info-table.component.html',
-  styleUrls: ['./info-table.component.scss']
+    selector: 'info-table',
+    templateUrl: './info-table.component.html',
+    styleUrls: ['./info-table.component.scss'],
+    standalone: false
 })
 export class InfoTableComponent {
 

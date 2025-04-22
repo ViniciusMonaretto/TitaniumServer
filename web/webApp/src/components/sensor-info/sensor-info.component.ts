@@ -4,9 +4,10 @@ import {UiPanelService} from "../../services/ui-panels.service"
 import { SensorModule } from 'src/models/sensor-module';
 
 @Component({
-  selector: 'sensor-info',
-  templateUrl: './sensor-info.component.html',
-  styleUrls: ['./sensor-info.component.scss']
+    selector: 'sensor-info',
+    templateUrl: './sensor-info.component.html',
+    styleUrls: ['./sensor-info.component.scss'],
+    standalone: false
 })
 export class SensorInfoComponent implements OnInit {
 

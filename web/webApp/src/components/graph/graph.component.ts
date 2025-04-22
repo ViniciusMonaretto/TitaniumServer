@@ -2,9 +2,10 @@ import { Component, ElementRef, Input, ViewChild } from '@angular/core';
 import * as d3 from 'd3'
 
 @Component({
-  selector: 'graph',
-  templateUrl: './graph.component.html',
-  styleUrls: ['./graph.component.scss']
+    selector: 'graph',
+    templateUrl: './graph.component.html',
+    styleUrls: ['./graph.component.scss'],
+    standalone: false
 })
 export class GraphComponent {
   @ViewChild('overlay') overlayRef!: ElementRef;

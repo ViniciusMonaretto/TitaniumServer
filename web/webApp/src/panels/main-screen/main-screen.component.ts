@@ -4,9 +4,10 @@ import {ServerConectorService} from "../../services/server-conector.service"
 import {MainScreenOptions} from "../../enum/screen-type"
 
 @Component({
-  selector: 'app-main-screen',
-  templateUrl: './main-screen.component.html',
-  styleUrls: ['./main-screen.component.scss']
+    selector: 'app-main-screen',
+    templateUrl: './main-screen.component.html',
+    styleUrls: ['./main-screen.component.scss'],
+    standalone: false
 })
 export class MainScreenComponent implements OnInit {
 

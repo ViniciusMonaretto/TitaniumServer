@@ -5,9 +5,10 @@ import { SensorModule } from 'src/models/sensor-module';
 import { SensorTypesEnum } from 'src/enum/sensor-type';
 
 @Component({
-  selector: 'sensor-groups',
-  templateUrl: './sensor-group.component.html',
-  styleUrls: ['./sensor-group.component.scss']
+    selector: 'sensor-groups',
+    templateUrl: './sensor-group.component.html',
+    styleUrls: ['./sensor-group.component.scss'],
+    standalone: false
 })
 export class SensorGroupComponent implements OnInit {
 

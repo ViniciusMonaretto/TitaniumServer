@@ -8,9 +8,10 @@ import {UiPanelService} from "../../services/ui-panels.service"
 import { SensorTypesEnum } from 'src/enum/sensor-type';
 
 @Component({
-  selector: 'group-of-sensors',
-  templateUrl: './group-of-sensors.component.html',
-  styleUrls: ['./group-of-sensors.component.scss']
+    selector: 'group-of-sensors',
+    templateUrl: './group-of-sensors.component.html',
+    styleUrls: ['./group-of-sensors.component.scss'],
+    standalone: false
 })
 export class GroupOfSensorsComponent implements OnInit {
 

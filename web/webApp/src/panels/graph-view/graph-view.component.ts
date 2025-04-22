@@ -5,9 +5,10 @@ import { MatDialog } from '@angular/material/dialog';
 import { GraphRequestWindowComponent } from 'src/components/graph-request-window/graph-request-window.component';
 
 @Component({
-  selector: 'graph-view',
-  templateUrl: './graph-view.component.html',
-  styleUrls: ['./graph-view.component.scss']
+    selector: 'graph-view',
+    templateUrl: './graph-view.component.html',
+    styleUrls: ['./graph-view.component.scss'],
+    standalone: false
 })
 export class GraphViewComponent implements OnInit {
 

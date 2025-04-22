@@ -4,9 +4,10 @@ import { SensorAddWindowComponent } from '../sensor-add-window/sensor-add-window
 import { SensorModule } from 'src/models/sensor-module';
 
 @Component({
-  selector: 'app-graph-request',
-  templateUrl: './graph-request-window.component.html',
-  styleUrls: ['./graph-request-window.component.scss']
+    selector: 'app-graph-request',
+    templateUrl: './graph-request-window.component.html',
+    styleUrls: ['./graph-request-window.component.scss'],
+    standalone: false
 })
 export class GraphRequestWindowComponent implements OnInit {
 

@@ -1,9 +1,10 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 
 @Component({
-  selector: 'side-nav-option',
-  templateUrl: './side-nav-option.component.html',
-  styleUrls: ['./side-nav-option.component.scss']
+    selector: 'side-nav-option',
+    templateUrl: './side-nav-option.component.html',
+    styleUrls: ['./side-nav-option.component.scss'],
+    standalone: false
 })
 export class SideNavOptionComponent implements OnInit {
 
