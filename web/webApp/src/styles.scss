@@ -1,21 +1,13 @@
-/* You can add global styles to this file, and also import other style files */
-@import '@angular/material/theming';
+@use '@angular/material' as mat;
 
-// Define your custom palettes
-$custom-primary: mat-palette($mat-indigo); // You can customize these colors
-$custom-accent: mat-palette($mat-pink, A200, A100, A400);
-$custom-warn: mat-palette($mat-red);
-
-// Create the theme object
-$custom-theme: mat-light-theme($custom-primary, $custom-accent, $custom-warn);
-
-// Include Angular Material global styles and theming
-@include mat-core();
-@include angular-material-theme($custom-theme);
-
-html, body {
-    height: 100%;
-    margin: 0;
-    padding: 0;
-  }
-  
+@include mat.core();
+// Define your theme
+$primary: mat.define-palette(mat.$indigo-palette);
+$accent: mat.define-palette(mat.$pink-palette);
+$theme: mat.define-light-theme((
+  color: (
+    primary: $primary,
+    accent: $accent,
+  )
+));
+@include mat.all-component-themes($theme);

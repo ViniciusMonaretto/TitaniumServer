@@ -6,7 +6,7 @@
     "webApp": {
       "projectType": "application",
       "schematics": {
-        "@schematics/angular:component": {
+          "@schematics/angular:component": {
           "style": "scss"
         }
       },
@@ -32,7 +32,7 @@
             ],
             "styles": [
               "src/styles.scss"
-            ],
+        ],
             "scripts": [],
             "browser": "src/main.ts"
           },

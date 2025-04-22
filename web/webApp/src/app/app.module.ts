@@ -86,7 +86,6 @@ import { SpinnerComponent } from '../components/spinner/spinner.component';
     MatProgressSpinnerModule,
     NgxChartsModule
   ],
-  entryComponents: [SensorAddWindowComponent],
   providers: [],
   bootstrap: [AppComponent]
 })
