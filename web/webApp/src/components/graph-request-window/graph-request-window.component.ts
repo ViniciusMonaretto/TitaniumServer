@@ -2,6 +2,7 @@ import { Component, Inject, OnInit } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogModule } from '@angular/material/dialog';
 import { CommonModule } from '@angular/common';
 import { SensorAddWindowComponent } from '../sensor-add-window/sensor-add-window.component';
+import { MatNativeDateModule } from '@angular/material/core';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
@@ -19,6 +20,7 @@ import { SensorModule } from '../../models/sensor-module';
     MatSelectModule,
     MatInputModule,
     FormsModule,
+    MatNativeDateModule,
     MatDatepickerModule],
   standalone: true
 })

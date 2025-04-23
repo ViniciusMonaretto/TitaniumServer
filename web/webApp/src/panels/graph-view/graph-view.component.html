@@ -32,7 +32,7 @@
     <div class="graph-table">
         <ng-container *ngIf="lineChartData.length; else noSize">
             <graph style="height: 100%;" 
-                   [inputInfo]="lineChartData" 
+                   [inputInfo]="$any(lineChartData)" 
                    [zoomEnabled]="zoomWindowActivate"
                    [resize]="resizeTrigger"></graph>
         </ng-container>

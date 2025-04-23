@@ -25,7 +25,7 @@ export class GraphViewComponent implements OnInit {
 
   resizeTrigger: boolean = false
   zoomWindowActivate: boolean = false
-  lineChartData: Array<{ name: string, series: Array<any> }> = [];
+  lineChartData: Array<{ name: string, data: Array<any> }> = [];
 
   ngOnInit(): void { }
 
@@ -35,25 +35,25 @@ export class GraphViewComponent implements OnInit {
     if (chartId == -1) {
       this.lineChartData.push({
         name: tableName,
-        series: []
+        data: []
       });
       chartId = this.lineChartData.length - 1;
     }
 
-    let newSeries: { name: Date, value: number }[] = [];
+    let newSeries: { x: number, y: number }[] = [];
 
     for (let info of infoArr) {
       let timestamp = info['timestamp'];
       if (timestamp && !isNaN(new Date(timestamp).getTime())) {
         let dt = new Date(timestamp);
-        newSeries.push({ name: dt, value: info["value"] });
+        newSeries.push({ x: dt.getTime(), y: info["value"] });
       } else {
         console.error('Invalid timestamp:', timestamp); // Debugging
       }
     }
 
     // Update chart data and trigger Angular change detection
-    this.lineChartData[chartId].series = newSeries;
+    this.lineChartData[chartId].data = newSeries;
 
     this.lineChartData = [...this.lineChartData ]
   };

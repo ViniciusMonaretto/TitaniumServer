@@ -1,10 +1,13 @@
-<div style="padding: 10px; height: 90%;" class="chart-container" (wheel)="onMouseWheel($event)" (mousedown)="onMouseDown($event)"
-    (mousemove)="onMouseMove($event)" (mouseup)="onMouseUp($event)" #chartContainer>
-    <!-- <ngx-charts-line-chart  [results]="filteredData" [scheme]="'vivid'" [xAxis]="true" [yAxis]="true"
-        [xScaleMin]="getXLimits(xScaleMin)" [xScaleMax]="getXLimits(xScaleMax)" [yScaleMin]="yScaleMin"
-        [yScaleMax]="yScaleMax" [legend]="true" [showGridLines]="true" [autoScale]="true"
-        [animations]="false">
-    </ngx-charts-line-chart> -->
-    <div class="overlay" #overlay></div>
-    <div class="tooltip" #tooltip></div>
+<div style="padding: 10px; height: 90%;" class="chart-container" #chartContainer>
+    <apx-chart
+        [series]="lineChartData"
+        [chart]="chartOptions.chart"
+        [xaxis]="chartOptions.xaxis"
+        [yaxis]="chartOptions.yaxis"
+        [dataLabels]="chartOptions.dataLabels"
+        [stroke]="chartOptions.stroke"
+        [title]="chartOptions.title"
+        [tooltip]="chartOptions.tooltip"
+        [markers]="chartOptions.markers"
+    ></apx-chart>
 </div>

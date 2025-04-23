@@ -13,27 +13,32 @@
         </mat-select>
     </mat-form-field>
     <div>
-        <mat-form-field appearance="outline">
-            <mat-label>Data de Início</mat-label>
-            <input matInput [matDatepicker]="pickerStart" [(ngModel)]="startDate">
-            <mat-datepicker-toggle matSuffix [for]="pickerStart"></mat-datepicker-toggle>
-            <mat-datepicker #pickerStart></mat-datepicker>
-        </mat-form-field>
-        <mat-form-field appearance="outline">
-            <mat-label></mat-label>
-            <input matInput type="time" (change)="setTime($event, startDate)">
-        </mat-form-field>
-
-        <mat-form-field appearance="outline">
-            <mat-label>Data de Fim</mat-label>
-            <input matInput [matDatepicker]="pickerEnd" [(ngModel)]="endDate">
-            <mat-datepicker-toggle matSuffix [for]="pickerEnd"></mat-datepicker-toggle>
-            <mat-datepicker #pickerEnd></mat-datepicker>
-        </mat-form-field>
-        <mat-form-field appearance="outline">
-            <mat-label></mat-label>
-            <input matInput type="time" (change)="setTime($event, endDate)">
-        </mat-form-field>
+        <div class="date-picker-class">
+            <mat-form-field appearance="outline">
+                <mat-label>Data de Início</mat-label>
+                <input matInput [matDatepicker]="pickerStart" [(ngModel)]="startDate">
+                <mat-datepicker-toggle matSuffix [for]="pickerStart"></mat-datepicker-toggle>
+                <mat-datepicker #pickerStart></mat-datepicker>
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+                <mat-label></mat-label>
+                <input matInput type="time" (change)="setTime($event, startDate)">
+            </mat-form-field>
+        </div>
+        
+        <div class="date-picker-class">
+            <mat-form-field appearance="outline">
+                <mat-label>Data de Fim</mat-label>
+                <input matInput [matDatepicker]="pickerEnd" [(ngModel)]="endDate">
+                <mat-datepicker-toggle matSuffix [for]="pickerEnd"></mat-datepicker-toggle>
+                <mat-datepicker #pickerEnd></mat-datepicker>
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+                <mat-label></mat-label>
+                <input matInput type="time" (change)="setTime($event, endDate)">
+            </mat-form-field>
+        </div>
+        
     </div>
 
 </mat-dialog-content>
