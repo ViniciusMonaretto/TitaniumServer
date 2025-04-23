@@ -49,6 +49,7 @@ export class GraphComponent {
           mode: 'xy',
           onZoomStart: ({ chart, event }) => {
             const mouseEvent = event as MouseEvent;
+            
             if (mouseEvent.ctrlKey) {
               chart.options.plugins!.zoom!.zoom!.mode = 'x';
             } else if (mouseEvent.shiftKey) {
@@ -58,44 +59,40 @@ export class GraphComponent {
             }
 
             return true
-          }
+          },
+          drag: {
+            enabled: false,
+            backgroundColor: 'rgba(0,123,255,0.25)',
+            borderColor: 'rgba(0,123,255,0.8)',
+            borderWidth: 1,
+          },
         },
         pan: {
           enabled: true,
-          mode: 'x', // Pan direction: 'x', 'y', or 'xy'
+          mode: 'xy',
+          onPanStart: ({ chart, event }) => {
+            if(this.zoomEnabled)
+            {
+              chart.options.plugins!.zoom!.zoom!.drag!.enabled = true;
+              chart.options.plugins!.zoom!.pan!.enabled = false;
+            }
+            else
+            {
+              chart.options.plugins!.zoom!.zoom!.drag!.enabled = false;
+              chart.options.plugins!.zoom!.pan!.enabled = true;
+            }
+            return true
+          }
         },
       },
     },
   };
 
-  yAdjust = 0
-
-  refreshing: boolean = false
-
   first: boolean = true
-
-  lastMouseX = 0
-  lastMouseY = 0
-
-  isDragging: boolean = false
-
-  filteredNames: any = {}
 
   public lineChartData: ChartData<'line'> = {
     datasets: [
-      {
-        label: 'Temperature Over Time',
-        data: [
-          { x: new Date('2025-01-01').getTime(), y: 22 },
-          { x: new Date('2025-01-05').getTime(), y: 24 },
-          { x: new Date('2025-01-10').getTime(), y: 19 },
-          { x: new Date('2025-01-15').getTime(), y: 25 },
-        ],
-        borderColor: 'rgb(75, 192, 192)',
-        backgroundColor: 'rgba(75, 192, 192, 0.2)',
-        tension: 0.3,
-        fill: false,
-      },
+      
     ]
   };
   filteredData: Array<{ name: string, series: Array<any> }> = [];
@@ -118,49 +115,9 @@ export class GraphComponent {
     }
   }
 
-  constructor() {
-
-  }
+  constructor() { }
 
   ngAfterViewInit() {
-    //this.addKeyEventListeners();
-  }
-
-  // Add key event listeners for Ctrl and Shift keys
-  addKeyEventListeners() {
-    window.addEventListener('keydown', (event) => this.onKeyDown(event));
-    window.addEventListener('keyup', (event) => this.onKeyUp(event));
-  }
-
-  onKeyDown(event: KeyboardEvent) {
-    if (event.ctrlKey) {
-      // Zoom only on X axis when Ctrl is pressed
-      this.updateZoomMode('x');
-    } else if (event.shiftKey) {
-      // Zoom only on Y axis when Shift is pressed
-      this.updateZoomMode('y');
-    }
-  }
-
-  // Reset zoom mode when Ctrl or Shift key is released
-  onKeyUp(event: KeyboardEvent) {
-    if (!event.ctrlKey && !event.shiftKey) {
-      // Reset to zoom on both axes when neither key is pressed
-      this.updateZoomMode('xy');
-    }
-  }
-
-  // Update the zoom mode dynamically
-  updateZoomMode(mode: 'x' | 'y' | 'xy') {
-    this.lineChartOptions.plugins!.zoom!.zoom!.mode = mode;
-    this.lineChartOptions.plugins!.zoom!.pan!.mode = mode;
-
-    // Update the chart after modifying the options
-    this.chart?.chart?.update('none');
-  }
-
-  toggleSeries(seriesName: any, remove: boolean) {
-
   }
 
   fitAllGraph() {
@@ -217,83 +174,5 @@ export class GraphComponent {
 
     this.chart?.chart?.resetZoom();
 
-  }
-
-  getXLimits(limit: any) {
-    return limit
-  }
-
-  onMouseWheel(event: WheelEvent) {
-    // event.preventDefault(); // Prevent default scroll behavior
-
-    // const zoomFactor = 0.1; // Adjust zoom intensity
-    // const zoomIn = event.deltaY < 0; // If scrolling up, zoom in
-
-    // // Adjust X-Axis (Time)
-    // const xRange = (Number)(this.chartOptions.xaxis.max) - (Number)(this.chartOptions.xaxis.min);
-    // const xAdjust = xRange * zoomFactor;
-
-    // var ctrlPressed = event.ctrlKey
-    // var shiftPressed = event.shiftKey
-
-    // if (shiftPressed || !ctrlPressed) {
-    //   if (zoomIn) {
-    //     this.chartOptions.xaxis.min = new Date((Number)(this.chartOptions.xaxis.min) + xAdjust).getTime();
-    //     this.chartOptions.xaxis.max = new Date((Number)(this.chartOptions.xaxis.max) - xAdjust).getTime();
-    //   } else {
-    //     this.chartOptions.xaxis.min = new Date((Number)(this.chartOptions.xaxis.min) - xAdjust).getTime();
-    //     this.chartOptions.xaxis.max =  new Date((Number)(this.chartOptions.xaxis.max) + xAdjust).getTime();
-    //   }
-    // }
-
-    // if (ctrlPressed || !shiftPressed) {
-    //   const yRange = (Number)(this.chartOptions.yaxis.max) - (Number)(this.chartOptions.yaxis.min);
-    //   this.yAdjust = yRange * zoomFactor;
-
-    //   if (zoomIn) {
-    //     this.chartOptions.yaxis.min = (Number)(this.chartOptions.yaxis.min) + this.yAdjust;
-    //     this.chartOptions.yaxis.max = (Number)(this.chartOptions.yaxis.max) - this.yAdjust;
-    //   } else {
-    //     this.chartOptions.yaxis.min = (Number)(this.chartOptions.yaxis.min) - this.yAdjust;
-    //     this.chartOptions.yaxis.max = (Number)(this.chartOptions.yaxis.max) + this.yAdjust;
-    //   }
-    // }
-
-  }
-
-  onMouseDown(event: MouseEvent) {
-    if (this.zoomEnabled) return;
-    this.isDragging = true;
-    this.lastMouseX = event.clientX;
-    this.lastMouseY = event.clientY;
-  }
-
-  onMouseMove(event: MouseEvent) {
-    //     if (this.zoomEnabled) return;
-    //     if (!this.isDragging) return;
-    //     const deltaX = event.clientX - this.lastMouseX;
-    //     const deltaY = event.clientY - this.lastMouseY;
-
-    //     this.lastMouseX = event.clientX;
-    //     this.lastMouseY = event.clientY;
-
-    //     // Adjust X-Axis (Time)
-    //     const xRange = (Number)(this.chartOptions.xaxis.max) - (Number)(this.chartOptions.xaxis.min);
-    //     const xMoveFactor = xRange * (deltaX / 700); // 700px = chart width
-    // 90
-    //     this.chartOptions.xaxis.min = (Number)(this.chartOptions.xaxis.min) - xMoveFactor;
-    //     this.chartOptions.xaxis.max = (Number)(this.chartOptions.xaxis.max) - xMoveFactor;
-
-    //     // Adjust Y-Axis (Temperature)
-    //     const yRange = (Number)(this.chartOptions.yaxis.max) - (Number)(this.chartOptions.yaxis.min);
-    //     const yMoveFactor = yRange * (deltaY / 400); // 400px = chart height
-
-    //     this.chartOptions.yaxis.min = (Number)(this.chartOptions.yaxis.min) + yMoveFactor;
-    //     this.chartOptions.yaxis.max = (Number)(this.chartOptions.yaxis.max) + yMoveFactor;
-  }
-
-  /** 📌 Mouse Drag End **/
-  onMouseUp(event: MouseEvent) {
-    this.isDragging = false;
   }
 }
