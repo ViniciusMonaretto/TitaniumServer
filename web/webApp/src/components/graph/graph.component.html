@@ -1,13 +1,9 @@
-<div style="padding: 10px; height: 90%;" class="chart-container" #chartContainer>
-    <apx-chart
-        [series]="lineChartData"
-        [chart]="chartOptions.chart"
-        [xaxis]="chartOptions.xaxis"
-        [yaxis]="chartOptions.yaxis"
-        [dataLabels]="chartOptions.dataLabels"
-        [stroke]="chartOptions.stroke"
-        [title]="chartOptions.title"
-        [tooltip]="chartOptions.tooltip"
-        [markers]="chartOptions.markers"
-    ></apx-chart>
+<div class="chart-wrapper" #chartContainer>
+    <canvas
+        style="height: 100%;"
+        baseChart
+        [data]="lineChartData"
+        [options]="lineChartOptions"
+        type="line"
+    ></canvas>
 </div>

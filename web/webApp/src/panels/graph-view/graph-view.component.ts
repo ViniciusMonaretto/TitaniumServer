@@ -25,16 +25,20 @@ export class GraphViewComponent implements OnInit {
 
   resizeTrigger: boolean = false
   zoomWindowActivate: boolean = false
-  lineChartData: Array<{ name: string, data: Array<any> }> = [];
+  lineChartData: Array<any> = [];
 
   ngOnInit(): void { }
 
   onGraphUpdate: Function = (tableName: string, infoArr: Array<any>) => {
-    let chartId = this.lineChartData.findIndex(x => x.name == tableName);
+    let chartId = this.lineChartData.findIndex(x => x.label == tableName);
 
     if (chartId == -1) {
       this.lineChartData.push({
-        name: tableName,
+        label: tableName,
+        borderColor: 'rgb(75, 192, 192)',
+        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+        tension: 0.3,
+        fill: false,
         data: []
       });
       chartId = this.lineChartData.length - 1;

@@ -6,18 +6,18 @@
     display: none;
 }
 
-.chart-container {
-    position: relative;
-}
 
-.tooltip {
-    position: absolute;
-    background-color: rgba(0, 0, 0, 0.75);
-    color: white;
-    padding: 5px;
-    font-size: 12px;
-    border-radius: 4px;
-    pointer-events: none;
-    display: none;
-    white-space: nowrap;
+.chart-wrapper {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+  
+canvas {
+    display: block;
+    //width: 95% !important;
+    //height: 95% !important;
 }
