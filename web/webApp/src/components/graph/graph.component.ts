@@ -26,7 +26,7 @@ export class GraphComponent {
         type: 'time',
         title: {
           display: true,
-          text: 'Time',
+          text: 'Tempo',
         },
         min: undefined,
         max: undefined
@@ -42,6 +42,9 @@ export class GraphComponent {
       },
     },
     plugins: {
+      legend: {
+        position: 'bottom'
+      },
       zoom: {
         zoom: {
           wheel: { enabled: true, speed: 0.1 },
@@ -57,6 +60,16 @@ export class GraphComponent {
             } else {
               chart.options.plugins!.zoom!.zoom!.mode = 'xy';
             }
+            if(this.zoomEnabled)
+            {
+              chart.options.plugins!.zoom!.zoom!.drag!.enabled = true;
+              chart.options.plugins!.zoom!.pan!.enabled = false;
+            }
+            else
+            {
+              chart.options.plugins!.zoom!.zoom!.drag!.enabled = false;
+              chart.options.plugins!.zoom!.pan!.enabled = true;
+            }
 
             return true
           },
@@ -64,7 +77,7 @@ export class GraphComponent {
             enabled: false,
             backgroundColor: 'rgba(0,123,255,0.25)',
             borderColor: 'rgba(0,123,255,0.8)',
-            borderWidth: 1,
+            borderWidth: 1
           },
         },
         pan: {
