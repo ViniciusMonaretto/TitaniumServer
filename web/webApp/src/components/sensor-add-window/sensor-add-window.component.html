@@ -18,6 +18,15 @@
       <mat-option  *ngFor="let typeSensor of sensorTypes" [value]="typeSensor">{{typeSensor}}</mat-option>
     </mat-select>
   </mat-form-field>
+
+  <mat-form-field appearance="fill">
+    <mat-label>Cor Representativa</mat-label>
+    <input matInput [value]="this.sensorModule.color" readonly (click)="showPicker = !showPicker" />
+  </mat-form-field>
+
+  <div *ngIf="showPicker">
+    <color-chrome [(color)]="this.sensorModule.color"></color-chrome>
+  </div>
   
 </mat-dialog-content>
 <mat-dialog-actions> 

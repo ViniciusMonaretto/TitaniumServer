@@ -29,14 +29,15 @@ export class GraphViewComponent implements OnInit {
 
   ngOnInit(): void { }
 
-  onGraphUpdate: Function = (tableName: string, infoArr: Array<any>) => {
-    let chartId = this.lineChartData.findIndex(x => x.label == tableName);
+  onGraphUpdate: Function = (tableInfo: {name: string, realName: string, color: string}, infoArr: Array<any>) => {
+    let chartId = this.lineChartData.findIndex(x => x.realName == tableInfo.realName);
 
     if (chartId == -1) {
       this.lineChartData.push({
-        label: tableName,
-        borderColor: 'rgb(75, 192, 192)',
-        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+        label: tableInfo.name,
+        realName: tableInfo.realName,
+        borderColor: tableInfo.color,
+        backgroundColor: tableInfo.color + '0A',
         tension: 0.3,
         fill: false,
         data: []
@@ -86,10 +87,11 @@ export class GraphViewComponent implements OnInit {
   }
 
   getTable(sensorData: any): void {
-    this.serverConnector.sendRequestForTableInfo(sensorData['selectedSensors'], 
-                                                   this.onGraphUpdate,
-                                                   sensorData['startDate'],
-                                                   sensorData['endDate'])
+    this.serverConnector.sendRequestForTableInfo(sensorData['selectedSensors'],
+                                                 sensorData['group'], 
+                                                 this.onGraphUpdate,
+                                                 sensorData['startDate'],
+                                                 sensorData['endDate'])
   }
 
 }

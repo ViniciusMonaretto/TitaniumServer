@@ -10,6 +10,8 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatInputModule } from '@angular/material/input';
 import { FormsModule } from '@angular/forms';
 
+import { ColorChromeModule } from 'ngx-color/chrome';
+
 
 @Component({
     selector: 'app-sensor-add-window',
@@ -21,10 +23,12 @@ import { FormsModule } from '@angular/forms';
         MatInputModule,
         FormsModule,
         MatDatepickerModule,
-        MatDialogModule],
+        MatDialogModule,
+        ColorChromeModule],
     standalone: true
 })
 export class SensorAddWindowComponent {
+  public showPicker: boolean = false
   public sensorModule: SensorModule = new SensorModule()
 
   public sensorTypes = Object.values(SensorTypesEnum);
@@ -52,7 +56,8 @@ export class SensorAddWindowComponent {
       "gateway": this.sensorModule.gateway,
       "topic": this.sensorModule.topic,
       "sensorType": this.sensorModule.sensorType,
-      "group": this.group
+      "group": this.group,
+      "color": this.sensorModule.color
     }
   }
 

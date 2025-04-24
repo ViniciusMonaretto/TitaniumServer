@@ -5,6 +5,7 @@ export class SensorModule{
     public name: string = "";
     public gateway: string = "";
     public topic: string = "";
+    public color: string = "#000000"
     public sensorType: SensorTypesEnum = SensorTypesEnum.PREASSURE
     public value: Number|null = null
 

@@ -85,7 +85,8 @@ export class GraphRequestWindowComponent implements OnInit {
     let obj = {
       "selectedSensors": selectedPanels,
       "startDate": this.startDate,
-      "endDate": this.endDate
+      "endDate": this.endDate,
+      "group": this.selectedGroup	
     }
 
     this.data.callback(obj)

@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import {UiPanelService} from './ui-panels.service'
+import { UiPanelService } from './ui-panels.service'
 import { v4 as uuidv4 } from 'uuid';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { ErrorDialogComponent } from '../components/error-dialog/error-dialog.component';
@@ -17,23 +17,23 @@ export class ServerConectorService {
 
   private dialogRef: MatDialogRef<SpinnerComponent> | null = null;
 
-  constructor(private uiPanelService: UiPanelService, private dialog: MatDialog) { 
+  constructor(private uiPanelService: UiPanelService, private dialog: MatDialog) {
     this.socket = null
-    setTimeout(()=>{
+    setTimeout(() => {
       this.connectToServer();
     }, 100)
-    
+
   }
 
   private connectToServer(): void {
     this.showSpinnerDialog();
     this.socket = new WebSocket(this.wsUrl);
 
-    this.socket.onmessage = (message) => {this.onMessage(message)}
+    this.socket.onmessage = (message) => { this.onMessage(message) }
 
-    this.socket.onclose = () => {this.onDisconnection()}
+    this.socket.onclose = () => { this.onDisconnection() }
 
-    this.socket.onerror = (err) => {this.onError(err)}
+    this.socket.onerror = (err) => { this.onError(err) }
 
     this.socket.onopen = () => {
       console.log('WebSocket connected successfully!');
@@ -42,14 +42,14 @@ export class ServerConectorService {
   }
 
   private showSpinnerDialog(): void {
-    if(!this.dialogRef) {
+    if (!this.dialogRef) {
       this.dialogRef = this.dialog.open(SpinnerComponent, {
         disableClose: true,
         panelClass: 'transparent-dialog',
         backdropClass: 'dimmed-backdrop',
       });
     }
-   
+
   }
 
   private hideSpinnerDialog(): void {
@@ -57,13 +57,11 @@ export class ServerConectorService {
     this.dialogRef = null;
   }
 
-  private onDisconnection()
-  {
-    if(this.handleReconnection)
-    {
+  private onDisconnection() {
+    if (this.handleReconnection) {
       this.handleReconnection();
     }
-      
+
   }
 
   private handleReconnection() {
@@ -91,34 +89,34 @@ export class ServerConectorService {
     const minutes = String(date.getMinutes()).padStart(2, '0');
     const seconds = String(date.getSeconds()).padStart(2, '0');
     const milliseconds = String(date.getMilliseconds()).padStart(3, '0');
-  
+
     // Generate microseconds (can be random or based on more precise sources)
     const microseconds = '000000'; // You could generate this or extract from more precise sources
-  
+
     // Combine them into the required format
     return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}.${milliseconds}${microseconds}`;
   }
 
 
-  public sendRequestForTableInfo(sensorInfos: Array<any>, callback?: Function, beginDate?: Date|null, endDate?: Date|null)
-  {
+  public sendRequestForTableInfo(sensorInfos: Array<any>,
+    group: string,
+    callback?: Function, 
+    beginDate?: Date | null, 
+    endDate?: Date | null) {
     const requestId = uuidv4();
-    let obj: any = {"sensorInfos": sensorInfos, "requestId": requestId}
-    if(beginDate)
-    {
+    let obj: any = { "sensorInfos": sensorInfos, "requestId": requestId }
+    if (beginDate) {
       obj["beginDate"] = this.formatLocalDateToCustomString(beginDate)
-      if(endDate)
-      {
+      if (endDate) {
         obj["endDate"] = this.formatLocalDateToCustomString(endDate)
       }
     }
 
-    this.uiPanelService.AddGraphRequest(sensorInfos, requestId, callback)
+    this.uiPanelService.AddGraphRequest(sensorInfos, requestId, group, callback)
     this.sendCommand("getStatusHistory", obj)
   }
 
-  public sendCommand(commandName: string, payload: any)
-  {
+  public sendCommand(commandName: string, payload: any) {
     if (this.socket?.readyState === WebSocket.OPEN) {
       let obj = {
         "commandName": commandName,
@@ -133,27 +131,22 @@ export class ServerConectorService {
   private onMessage(message: any): void {
     console.log('Received message:', message);
     let data = JSON.parse(message["data"])
-    if(data["status"] == "uiConfig")
-    {
+    if (data["status"] == "uiConfig") {
       this.uiPanelService.SetNewUiConfig(data["message"])
       this.hideSpinnerDialog();
     }
-    else if(data["status"] == "sensorUpdate")
-    {
+    else if (data["status"] == "sensorUpdate") {
       let message = data["message"]
       this.uiPanelService.OnSubscriptionUpdate(message["subStatusName"], message["data"])
     }
-    else if(data["status"] == "statusInfo")
-    {
+    else if (data["status"] == "statusInfo") {
       let message = data["message"]
       this.uiPanelService.OnStatusInfoUpdate(message["data"].requestId, message["data"].info)
     }
-    else if(data["status"] == "error")
-    {
+    else if (data["status"] == "error") {
       this.openErrorDialog(data["message"])
     }
-    else
-    {
+    else {
       console.log("Status " + data["status"] + " not found")
     }
   }

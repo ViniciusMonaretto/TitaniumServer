@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import {SensorModule} from "../models/sensor-module"
 import { SensorTypesEnum } from '../enum/sensor-type';
+import { table } from 'console';
 
 export class PanelInfo {
   public temperature: Array<SensorModule> = [];
@@ -15,7 +16,7 @@ export class UiPanelService {
     
     panels: {[id: string]:  PanelInfo} = {}
     subscriptioMap: {[id: string]: Array<SensorModule | Function>} = {}
-    subscriptionInfoArrayMap: {[id: string]: {"callback": Function, "tableNames": Array<string>}} = {}
+    subscriptionInfoArrayMap: {[id: string]: {"callback": Function, "tableNames": Array<string>, "group": string}} = {}
 
     groupSelected: string = ""
 
@@ -93,7 +94,7 @@ export class UiPanelService {
       this.sensorCachedCurrentInfo[tableName] = infoArr
     }
 
-    AddGraphRequest(sensorInfos: Array<any>, requestId: any, callback?: Function)
+    AddGraphRequest(sensorInfos: Array<any>, requestId: any, group: string, callback?: Function)
     {
       let arr = []
       for(let sensorInfo of sensorInfos)
@@ -103,11 +104,11 @@ export class UiPanelService {
       }
       if(callback)
       {
-        this.subscriptionInfoArrayMap[requestId] = {"callback": callback, "tableNames": arr}
+        this.subscriptionInfoArrayMap[requestId] = {"callback": callback, "tableNames": arr, "group":group}
       }
       else
       {
-        this.subscriptionInfoArrayMap[requestId] = {"callback": this.SensorInfoCallback, "tableNames": arr}
+        this.subscriptionInfoArrayMap[requestId] = {"callback": this.SensorInfoCallback, "tableNames": arr, "group":group}
       }
        
     } 
@@ -144,7 +145,27 @@ export class UiPanelService {
         let obj = this.subscriptionInfoArrayMap[requestId]
         for(let tableName in infoArray)
         {
-          obj.callback(tableName, infoArray[tableName]);
+          let info = {}
+
+          let panel = this.panels[obj.group].temperature.find(x=> this.GetTableName(x.gateway, x.topic) == tableName)
+          if(panel)
+          {
+            info = {
+              "name": panel?.name,
+              "realName": tableName,
+              "color": panel?.color,
+            }
+          }
+          else
+          {
+            info = {
+              "name": tableName,
+              "realName": tableName,
+              "color": "#FFFFFF",
+            }
+          }
+          
+          obj.callback(info, infoArray[tableName]);
         }
 
         delete this.subscriptionInfoArrayMap[requestId]
