@@ -1,13 +1,13 @@
 .main-group-div {
   display: flex;
   flex-wrap: wrap;
-  gap: 20px; /* space between items */
-  justify-content: flex-start; /* or space-between / center / start */
+  gap: 10px; 
+  justify-content: flex-start; 
 }
 
 .flex-item {
   width: 260px;
-  //flex: 1 1 200px; /* Grow, shrink, base width */
+  //flex: 1 1 200px; 
   max-width: 300px;
   box-sizing: border-box;
   text-align: center;
@@ -18,5 +18,11 @@
   font-size: xx-large;
   padding-bottom: 20px;
   font-weight: bold;
+}
+
+.add-button{
+  height: 100px;
+  align-items: center;
+  display: flex;
 }
   

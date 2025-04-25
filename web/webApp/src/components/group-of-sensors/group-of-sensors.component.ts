@@ -9,12 +9,13 @@ import { SensorComponent } from '../sensor/sensor.component';
 import {ServerConectorService} from "../../services/server-conector.service"
 import {UiPanelService} from "../../services/ui-panels.service"
 import { SensorTypesEnum } from '../../enum/sensor-type';
+import { MatIconModule } from '@angular/material/icon';
 
 @Component({
     selector: 'group-of-sensors',
     templateUrl: './group-of-sensors.component.html',
     styleUrls: ['./group-of-sensors.component.scss'],
-    imports: [CommonModule, SensorComponent],
+    imports: [CommonModule, SensorComponent, MatIconModule],
     standalone: true
 })
 export class GroupOfSensorsComponent implements OnInit {

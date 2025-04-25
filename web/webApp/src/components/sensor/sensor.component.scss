@@ -4,7 +4,7 @@
     border: solid;
     border-width: thin;
     border-color: black;
-    border-radius: 10px;
+    border-radius: 5px;
     background-color: black;
     color: white;
     font-family: 'LCD', sans-serif;
@@ -16,12 +16,13 @@
     display: flex;
     align-items: center;
     padding-left: 10px;
-    font-size: 20px;
+    font-size: 15px;
     padding-top: 10px;
 }
 
 .measure-display
 {
+    font-family: 'Digital Numbers', sans-serif;
     display: flex;
     height: 100%;
     align-items: center;
@@ -34,13 +35,13 @@
     display: flex;
     align-items: center;
     justify-content: space-around;
-    font-size: 60px;
+    font-size: 50px;
 }
 
 .border-measure
 {
     width: 20%;
-    font-size: 40px;
+    font-size: 30px;
 }
 
 .footer-measure{

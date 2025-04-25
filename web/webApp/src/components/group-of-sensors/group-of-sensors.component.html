@@ -8,7 +8,12 @@
               (clickCallback)="selectSensor($event)" 
               (deleteCallback)="removeSensorCallback($event)">
       </sensor>
-      <button mat-button (click)="addSensor(group)">Add Sensor</button>
+      <div>
+        <button class="add-button" mat-button (click)="addSensor(group)">
+          <mat-icon >add</mat-icon>
+        </button>
+      </div>
+      
     </div>
   </div>
   
