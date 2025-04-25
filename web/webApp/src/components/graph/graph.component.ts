@@ -43,7 +43,11 @@ export class GraphComponent {
     },
     plugins: {
       legend: {
-        position: 'bottom'
+        position: 'bottom',
+        display: true,
+        labels: {
+          boxWidth: 12
+        }
       },
       zoom: {
         zoom: {
