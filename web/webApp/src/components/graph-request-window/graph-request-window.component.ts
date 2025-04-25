@@ -2,7 +2,7 @@ import { Component, Inject, OnInit } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogModule } from '@angular/material/dialog';
 import { CommonModule } from '@angular/common';
 import { SensorAddWindowComponent } from '../sensor-add-window/sensor-add-window.component';
-import { MatNativeDateModule } from '@angular/material/core';
+import { DateAdapter, MAT_DATE_FORMATS, MAT_DATE_LOCALE, MatNativeDateModule, NativeDateAdapter } from '@angular/material/core';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
@@ -10,18 +10,37 @@ import { MatInputModule } from '@angular/material/input';
 import { FormsModule } from '@angular/forms';
 import { SensorModule } from '../../models/sensor-module';
 
+export const MY_DATE_FORMATS = {
+  parse: {
+    dateInput: 'l, LLL d, yyyy',
+  },
+  display: {
+    dateInput: 'dd/MM/yyyy',   // <- This is the one users will see
+    monthYearLabel: 'MMM yyyy',
+    dateA11yLabel: 'LL',
+    monthYearA11yLabel: 'MMMM yyyy',
+  }
+};
+
 @Component({
   selector: 'app-graph-request',
   templateUrl: './graph-request-window.component.html',
   styleUrls: ['./graph-request-window.component.scss'],
-  imports: [CommonModule,
+  imports: [
+    CommonModule,
     MatDialogModule,
     MatFormFieldModule,
     MatSelectModule,
     MatInputModule,
     FormsModule,
     MatNativeDateModule,
-    MatDatepickerModule],
+    MatDatepickerModule
+  ],
+  providers: [
+    { provide: DateAdapter, useClass: NativeDateAdapter },
+    { provide: MAT_DATE_LOCALE, useValue: 'en-US' },
+    { provide: MAT_DATE_FORMATS, useValue: MY_DATE_FORMATS }
+  ],
   standalone: true
 })
 export class GraphRequestWindowComponent implements OnInit {
@@ -86,7 +105,7 @@ export class GraphRequestWindowComponent implements OnInit {
       "selectedSensors": selectedPanels,
       "startDate": this.startDate,
       "endDate": this.endDate,
-      "group": this.selectedGroup	
+      "group": this.selectedGroup
     }
 
     this.data.callback(obj)
