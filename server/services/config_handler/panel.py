@@ -3,6 +3,7 @@ import uuid
 class SensorTypes:
     Pressure = "Pressure"
     Temperature = "Temperature"
+    Power = "Power"
     Unknow = "Unknow"
 
     @classmethod
@@ -11,6 +12,8 @@ class SensorTypes:
             return cls.Pressure
         elif panelName == cls.Temperature:
             return cls.Temperature
+        elif panelName == cls.Power:
+            return cls.Power
         
         return cls.Unknow
 

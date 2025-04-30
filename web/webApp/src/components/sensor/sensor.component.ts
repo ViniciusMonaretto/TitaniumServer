@@ -25,13 +25,13 @@ export class SensorComponent implements OnInit {
   {
     if(this.sensorInfo.sensorType == SensorTypesEnum.PREASSURE)
     {
-      return "Psa"
+      return "Pa"
     }
     if(this.sensorInfo.sensorType == SensorTypesEnum.TEMPERATURE)
     {
         return "ºC"
     }
-    if(this.sensorInfo.sensorType == SensorTypesEnum.POTENCY)
+    if(this.sensorInfo.sensorType == SensorTypesEnum.POWER)
     {
         return "Kw"
     }

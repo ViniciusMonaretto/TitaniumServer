@@ -6,6 +6,7 @@ import { MatCardModule } from '@angular/material/card';
 import { CommonModule } from '@angular/common';
 import { SensorInfoComponent } from '../../components/sensor-info/sensor-info.component';
 import { GroupOfSensorsComponent } from '../../components/group-of-sensors/group-of-sensors.component';
+import { SensorTypesEnum } from '../../enum/sensor-type';
 
 @Component({
     selector: 'sensor-groups',
@@ -34,6 +35,11 @@ export class SensorGroupComponent implements OnInit {
   getGroupSelected()
   {
     return this.UiPanelsService.GetGroup()
+  }
+
+  getSensorType()
+  {
+    return SensorTypesEnum
   }
 
   getGroupSensorUi()

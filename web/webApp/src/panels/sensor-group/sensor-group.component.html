@@ -4,15 +4,29 @@
         (onExit)="diselectSensor()" (onLoad)="loadInfo($event)"></sensor-info>
     <div style="height: 100%;" *ngIf="true">
         <div class="group-header">{{getGroupSelected()}}</div>
-        <mat-card style="height: calc(100% - 90px);">
+        <mat-card style="height: calc(100% - 40px);">
             <mat-card-content style="height: 100%;">
-                <div style="height: calc(100%);">
-                    <div style="height: 80%;">
-                        <group-of-sensors [name]="'Temperatura'" [group]="getGroupSelected()" [sensorArray]="getInfoOfGroup().temperature"></group-of-sensors>
+                <div style="height: 100%;
+                                display: flex;
+                                flex-direction: column;
+                                justify-content: space-between;">
+                    <div style="height: 75%;">
+                        <group-of-sensors [name]="'Temperatura'" 
+                                          [group]="getGroupSelected()" 
+                                          [type]="getSensorType().TEMPERATURE"
+                                          [sensorArray]="getInfoOfGroup().temperature"></group-of-sensors>
                     </div>
-                    <div style="display: flex; height: 20%;">
-                        <group-of-sensors class="info-bellow-display" [group]="getGroupSelected()" [name]="'Potência'" [sensorArray]="getInfoOfGroup().potency"></group-of-sensors>
-                        <group-of-sensors class="info-bellow-display" [group]="getGroupSelected()" [name]="'Pressão'" [sensorArray]="getInfoOfGroup().pressure"></group-of-sensors>
+                    <div style="display: flex; height: 23%;">
+                        <group-of-sensors class="info-bellow-display" 
+                                          [group]="getGroupSelected()" 
+                                          [name]="'Potência'" 
+                                          [sensorArray]="getInfoOfGroup().power"
+                                          [type]="getSensorType().POWER"></group-of-sensors>
+                        <group-of-sensors class="info-bellow-display" 
+                                          [group]="getGroupSelected()" 
+                                          [name]="'Pressão'" 
+                                          [sensorArray]="getInfoOfGroup().pressure"
+                                          [type]="getSensorType().PREASSURE"></group-of-sensors>
                     </div>
                 </div>
             </mat-card-content>

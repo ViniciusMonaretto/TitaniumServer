@@ -6,7 +6,7 @@ import { table } from 'console';
 export class PanelInfo {
   public temperature: Array<SensorModule> = [];
   public pressure: Array<SensorModule>  = [];
-  public potency: Array<SensorModule> = [];
+  public power: Array<SensorModule> = [];
 }
 
 @Injectable({
@@ -59,8 +59,8 @@ export class UiPanelService {
         case SensorTypesEnum.PREASSURE:
           this.panels[groupName]["pressure"].push(sensor)
           break
-        case SensorTypesEnum.POTENCY:
-          this.panels[groupName]["potency"].push(sensor)
+        case SensorTypesEnum.POWER:
+          this.panels[groupName]["power"].push(sensor)
           break
       }
     }

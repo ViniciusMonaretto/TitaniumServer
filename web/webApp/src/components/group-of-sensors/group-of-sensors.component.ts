@@ -22,6 +22,7 @@ export class GroupOfSensorsComponent implements OnInit {
 
   @Input() name: string = "";
   @Input() group: string = "";
+  @Input() type: string = "";
   @Input() sensorArray: Array<SensorModule> = [];
 
   constructor(public dialog: MatDialog, private serverConnector: ServerConectorService, private UiPanelsService: UiPanelService) { }
@@ -36,7 +37,7 @@ export class GroupOfSensorsComponent implements OnInit {
         sensorData["group"] = groupName
         this.addNewSensorCallback(sensorData)
       },
-      sensorType: SensorTypesEnum.TEMPERATURE
+      sensorType: this.type
     }
     });
   }
