@@ -16,7 +16,7 @@ from services.config_handler.config_handler_command import ConfigHandlerCommands
 
 class Visualization(tornado.web.RequestHandler):
     def get(self):
-        self.render("../../webApp/index.html")
+        self.render("../../webApp/browser/index.html")
 
 class VisualizationWebSocketHandler(tornado.websocket.WebSocketHandler):
     _panels_count = 1

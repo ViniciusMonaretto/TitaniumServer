@@ -39,7 +39,7 @@ class AppServer:
 
     def make_app(self):
         base_dir = os.path.dirname(__file__)  # Current directory of the server script
-        angular_dist = os.path.join(base_dir, "../webApp")
+        angular_dist = os.path.join(base_dir, "../webApp/browser")
         return tornado.web.Application([
             (r"/websocket", VisualizationWebSocketHandler, {'middleware': self._middleware}),
             (r"/(.*\.(js|css|ico|png|jpg|jpeg|woff|woff2|ttf|svg))", tornado.web.StaticFileHandler, {"path": angular_dist}),
