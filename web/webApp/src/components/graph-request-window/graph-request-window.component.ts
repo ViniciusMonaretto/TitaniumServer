@@ -53,6 +53,8 @@ export class GraphRequestWindowComponent implements OnInit {
   startDate: Date | null = null
   endDate: Date | null = null
 
+  option: string = ""
+
   constructor(public dialogRef: MatDialogRef<SensorAddWindowComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any
   ) {
@@ -73,12 +75,23 @@ export class GraphRequestWindowComponent implements OnInit {
     }
   }
 
-  getTemperatureSensors() {
-    return this.uiConfig[this.selectedGroup].temperature
+  getAvailableSensors()
+  {
+    switch(this.option)
+    {
+      case "temperature":
+        return this.uiConfig[this.selectedGroup].temperature
+      case "pressure":
+        return this.uiConfig[this.selectedGroup].pressure
+      case "power":
+        return this.uiConfig[this.selectedGroup].power
+      default:
+        return []
+    }
   }
 
   validForm() {
-    return this.selectedGroup != "" &&
+    return this.selectedGroup != "" && this.option != "" &&
       ((this.startDate == null && this.endDate == null) ||
         (this.startDate != null && this.endDate == null) ||
         (this.startDate != null && this.endDate != null && this.startDate?.getTime() < this.endDate.getTime()))
@@ -91,7 +104,7 @@ export class GraphRequestWindowComponent implements OnInit {
   onAddCLick() {
     let selectedPanels = []
     if (this.selectedSensors.length == 0) {
-      this.selectedSensors = this.getTemperatureSensors()
+      this.selectedSensors = this.getAvailableSensors()
     }
 
     for (let panel of this.selectedSensors) {

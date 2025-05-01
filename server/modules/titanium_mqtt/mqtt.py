@@ -110,6 +110,8 @@ class TitaniumMqtt:
                 self._middleware.send_status(topic_name, {'data': cls['data'], 'timestamp':cls['timestamp']})
             except queue.Empty as exc:
                 pass
+            except Exception as e:
+                Logger.error(f"Mqtt.handle_incoming_messages: Error Parsing messages {e}")
         
         
     
