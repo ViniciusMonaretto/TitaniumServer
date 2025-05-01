@@ -11,4 +11,4 @@ cd ../../server
 rm -rf ./webApp
 mkdir ./webApp
 
-cp ../web/webApp/dist/web-app/* ./webApp
+cp -r ../web/webApp/dist/web-app/* ./webApp
