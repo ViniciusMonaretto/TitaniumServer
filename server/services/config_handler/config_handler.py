@@ -7,7 +7,7 @@ from middleware.status_subscriber import StatuSubscribers
 from middleware.middleware import ClientMiddleware
 import uuid
 
-from .panel import Panel
+from dataModules.panel import Panel
 
 from .config_handler_command import ConfigHandlerCommands
 
@@ -39,7 +39,7 @@ class ConfigHandler(ServiceInterface):
             }
         self._middleware.add_commands(commands)
     
-    def initialize_system(self):
+    def read_default_config(self):
         script_directory = os.path.dirname(os.path.abspath(__file__))
         json_directory = os.path.join(script_directory, "..", "..", "config",  "ui_config.json")
         with open(json_directory, 'r') as json_file:
@@ -51,6 +51,18 @@ class ConfigHandler(ServiceInterface):
                 self._logger.info(f"Processing file: {json_directory}")
             except json.JSONDecodeError as e:
                 self._logger.error(f"VisualizationWebSocketHandler:: Error processing file {json_directory}: {e}")
+    
+    def initialize_panels_from_db(self, panels_infos):
+        for panel_info in panels_infos:
+            self.add_panel(panel_info)
+
+    def initialize_system(self):
+        panels_infos = self._status_saver.get_panels()
+        if len(panels_infos) == 0:
+            self.read_default_config()
+        else:
+            self.initialize_panels_from_db(panels_infos)
+
 
     def add_group(self, group_name) -> Union[bool, str]:
         if group_name in self._panels_info:
@@ -63,26 +75,36 @@ class ConfigHandler(ServiceInterface):
             if group_name not in self._panels_info:
                 self._panels_info[group_name] = []
             for panel_info in panels_info[group_name]:
-                self.add_panel(panel_info, group_name)
+                self.add_panel(panel_info)
 
-    def add_panel(self, panel_info, group_name) -> Union[bool, str]:
+    def add_panel(self, panel_info) -> Union[bool, str]:
+        result = False
+        message = ""
         panel = Panel(panel_info)
 
+        group_name = panel._group
+
         if group_name not in self._panels_info:
-            return False, "Add panel error, no group to add"
-
-        result, message = self._status_saver.add_new_reading(panel._topic, panel._gateway)
-
-        if result:
-            self._panels_info[group_name].append(panel)
-            self.update_ui_file()
+            self.add_group(group_name)
+        
+        index = -1
+        if(not panel._id):
+            index = self._status_saver.add_panel(panel)
+        else:
+            index = panel._id
+        if( index != -1):
+            panel._id = index
+            result, message = self._status_saver.add_new_reading(panel._topic, panel._gateway)
+        
+            if result:
+                self._panels_info[group_name].append(panel)
 
         return result, message
     
     def add_panel_command(self, command):
         data = command["data"]
 
-        result, message = self.add_panel(data, data["group"])
+        result, message = self.add_panel(data)
 
         if result:
             self._middleware.send_command_answear( result, self._panels_info[data["group"]][-1], command["requestId"])
@@ -91,15 +113,17 @@ class ConfigHandler(ServiceInterface):
         
     
     def remove_panel(self, panel_id) -> Union[bool, str]:
-        for panels in self._panels_info.values():
-            for idx, panel in enumerate(panels):
-                if panel._id == panel_id:
-                    result, message = self._status_saver.drop_reading(panel._topic, panel._gateway)
-                    if result:
-                        del panels[idx]
-                        self.update_ui_file()
-                    
-                    return result, message
+        try: 
+            for panels in self._panels_info.values():
+                for idx, panel in enumerate(panels):
+                    if panel._id == panel_id:
+                        result, message = self._status_saver.drop_reading(panel.topic, panel.gateway, panel_id)
+                        if result:
+                            del panels[idx]
+                        
+                        return result, message
+        except Exception as e:
+            Logger.error(f"ConfigHandler::remove_panel: Error while removing panel {e}")
         
         return False, "Remove panel error: Panel not found"
     
@@ -123,12 +147,3 @@ class ConfigHandler(ServiceInterface):
     
     def get_panels_list_command(self, command):
         self._middleware.send_command_answear( True, self.create_object_from_panels_info(), command["requestId"])
-
-    def update_ui_file(self):
-        script_directory = os.path.dirname(os.path.abspath(__file__))
-        json_directory = os.path.join(script_directory, "..", "..", "config",  "ui_config.json")
-
-        obj = self.create_object_from_panels_info()
-
-        with open(json_directory, 'w') as json_file:
-            json_file.write( json.dumps(obj))

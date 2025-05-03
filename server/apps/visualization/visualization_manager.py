@@ -6,7 +6,7 @@ import json
 import uuid
 from support.logger import Logger 
 
-from services.config_handler.panel import Panel
+from dataModules.panel import Panel
 from middleware.subscriber_interface import SubscriberInterface
 from middleware.status_subscriber import StatuSubscribers
 from middleware.middleware import ClientMiddleware
@@ -71,7 +71,7 @@ class VisualizationWebSocketHandler(tornado.websocket.WebSocketHandler):
         if("endDate" in request):
             data['endDate'] = request["endDate"]
     
-        self._middleware.send_command(StatusSaverCommands.GET_TABLE_INFO, data, self.send_status_history)                                    
+        self._middleware.send_command(StatusSaverCommands.GET_SENSOR_INFO, data, self.send_status_history)                                    
     
     def send_status_history(self, data):
         self._logger.info("Visualization.send_status_history: graph send")

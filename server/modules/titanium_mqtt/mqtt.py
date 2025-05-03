@@ -100,18 +100,12 @@ class TitaniumMqtt:
 
                 topic_name = TitaniumMqtt.get_topic_from_mosquitto_obj(id, cls)
                 self.world_count2 += 1
-                # if(self.world_count2 == 40):
-                #     #print(f"batch completed 2 " + str(self.world_count2_rev))
-                #     self.world_count2_rev+=1
-                #     if(self.world_count2_rev==3):
-                #         self.world_count2_rev = 0
-                #         print("----\n\n\n")
-                #     self.world_count2 = 0
+
                 self._middleware.send_status(topic_name, {'data': cls['data'], 'timestamp':cls['timestamp']})
             except queue.Empty as exc:
                 pass
             except Exception as e:
-                Logger.error(f"Mqtt.handle_incoming_messages: Error Parsing messages {e}")
+                self._logger.error(f"Mqtt.handle_incoming_messages: Error Parsing messages {e}")
         
         
     
