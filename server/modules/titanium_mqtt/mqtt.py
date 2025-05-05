@@ -91,17 +91,16 @@ class TitaniumMqtt:
 
                 if not len(msg_split) == 5:
                     self._logger.error(f"TitaniumMqtt::on_message: mqtt topic {msg.topic} not valid")
-                    return
+                else:
+                    id = str(msg_split[2])
+                    cls = self._translator.translate_payload(msg_split[3], msg.payload, id)
 
-                id = str(msg_split[2])
-                cls = self._translator.translate_payload(msg_split[3], msg.payload, id)
+                    self._logger.debug(f"Received message: {msg.topic} {cls}")
 
-                self._logger.debug(f"Received message: {msg.topic} {cls}")
+                    topic_name = TitaniumMqtt.get_topic_from_mosquitto_obj(id, cls)
+                    self.world_count2 += 1
 
-                topic_name = TitaniumMqtt.get_topic_from_mosquitto_obj(id, cls)
-                self.world_count2 += 1
-
-                self._middleware.send_status(topic_name, {'data': cls['data'], 'timestamp':cls['timestamp']})
+                    self._middleware.send_status(topic_name, {'data': cls['data'], 'timestamp':cls['timestamp']})
             except queue.Empty as exc:
                 pass
             except Exception as e:

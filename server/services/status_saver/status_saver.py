@@ -101,9 +101,6 @@ class StatusSaver(ServiceInterface):
             );
             """)
 
-            # === Create Indexes ===
-            cursor.execute("CREATE INDEX IF NOT EXISTS idx_alarm_time ON Alarms(name, timestamp);")
-            cursor.execute("CREATE INDEX IF NOT EXISTS idx_time_alm ON Alarms(timestamp);")
             conn.commit()
             
             conn.close()
