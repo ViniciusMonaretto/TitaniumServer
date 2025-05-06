@@ -1,14 +1,16 @@
-<mat-card>
-    <mat-card-title>{{sensorInfo.name}}</mat-card-title>
-    <mat-card-content>
-      <div class="main-group-div">
-        <ng-container  *ngIf="tableArray && tableArray.length; else noSize" >
-            <div class="sensor-info-container">
-                Current Value: {{getCurrentValue()}}
-            </div>
-            <info-table *ngIf="!refreshing" style="width: 100%;" [fieldsInfo]="headerInfo" [tableInfo]="tableArray"></info-table>
-            <div *ngIf="refreshing">
-                Refreshing Info...
+<mat-card style="height: 100%;">
+    <mat-card-title>{{sensorInfo?.name}}</mat-card-title>
+    <mat-card-content style="height: calc(100% - 32px);">
+      <div style="height: 100%;" class="main-group-div">
+        <div class="sensor-info-container">
+          Valor Atual: {{getCurrentValue()}}
+        </div>
+        <ng-container  *ngIf="lineChartData && lineChartData.length > 0; else noSize" >
+            <div style="height: 90%;">
+              <graph style="height: 100%;" 
+                      [blockFitAll]="true"
+                      [inputInfo]="$any(lineChartData)">
+              </graph>
             </div>
         </ng-container>
         <ng-template #noSize>

@@ -309,8 +309,7 @@ class StatusSaver(ServiceInterface):
 
             if("endDate" in data):
                 date_command += " AND timestamp <= ?"
-                values = values + [data["endDAte"]]
-
+                values = values + [data["endDate"]]
 
         data_out = {'info': {}}
 

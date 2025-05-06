@@ -100,9 +100,9 @@ export class ServerConectorService {
 
   public sendRequestForTableInfo(sensorInfos: Array<any>,
     group: string,
-    callback?: Function, 
     beginDate?: Date | null, 
-    endDate?: Date | null) {
+    endDate?: Date | null,
+    callback?: Function) {
     const requestId = uuidv4();
     let obj: any = { "sensorInfos": sensorInfos, "requestId": requestId }
     if (beginDate) {

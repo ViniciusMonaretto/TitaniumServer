@@ -31,17 +31,15 @@ export class UiPanelService {
 
     SetNewUiConfig(uiConfig: {[id: string]: SensorModule[]} )
     {
-        for(let groupName in uiConfig)
+      for(let groupName in uiConfig)
+      {
+        this.panels[groupName] = new PanelInfo()
+        this.CreateSensorSubscriptionFromPanel(uiConfig[groupName], groupName)
+        if(this.groupSelected == "")
         {
-          this.panels[groupName] = new PanelInfo()
-          this.CreateSensorSubscriptionFromPanel(uiConfig[groupName], groupName)
-          if(this.groupSelected == "")
-          {
-            this.groupSelected = groupName
-          }
+          this.groupSelected = groupName
         }
-        
-        
+      }
     }
 
     GetUiConfig()
@@ -90,8 +88,8 @@ export class UiPanelService {
       return []
     }
 
-    SensorInfoCallback = (tableName: string, infoArr: any[]) => {
-      this.sensorCachedCurrentInfo[tableName] = infoArr
+    SensorInfoCallback = (info: any, infoArr: any[]) => {
+      this.sensorCachedCurrentInfo[info.realName] = infoArr
     }
 
     AddGraphRequest(sensorInfos: Array<any>, requestId: any, group: string, callback?: Function)
@@ -186,10 +184,13 @@ export class UiPanelService {
             callbackObj.value = value.data
             if(tableFullName in this.sensorCachedCurrentInfo)
             {
-              this.sensorCachedCurrentInfo[tableFullName].push(value)
+              this.sensorCachedCurrentInfo[tableFullName].push({
+                timestamp: value["timestamp"],
+                value: value["data"],
+              })
               let filterDate = new Date()
               filterDate.setHours(filterDate.getHours() - 1)
-              this.sensorCachedCurrentInfo[tableFullName] = this.sensorCachedCurrentInfo[tableFullName].filter(x=> x.timestamp >= filterDate)
+              this.sensorCachedCurrentInfo[tableFullName] = this.sensorCachedCurrentInfo[tableFullName].filter(x=> new Date(x.timestamp) >= filterDate)
             }
           }
           else
@@ -211,7 +212,7 @@ export class UiPanelService {
       this.selectedSensor = model
     }
   
-    public GetSelectedSensor()
+    public GetSelectedSensor(): SensorModule | null
     {
       return this.selectedSensor
     }

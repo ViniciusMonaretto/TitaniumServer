@@ -7,6 +7,7 @@ import { CommonModule } from '@angular/common';
 import { SensorInfoComponent } from '../../components/sensor-info/sensor-info.component';
 import { GroupOfSensorsComponent } from '../../components/group-of-sensors/group-of-sensors.component';
 import { SensorTypesEnum } from '../../enum/sensor-type';
+import { SensorModule } from '../../models/sensor-module';
 
 @Component({
     selector: 'sensor-groups',
@@ -48,7 +49,7 @@ export class SensorGroupComponent implements OnInit {
     return info
   }
 
-  getSensorSelected(): any
+  getSensorSelected(): SensorModule | null
   {
     return this.UiPanelsService.GetSelectedSensor()
   }
@@ -72,7 +73,21 @@ export class SensorGroupComponent implements OnInit {
 
   loadInfo(tableInfo:any)
   {
-    this.ServerConectorService.sendRequestForTableInfo(tableInfo['gateway'], tableInfo['table'])
+    let info = this.UiPanelsService.GetCachedSelectedSensorInfo(tableInfo['topic'], tableInfo['gateway'])
+    if(info.length == 0)
+    {
+      var endDate = new Date();
+      var startDate =  new Date()
+      startDate.setMinutes(endDate.getMinutes() - 30)
+      this.ServerConectorService.sendRequestForTableInfo([{
+                                                          "gateway": tableInfo['gateway'],
+                                                          "topic": tableInfo['table']
+                                                        }],
+                                                         this.getGroupSelected(),
+                                                         startDate,
+                                                         endDate)
+    }
+   
   }
 
 }

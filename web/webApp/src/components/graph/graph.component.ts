@@ -114,6 +114,8 @@ export class GraphComponent {
   };
   filteredData: Array<{ name: string, series: Array<any> }> = [];
 
+  @Input() blockFitAll: boolean = false
+
   @Input() set resize(trigger: boolean) {
     this.fitAllGraph()
   }
@@ -138,7 +140,7 @@ export class GraphComponent {
   }
 
   fitAllGraph() {
-    if (this.lineChartData) {
+    if (this.lineChartData && !this.blockFitAll) {
       let minYaxis = Number.MAX_SAFE_INTEGER
       let maxYaxis = Number.MIN_SAFE_INTEGER
 
