@@ -1,26 +1,54 @@
-<mat-card style="height: 100%;">
-    <mat-card-title>{{sensorInfo?.name}}</mat-card-title>
-    <mat-card-content style="height: calc(100% - 32px);">
-      <div style="height: 100%;" class="main-group-div">
-        <div class="sensor-info-container">
-          Valor Atual: {{getCurrentValue()}}
-        </div>
-        <ng-container  *ngIf="lineChartData && lineChartData.length > 0; else noSize" >
-            <div style="height: 90%;">
-              <graph style="height: 100%;" 
-                      [blockFitAll]="true"
-                      [inputInfo]="$any(lineChartData)">
-              </graph>
-            </div>
-        </ng-container>
-        <ng-template #noSize>
-            No info selected
-        </ng-template>
+<mat-card style="height: 100%;background-color: #f0f0f0;">
+  <mat-card-title>{{sensorInfo?.name}}</mat-card-title>
+  <mat-card-content style="height: calc(100% - 32px);">
+    <div style="height: 100%;" class="main-group-div">
+      <div class="sensor-info-container">
+        Valor Atual: {{getCurrentValue()}}
       </div>
-        
-    </mat-card-content>
-    <mat-card-actions align="end">
-      <button mat-button (click)="return()">Return</button>
-    </mat-card-actions>
-</mat-card>
+      <div class="sensor-info-datacontainer">
+        <div class="info-card-internal" style="width: 70%; height: 100%;">
+          <mat-card  style="height: 100%; width: 100%;">
+            <mat-card-title class="info-title-card">Medição da última hora</mat-card-title>
+            <mat-card-content class="interior-container-card">
+              <ng-container *ngIf="lineChartData && lineChartData.length > 0; else noSize">
+                <div style="height: 100%;">
+                  <graph style="height: 100%;" [blockFitAll]="true" [inputInfo]="$any(lineChartData)">
+                  </graph>
+                </div>
+              </ng-container>
+              <ng-template #noSize>
+                Sem Informação Disponível
+              </ng-template>
+            </mat-card-content>
+          </mat-card>
+        </div>
+        <div class="info-card-internal" style="width: 30%; height: 100%;">
+          <mat-card style="height: 40%; width: 100%; min-height: 230px;">
+            <mat-card-title class="info-title-card">Calibração</mat-card-title>
+            <mat-card-content class="interior-container-card">
+              <div class="calibration-info">
+                <mat-form-field appearance="fill">
+                  <mat-label>Offset:</mat-label>
+                  <input matInput [(ngModel)]="offset" />
+                </mat-form-field>
+                <mat-form-field appearance="fill">
+                  <mat-label>Enclinação:</mat-label>
+                  <input matInput [(ngModel)]="slope" />
+                </mat-form-field>
+                <button mat-button>Cancel</button>
+              </div>
+            </mat-card-content>
+          </mat-card>
+          <div style="width: 100%; height: 60%; max-height: calc(100% - 230px)">
+            Hello
+          </div>
+        </div>
+      </div>
 
+    </div>
+
+  </mat-card-content>
+  <mat-card-actions align="end">
+    <button mat-button (click)="return()">Return</button>
+  </mat-card-actions>
+</mat-card>

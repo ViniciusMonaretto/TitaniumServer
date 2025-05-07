@@ -4,12 +4,22 @@ import { CommonModule } from '@angular/common';
 
 import { SensorModule } from '../../models/sensor-module';
 import { GraphComponent } from '../graph/graph.component';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { FormsModule } from '@angular/forms';
 
 @Component({
     selector: 'sensor-info',
     templateUrl: './sensor-info.component.html',
     styleUrls: ['./sensor-info.component.scss'],
-    imports: [MatCardModule, CommonModule, GraphComponent ], // Add MatCardModule to imports
+    imports: [MatCardModule, 
+              CommonModule, 
+              GraphComponent,
+              MatFormFieldModule,
+              MatSelectModule,
+              MatInputModule,
+              FormsModule ], // Add MatCardModule to imports
     standalone: true
 })
 export class SensorInfoComponent implements OnInit {
@@ -22,6 +32,9 @@ export class SensorInfoComponent implements OnInit {
 
   @Output() onLoad: EventEmitter<any> = new EventEmitter()
   @Output() onExit: EventEmitter<any> = new EventEmitter()
+
+  offset = 10
+  slope = 3
 
   lineChartData: any = null
 
