@@ -12,12 +12,12 @@ from dataModules.panel import Panel
 from dataModules.alarm import Alarm
 from support.logger import Logger
 from ..service_interface import ServiceInterface
-from .status_saver_commands import Commands
+from .config_storage_commands import Commands
 
 DB_CONFIG = "db_status_saves.json"
 DB_NAME = "titanium_server_db.db"
 
-class StatusSaver(ServiceInterface):
+class ConfigStorage(ServiceInterface):
     def __init__(self, middleware: ClientMiddleware):
         self._logger = Logger()
         self.id = str(uuid.uuid4())
@@ -34,7 +34,7 @@ class StatusSaver(ServiceInterface):
         self._info_wrything_thread = threading.Thread(target=self.write_sensor_data_loop, daemon=True)
         self._info_wrything_thread.start()
 
-        self._logger.info("StatusSaver initialized")
+        self._logger.info("ConfigStorage initialized")
         
     def get_panel_topic(self, gateway, status_name):
         return gateway + "/" + status_name
@@ -105,7 +105,7 @@ class StatusSaver(ServiceInterface):
             
             conn.close()
         except Exception as e:
-            message = f"StatusSaver::create_db: Exceptio creating new table {e}"
+            message = f"ConfigStorage::create_db: Exceptio creating new table {e}"
             self._logger.error(message)
             return False, message
         
@@ -121,7 +121,7 @@ class StatusSaver(ServiceInterface):
             return True, ""
         
         except Exception as e:
-            message = f"StatusSaver::add_new_reading: Exceptio creating new table {e}"
+            message = f"ConfigStorage::add_new_reading: Exceptio creating new table {e}"
             self._logger.error(message)
             return False, message
         
@@ -274,7 +274,7 @@ class StatusSaver(ServiceInterface):
             result = True
 
         except Exception as e:
-            self._logger.error(f"StatusSaver::get_table_info_command: Error trying to fetch info from table {e}")
+            self._logger.error(f"ConfigStorage::get_table_info_command: Error trying to fetch info from table {e}")
         finally:
             conn.close()
         
@@ -338,7 +338,7 @@ class StatusSaver(ServiceInterface):
                 data_out['info'][sensor_name].append({'timestamp': tm.isoformat(), 'value': value})
             data_out['requestId'] = data['websocketId']
         except Exception as e:
-            self._logger.error(f"StatusSaver::get_table_info_command: Error trying to fetch info from table {e}")
+            self._logger.error(f"ConfigStorage::get_table_info_command: Error trying to fetch info from table {e}")
             result = False
         finally:
             conn.close()
@@ -371,7 +371,7 @@ class StatusSaver(ServiceInterface):
         try:
             self._write_queue.put(status_info)
         except Exception as e:
-            self._logger.error(f"StatusSaver::add_sensor_data_to_queue: Error adding data to queue {e}")
+            self._logger.error(f"ConfigStorage::add_sensor_data_to_queue: Error adding data to queue {e}")
 
     def write_sensor_data_loop(self):
         while True:
@@ -387,7 +387,7 @@ class StatusSaver(ServiceInterface):
                 except KeyboardInterrupt:
                     break
                 except Exception as e:
-                    self._logger.error(f"StatusSaver::write_sensor_data_loop: Error getting data from write queue {e}")
+                    self._logger.error(f"ConfigStorage::write_sensor_data_loop: Error getting data from write queue {e}")
                     break
             
             if len(sensor_infos) > 0:
@@ -406,6 +406,6 @@ class StatusSaver(ServiceInterface):
 
             conn.commit()
         except Exception as e:
-            self._logger.error(f"StatusSaver::save_sensor_data_on_db: Error saving data on db {e}")
+            self._logger.error(f"ConfigStorage::save_sensor_data_on_db: Error saving data on db {e}")
         finally:
             conn.close()

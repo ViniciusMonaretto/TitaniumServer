@@ -5,14 +5,14 @@ from server.dataModules.alarm import Alarm
 from server.middleware.middleware import ClientMiddleware
 from server.middleware.status_subscriber import StatuSubscribers
 from server.services.alarm_manager.alarm_manager_commands import AlarmManagerCommands
-from server.services.status_saver.status_saver import StatusSaver
+from server.services.config_storage.config_storage import ConfigStorage
 from ..service_interface import ServiceInterface
 
 class AlarmManager(ServiceInterface):
     _alarms_info: dict[str: Alarm] = {}
     _status_subscribers: dict[str: StatuSubscribers]
 
-    def __init__(self, middleware: ClientMiddleware, status_saver: StatusSaver):
+    def __init__(self, middleware: ClientMiddleware, status_saver: ConfigStorage):
         self._logger = Logger()
         self._middleware = middleware
         self._status_saver = status_saver

@@ -7,14 +7,14 @@ from support.logger import Logger
 
 from middleware.middleware import ClientMiddleware
 
-from .status_saver.status_saver import StatusSaver
+from .config_storage.config_storage import ConfigStorage
 
 class ServiceManager:
     def __init__(self, middleware):
         self._logger = Logger()
         self._middleware = ClientMiddleware(middleware)
 
-        self._status_saver = StatusSaver(self._middleware)
+        self._status_saver = ConfigStorage(self._middleware)
         self._config_handler = ConfigHandler(self._middleware, self._status_saver)
         self._status_saver_thread = Thread(target = self.threaded_function, args = (10, ))
     

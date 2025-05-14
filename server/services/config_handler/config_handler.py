@@ -14,14 +14,14 @@ from .config_handler_command import ConfigHandlerCommands
 from support.logger import Logger
 from ..service_interface import ServiceInterface
 
-from ..status_saver.status_saver import StatusSaver
+from ..config_storage.config_storage import ConfigStorage
 
 DB_CONFIG = "db_status_saves.json"
 DB_NAME = "titanium_server_db.db"
 
 class ConfigHandler(ServiceInterface):
     _panels_info: dict[str: list[Panel]] = {}
-    def __init__(self, middleware: ClientMiddleware, status_saver: StatusSaver):
+    def __init__(self, middleware: ClientMiddleware, status_saver: ConfigStorage):
         self._logger = Logger()
         self._middleware = middleware
         self._status_saver = status_saver
