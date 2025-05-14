@@ -17,6 +17,26 @@ import 'chartjs-adapter-date-fns';
 export class GraphComponent {
   @ViewChild(BaseChartDirective) chart?: BaseChartDirective;
 
+  @Input() blockFitAll: boolean = false
+
+  @Input() set resize(trigger: boolean) {
+    this.fitAllGraph()
+  }
+  @Input() zoomEnabled: boolean = true
+
+  @Input() set inputInfo(newValue: any) {
+    console.log('Novo info de gráfico recebido:');
+    this.lineChartData = 
+    {
+      datasets: [...newValue]
+    }
+
+    if (this.first) {
+      this.first = false
+      this.fitAllGraph()
+    }
+  }
+
   lineChartOptions: ChartOptions<'line'> = {
     responsive: true,
     animation: false,
@@ -78,14 +98,14 @@ export class GraphComponent {
             return true
           },
           drag: {
-            enabled: false,
+            enabled: true,
             backgroundColor: 'rgba(0,123,255,0.25)',
             borderColor: 'rgba(0,123,255,0.8)',
             borderWidth: 1
           },
         },
         pan: {
-          enabled: true,
+          enabled: false,
           mode: 'xy',
           onPanStart: ({ chart, event }) => {
             if(this.zoomEnabled)
@@ -113,26 +133,6 @@ export class GraphComponent {
     ]
   };
   filteredData: Array<{ name: string, series: Array<any> }> = [];
-
-  @Input() blockFitAll: boolean = false
-
-  @Input() set resize(trigger: boolean) {
-    this.fitAllGraph()
-  }
-  @Input() zoomEnabled: boolean = false
-
-  @Input() set inputInfo(newValue: any) {
-    console.log('Novo info de gráfico recebido:');
-    this.lineChartData = 
-    {
-      datasets: [...newValue]
-    }
-
-    if (this.first) {
-      this.first = false
-      this.fitAllGraph()
-    }
-  }
 
   constructor() { }
 

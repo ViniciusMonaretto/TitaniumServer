@@ -10,7 +10,7 @@ from .gateway_object import GatewayObject
 from .translators.protobus.gateway_protobuf_factory import GatewayProtobufFactory
 from .translators.direct_translator import DirectTranslator
 from .translators.translator_model import PayloadTranslator
-
+ 
 
 SUBSCRIBE_TOPIC_LIST = [("/titanium/#", 0)]
 

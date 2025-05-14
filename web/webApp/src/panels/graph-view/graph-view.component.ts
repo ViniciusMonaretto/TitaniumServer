@@ -24,7 +24,7 @@ export class GraphViewComponent implements OnInit {
   }
 
   resizeTrigger: boolean = false
-  zoomWindowActivate: boolean = false
+  zoomWindowActivate: boolean = true
   lineChartData: Array<any> = [];
 
   ngOnInit(): void { }
