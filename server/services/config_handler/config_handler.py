@@ -8,6 +8,7 @@ from middleware.middleware import ClientMiddleware
 import uuid
 
 from dataModules.panel import Panel
+from services.sensor_data_storage.sensor_data_storage import SensorDataStorage
 
 from .config_handler_command import ConfigHandlerCommands
 
@@ -21,10 +22,11 @@ DB_NAME = "titanium_server_db.db"
 
 class ConfigHandler(ServiceInterface):
     _panels_info: dict[str: list[Panel]] = {}
-    def __init__(self, middleware: ClientMiddleware, status_saver: ConfigStorage):
+    def __init__(self, middleware: ClientMiddleware, config_storage: ConfigStorage, sensor_data_storage: SensorDataStorage):
         self._logger = Logger()
         self._middleware = middleware
-        self._status_saver = status_saver
+        self._config_storage = config_storage
+        self._sensor_data_storage = sensor_data_storage
 
         self.initialize_commands()
         self.initialize_system()
@@ -57,7 +59,7 @@ class ConfigHandler(ServiceInterface):
             self.add_panel(panel_info)
 
     def initialize_system(self):
-        panels_infos = self._status_saver.get_panels()
+        panels_infos = self._config_storage.get_panels()
         if len(panels_infos) == 0:
             self.read_default_config()
         else:
@@ -89,12 +91,12 @@ class ConfigHandler(ServiceInterface):
         
         index = -1
         if(not panel._id):
-            index = self._status_saver.add_panel(panel)
+            index = self._config_storage.add_panel(panel)
         else:
             index = panel._id
         if( index != -1):
             panel._id = index
-            result, message = self._status_saver.add_new_reading(panel._topic, panel._gateway)
+            result, message = self._sensor_data_storage.add_new_subscription(panel._topic, panel._gateway)
         
             if result:
                 self._panels_info[group_name].append(panel)
@@ -117,7 +119,7 @@ class ConfigHandler(ServiceInterface):
             for panels in self._panels_info.values():
                 for idx, panel in enumerate(panels):
                     if panel._id == panel_id:
-                        result, message = self._status_saver.drop_reading(panel.topic, panel.gateway, panel_id)
+                        result, message = self._config_storage.drop_reading(panel.topic, panel.gateway, panel_id)
                         if result:
                             del panels[idx]
                         

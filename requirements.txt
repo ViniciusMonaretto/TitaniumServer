@@ -2,3 +2,4 @@ tornado==6.4.1
 paho-mqtt
 pytz
 pymongo
+motor

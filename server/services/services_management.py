@@ -2,6 +2,8 @@ from threading import Thread
 from time import sleep
 import asyncio
 
+from services.sensor_data_storage.sensor_data_storage import SensorDataStorage
+
 from .config_handler.config_handler import ConfigHandler
 from support.logger import Logger
 
@@ -14,8 +16,10 @@ class ServiceManager:
         self._logger = Logger()
         self._middleware = ClientMiddleware(middleware)
 
-        self._status_saver = ConfigStorage(self._middleware)
-        self._config_handler = ConfigHandler(self._middleware, self._status_saver)
+        self._config_storage = ConfigStorage(self._middleware)
+        self._sensor_data_storage = SensorDataStorage(self._middleware)
+        self._config_handler = ConfigHandler(self._middleware, self._config_storage, self._sensor_data_storage)
+        
         self._status_saver_thread = Thread(target = self.threaded_function, args = (10, ))
     
     def run(self):

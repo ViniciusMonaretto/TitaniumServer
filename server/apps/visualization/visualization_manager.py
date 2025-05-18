@@ -10,7 +10,7 @@ from dataModules.panel import Panel
 from middleware.subscriber_interface import SubscriberInterface
 from middleware.status_subscriber import StatuSubscribers
 from middleware.middleware import ClientMiddleware
-from services.config_storage.config_storage_commands import Commands as ConfigStorageCommands
+from services.sensor_data_storage.sensor_data_storage_commands import SensorDataStorageCommands
 
 from services.config_handler.config_handler_command import ConfigHandlerCommands
 
@@ -71,7 +71,7 @@ class VisualizationWebSocketHandler(tornado.websocket.WebSocketHandler):
         if("endDate" in request):
             data['endDate'] = request["endDate"]
     
-        self._middleware.send_command(ConfigStorageCommands.GET_SENSOR_INFO, data, self.send_status_history)                                    
+        self._middleware.send_command(SensorDataStorageCommands.READ_SENSOR_INFO, data, self.send_status_history)                                    
     
     def send_status_history(self, data):
         self._logger.info("Visualization.send_status_history: graph send")

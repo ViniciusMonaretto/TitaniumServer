@@ -11,7 +11,7 @@ TOPIC = "/titanium/1C692031BE04/temperature/response"
 TOPIC2 = "/titanium/1C692031BE05/temperature/response"
 TOPIC3 = "/titanium/1C692031BE06/temperature/response"
 
-MESSAGES_TO_SEND = 20
+MESSAGES_TO_SEND = 1
 
 # Callback for successful connection
 def on_connect(client, userdata, flags, rc):
