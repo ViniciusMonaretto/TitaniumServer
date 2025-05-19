@@ -23,16 +23,18 @@ MONGO_DB_NAME = "IoCloud"
 MONGO_DB_COLLECTION = "SensorData"
 
 class SensorDataStorage(ServiceInterface):
+    _indexes_created = False
     def __init__(self, middleware: ClientMiddleware):
         self._logger = Logger()
         self._middleware = middleware
 
+        self._async_loop = AsyncioLoopThread()
+
+        self._indexes_created = False
         self.initialize_commands()
         self.initialize_system()
         self.id = str(uuid.uuid4())
         self._subscriptions_add = 0
-
-        self._async_loop = AsyncioLoopThread()
 
         self._info_wrything_thread = threading.Thread(target=self.write_sensor_data_loop, daemon=True)
         self._info_wrything_thread.start()
@@ -50,10 +52,12 @@ class SensorDataStorage(ServiceInterface):
         self._middleware.add_commands(commands)
 
     async def create_indexes_of_db(self): 
-        self._collection.create_index(
-                    [("SensorFullTopic", ASCENDING), ("Timestamp", ASCENDING)],
-                    background=True
-                )
+        if not self._indexes_created:
+            await self._collection.create_index(
+                        [("SensorFullTopic", ASCENDING), ("Timestamp", ASCENDING)],
+                        background=True
+                    )
+            self._indexes_created = True
 
 
     def initialize_system(self):
@@ -64,11 +68,10 @@ class SensorDataStorage(ServiceInterface):
 
             self._db = self._client[MONGO_DB_NAME]
             self._collection = self._db[MONGO_DB_COLLECTION]
-            
 
-            asyncio.get_event_loop().run_until_complete( lambda :
-                
-            )
+            self.run_mongo_commands_async_background( self.create_indexes_of_db() )
+
+            while(self._indexes_created is False): pass
 
             self._logger.debug("SensorDataStorage: MongoDB connection established")
         except Exception as e:

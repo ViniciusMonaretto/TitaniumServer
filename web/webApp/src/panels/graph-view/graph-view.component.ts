@@ -35,6 +35,7 @@ export class GraphViewComponent implements OnInit {
     if (chartId == -1) {
       this.lineChartData.push({
         label: tableInfo.name,
+        type: 'line',
         realName: tableInfo.realName,
         borderColor: tableInfo.color,
         backgroundColor: tableInfo.color + '0A',

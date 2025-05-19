@@ -61,7 +61,14 @@ export class GraphComponent {
         max: undefined
       },
     },
+    parsing: false,
     plugins: {
+      decimation: {
+        enabled: true,
+        algorithm: 'lttb', // 'lttb' (Largest Triangle Three Buckets) is preferred for line charts
+        samples: 1000,     // You can tweak this (e.g., 1000–5000)
+        threshold: 1000   // Enable decimation only if points > threshold
+      },
       legend: {
         position: 'bottom',
         display: true,
