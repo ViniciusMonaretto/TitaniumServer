@@ -44,9 +44,27 @@ export class GraphComponent {
     scales: {
       x: {
         type: 'time',
+        time: {
+          displayFormats: {
+            millisecond: 'HH:mm:ss.SSS',
+            second:     'HH:mm:ss',
+            minute:     'HH:mm',
+            hour:       'HH:mm',
+            day:        'dd/MM',
+            week:       'dd/MM',
+            month:      'MMM yyyy',
+            quarter:    '[Q]Q - yyyy',
+            year:       'yyyy',
+          },
+          tooltipFormat: 'MMM dd, HH:mm', 
+        },
+        ticks: {
+          source: 'auto',
+        },
         title: {
           display: true,
           text: 'Tempo',
+          
         },
         min: undefined,
         max: undefined

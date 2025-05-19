@@ -188,7 +188,7 @@ class SensorDataStorage(ServiceInterface):
 
             if("endDate" in data):
                 dt_end = datetime.strptime( data["endDate"][:26], '%Y-%m-%dT%H:%M:%S.%f')
-                query["Timestamp"]["$gt"] = dt_end.timestamp()
+                query["Timestamp"]["$lt"] = dt_end.timestamp()
 
         data_out = {'info': {}}
 
