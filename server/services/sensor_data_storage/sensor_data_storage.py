@@ -142,10 +142,10 @@ class SensorDataStorage(ServiceInterface):
         data_info = command["data"]
         self.add_info(data_info, lambda result: self._middleware.send_command_answear( result, "", command["requestId"]))
     
-    def add_info(self, data: object, finishCallback = None):
-        self.run_mongo_commands_async_background(self._add_info(data, finishCallback))
+    def add_info(self, data: object, finish_callback = None):
+        self.run_mongo_commands_async_background(self._add_info(data, finish_callback))
 
-    async def _add_info(self, data, finishCallback = None):
+    async def _add_info(self, data, finish_callback = None):
         try:
             if isinstance(data, list):
                 result = await self._collection.insert_many(data)
@@ -155,18 +155,17 @@ class SensorDataStorage(ServiceInterface):
                 print(f"SensorDataStorage:add_info: Inserted documents ID: {result.inserted_id}")
         except Exception as e:
             self._logger.error(f"SensorDataStorage:add_info: error adding info {e}")
-        if finishCallback:
-            finishCallback(result)
+        if finish_callback:
+            finish_callback(result)
     
     def read_sensor_info_command(self, command):
         self.read_sensor_info(command, lambda result, data_out: self._middleware.send_command_answear( result, data_out, command["requestId"]))
     
-    def read_sensor_info(self, command: object, finishCallback):
-        self.run_mongo_commands_async_background(self._read_sensor_info(command, finishCallback))
+    def read_sensor_info(self, command: object, finish_callback):
+        self.run_mongo_commands_async_background(self._read_sensor_info(command, finish_callback))
 
-    async def _read_sensor_info(self, command: object, finishCallback):
+    async def _read_sensor_info(self, command: object, finish_callback):
         data = command["data"]
-
         sensor_infos = data["sensorInfos"]
 
         query = {
@@ -209,7 +208,71 @@ class SensorDataStorage(ServiceInterface):
             self._logger.error(f"SensorDataStorage::read_sensor_info: Error trying to fetch info from table {e}")
             result = False
 
-        finishCallback(result, data_out)
+        finish_callback(result, data_out)
     
-    def erase_sensor_info_command(self, commands):
-        raise NotImplementedError()
+    def erase_sensor_info_command(self, command):
+        data = command["data"]
+        sensor_infos = data["sensorInfos"]
+        
+        sensors_ids = []
+        for index, info in enumerate(sensor_infos):
+            table_name = info["topic"]
+            gateway = info["gateway"]
+            if(gateway):
+                table_name = gateway + '-' + table_name
+            
+            sensors_ids = sensors_ids + [table_name]
+        
+        dt_begin = None
+        dt_end = None
+
+        if("beginDate" in data):
+            dt_begin = datetime.strptime( data["beginDate"][:26], '%Y-%m-%dT%H:%M:%S.%f')
+
+            if("endDate" in data):
+                dt_end = datetime.strptime( data["endDate"][:26], '%Y-%m-%dT%H:%M:%S.%f')
+
+
+        self.erase_sensor_info(sensors_ids,
+                              dt_begin,
+                              dt_end,
+                              lambda result, data_out:self._middleware.send_command_answear( result, data_out, command["requestId"]))
+    
+    def erase_sensor_info(self, 
+                          sensors_ids: list[str], 
+                          begin_date: datetime, 
+                          end_date: datetime, 
+                          finish_callback):
+        self.run_mongo_commands_async_background(self._erase_sensor_info(sensors_ids, 
+                                                                         begin_date, 
+                                                                         end_date, 
+                                                                         finish_callback))
+    
+    async def _erase_sensor_info(self, 
+                          sensors_ids: list[str], 
+                          begin_date: datetime, 
+                          end_date: datetime, 
+                          finish_callback):
+
+        result = False
+        message = "Successo"
+
+        query = {
+                "SensorFullTopic": {"$in": sensors_ids}
+            }
+        
+        if begin_date:
+            query["Timestamp"]["$gt"] = begin_date.timestamp()
+
+            if end_date:
+                query["Timestamp"]["$lt"] = end_date.timestamp()
+        
+        try:
+            result = await self._collection.delete_many(query)
+            
+        except Exception as e:
+            self._logger.error(f"SensorDataStorage::erase_sensor_info: Error trying to fetch info from table {e}")
+            message = "Erro removendo ids do banco"
+            result = False
+
+        finish_callback(result, message)

@@ -2,6 +2,7 @@ import sqlite3
 import json
 import os
 from datetime import datetime
+import threading
 from typing import Union
 from middleware.status_subscriber import StatuSubscribers
 from middleware.middleware import ClientMiddleware
@@ -119,11 +120,16 @@ class ConfigHandler(ServiceInterface):
             for panels in self._panels_info.values():
                 for idx, panel in enumerate(panels):
                     if panel._id == panel_id:
-                        result, message = self._config_storage.drop_reading(panel.topic, panel.gateway, panel_id)
-                        if result:
-                            del panels[idx]
+                        wait_flag = threading.Event()
+                        self._sensor_data_storage.erase_sensor_info([panel.get_full_name()], 
+                                                                    None,
+                                                                    None,
+                                                                    lambda a,b : wait_flag.set())
+                        wait_flag.wait(180)
+                            
+                        del panels[idx]
                         
-                        return result, message
+                        return True, "Painél Removido"
         except Exception as e:
             Logger.error(f"ConfigHandler::remove_panel: Error while removing panel {e}")
         
