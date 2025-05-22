@@ -12,6 +12,7 @@
                                 justify-content: space-between;">
                     <div style="height: 75%;">
                         <group-of-sensors [name]="'Temperatura'" 
+                                          [canEdit]="CanEdit()"
                                           [group]="getGroupSelected()" 
                                           [type]="getSensorType().TEMPERATURE"
                                           [sensorArray]="getInfoOfGroup().temperature"></group-of-sensors>
@@ -19,11 +20,13 @@
                     <div style="display: flex; height: 23%;">
                         <group-of-sensors class="info-bellow-display" 
                                           [group]="getGroupSelected()" 
+                                          [canEdit]="CanEdit()"
                                           [name]="'Potência'" 
                                           [sensorArray]="getInfoOfGroup().power"
                                           [type]="getSensorType().POWER"></group-of-sensors>
                         <group-of-sensors class="info-bellow-display" 
                                           [group]="getGroupSelected()" 
+                                          [canEdit]="CanEdit()"
                                           [name]="'Pressão'" 
                                           [sensorArray]="getInfoOfGroup().pressure"
                                           [type]="getSensorType().PREASSURE"></group-of-sensors>

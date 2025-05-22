@@ -1,8 +1,11 @@
 <div style="height: 100%;">
+    <side-nav-option [icon]="'storage'" [componentText]="'Gráficos'" (buttonCallback)="setStatusLOg()"></side-nav-option>
     <side-nav-option *ngFor="let group of getGroupSensorUi()"
                     [icon]="'timelapse'" 
                     [componentText]="group + ' - Display'" 
                     (buttonCallback)="setSensor(group)">
     </side-nav-option>
-    <side-nav-option [icon]="'storage'" [componentText]="'Gráficos'" (buttonCallback)="setStatusLOg()"></side-nav-option>
+    <side-nav-option [icon]="CanEdit()?'editOff':'modeEdit'" 
+                     [componentText]="CanEdit()?'Habilitar Edição':'Desabilitar Edição'" 
+                     (buttonCallback)="toogleEdit()"></side-nav-option>
 </div>

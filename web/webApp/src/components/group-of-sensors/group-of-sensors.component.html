@@ -5,10 +5,11 @@
       <sensor class="flex-item"
              *ngFor="let sensor of sensorArray" 
               [sensorInfo]="sensor" 
+              [canEdit]="canEdit"
               (clickCallback)="selectSensor($event)" 
               (deleteCallback)="removeSensorCallback($event)">
       </sensor>
-      <div>
+      <div *ngIf="canEdit">
         <button class="add-button" mat-button (click)="addSensor(group)">
           <mat-icon >add</mat-icon>
         </button>

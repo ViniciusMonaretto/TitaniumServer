@@ -13,6 +13,7 @@ import { MatIconModule } from '@angular/material/icon';
     standalone: true
 })
 export class SensorComponent implements OnInit {
+  @Input() canEdit: boolean = false
   @Input() sensorInfo: SensorModule = new SensorModule()
   @Output() clickCallback: EventEmitter<any> = new EventEmitter();
   @Output() deleteCallback: EventEmitter<any> = new EventEmitter();

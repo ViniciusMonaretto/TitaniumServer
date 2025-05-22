@@ -20,6 +20,7 @@ import { MatIconModule } from '@angular/material/icon';
 })
 export class GroupOfSensorsComponent implements OnInit {
 
+  @Input() canEdit: boolean = false;
   @Input() name: string = "";
   @Input() group: string = "";
   @Input() type: string = "";

@@ -50,4 +50,14 @@ export class NavbarComponent implements OnInit {
     this.mainScreenService.SelectScreen(MainScreenOptions.STATUS_LOG, null)
   } 
 
+  toogleEdit()
+  {
+    this.mainScreenService.toogleEdit()
+  }
+
+  CanEdit()
+  {
+    return this.mainScreenService.CanEdit()
+  }
+
 }

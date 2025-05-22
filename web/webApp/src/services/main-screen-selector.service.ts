@@ -8,6 +8,7 @@ type Panel = Array<SensorModule>
 })
 export class MainScreenSelector {
     
+    canEdit = false
     screenOption: MainScreenOptions = MainScreenOptions.SENSORS
     selectedGroup: string|null = ""
      
@@ -25,6 +26,16 @@ export class MainScreenSelector {
     GetScreen()
     {
       return this.screenOption;
+    }
+
+    toogleEdit()
+    {
+      this.canEdit = !this.canEdit
+    }
+
+    CanEdit()
+    {
+      return this.canEdit
     }
 
 }

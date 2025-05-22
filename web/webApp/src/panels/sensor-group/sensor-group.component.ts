@@ -8,6 +8,7 @@ import { SensorInfoComponent } from '../../components/sensor-info/sensor-info.co
 import { GroupOfSensorsComponent } from '../../components/group-of-sensors/group-of-sensors.component';
 import { SensorTypesEnum } from '../../enum/sensor-type';
 import { SensorModule } from '../../models/sensor-module';
+import { MainScreenSelector } from '../../services/main-screen-selector.service';
 
 @Component({
     selector: 'sensor-groups',
@@ -18,7 +19,7 @@ import { SensorModule } from '../../models/sensor-module';
 })
 export class SensorGroupComponent implements OnInit {
 
-  constructor(private UiPanelsService: UiPanelService, private ServerConectorService: ServerConectorService) { }
+  constructor(private UiPanelsService: UiPanelService, private mainScreenService: MainScreenSelector, private ServerConectorService: ServerConectorService) { }
 
   ngOnInit(): void {
   }
@@ -65,6 +66,10 @@ export class SensorGroupComponent implements OnInit {
     
   }
 
+  CanEdit()
+  {
+    return this.mainScreenService.CanEdit();
+  }
 
   diselectSensor()
   {

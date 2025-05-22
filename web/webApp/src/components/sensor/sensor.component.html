@@ -18,8 +18,9 @@
       </div>
       <div>
         <button
+          *ngIf="canEdit"
           mat-icon-button
-          style="background-color: transparent; border: transparent; color: white;"
+          class="delete-icon"
           (click)="deletePanel()"
         >
           <mat-icon>delete</mat-icon>
