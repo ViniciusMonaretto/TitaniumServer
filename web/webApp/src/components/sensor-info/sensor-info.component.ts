@@ -8,6 +8,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { FormsModule } from '@angular/forms';
+import { IoCloudTableComponent } from '../io-cloud-table/io-cloud-table.component';
 
 @Component({
     selector: 'sensor-info',
@@ -19,6 +20,7 @@ import { FormsModule } from '@angular/forms';
               MatFormFieldModule,
               MatSelectModule,
               MatInputModule,
+              IoCloudTableComponent,
               FormsModule ], // Add MatCardModule to imports
     standalone: true
 })
@@ -32,6 +34,13 @@ export class SensorInfoComponent implements OnInit {
 
   @Output() onLoad: EventEmitter<any> = new EventEmitter()
   @Output() onExit: EventEmitter<any> = new EventEmitter()
+
+  headerInfo: string[][] = [["eventType", "Tipo de Alarme"], ["value", "Medição"], ["timestamp", "Data"]]
+  info: any[] = [{
+    eventType: "Temperatura muito alta",
+    value: 26,
+    timestamp: new Date().toDateString()
+  }]
 
   offset = 10
   slope = 3

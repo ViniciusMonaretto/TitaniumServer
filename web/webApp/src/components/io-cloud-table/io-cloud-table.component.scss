@@ -1,0 +1,22 @@
+.rowTable{
+    display: flex;
+}
+
+.headerCell{
+    background-color: #cbcbcb;
+    flex: 1;
+    text-align: center;
+    height: 25px;
+}
+
+.bodyCell{
+    background-color: #cbcbcb;
+    flex: 1;
+    border-top-style: solid;
+    height: 50px;
+    display: flex;
+    border-top-width: thin;
+    border-color: #adadad;
+    justify-content: center;
+    align-items: center;
+}

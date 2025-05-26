@@ -22,8 +22,8 @@
             </mat-card-content>
           </mat-card>
         </div>
-        <div class="info-card-internal" style="width: 30%; height: 100%;">
-          <mat-card style="height: 40%; width: 100%; min-height: 230px;">
+        <div class="info-card-internal" style="width: 30%; height: 100%; ">
+          <mat-card style="height: 230px; width: 100%; margin-bottom: 10px;">
             <mat-card-title class="info-title-card">Calibração</mat-card-title>
             <mat-card-content class="interior-container-card">
               <div class="calibration-info">
@@ -39,9 +39,16 @@
               </div>
             </mat-card-content>
           </mat-card>
-          <div style="width: 100%; height: 60%; max-height: calc(100% - 230px)">
-            Hello
-          </div>
+          <mat-card style="width: 100%; height: calc(100% - 240px)">
+            <mat-card-title class="info-title-card">Alarmes</mat-card-title>
+            <mat-card-content class="interior-container-card">
+                <io-cloud-table
+                  [headerInfo]="headerInfo"
+                  [models] = "info"
+                >
+                </io-cloud-table>
+            </mat-card-content>
+          </mat-card>
         </div>
       </div>
 
