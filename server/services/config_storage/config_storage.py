@@ -203,14 +203,14 @@ class ConfigStorage(ServiceInterface):
         return result
 
     def get_alarm_info_command(self, command):
-        alarms, result = self.get_alarm_info()
+        alarms, result = self.get_alarm_info(command["id"], command["topic"])
         if(result):
             self._middleware.send_command_answear( alarms, "", command["requestId"])
         else:
             self._middleware.send_command_answear( [], "Error Getting Alarms", command["requestId"])
         
 
-    def get_alarm_info(self):
+    def get_alarm_info(self, id = None, topic = None):
         rows = []
         result = False
         try:
@@ -218,10 +218,24 @@ class ConfigStorage(ServiceInterface):
             conn.row_factory = sqlite3.Row
             cursor = conn.cursor()
 
+            values = None
+
+            where_clause = ""
+
+            if id or topic:
+                where_clause = " WHERE "
+                if id:
+                    where_clause += "id = ?"
+                    values = (id)
+                if topic:
+                    where_clause += " AND " if id else ""
+                    where_clause += "topic = ?"
+                    values  = (values, topic) if values else (topic)
+
             table_command =  f"""SELECT *
-                                 FROM Alarms""" 
+                                 FROM Alarms""" + where_clause
             
-            cursor.execute(table_command)
+            cursor.execute(table_command, values)
             rows = cursor.fetchall()
             result = True
 
