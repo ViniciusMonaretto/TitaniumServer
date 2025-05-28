@@ -1,8 +1,16 @@
-<div style="width: 150px;">
-    <button (click)="buttonCLick()" class="side-nav-class transparent-button" aria-label="Example icon-button with heart icon">
-        <mat-icon>{{icon}}</mat-icon>
+<div [ngClass]="{'nav-main': !isSuboption, 'nav-main-sub': isSuboption}">
+    <button (click)="buttonCLick()" 
+            [ngClass]="{'side-nav-inner-class': !isSuboption, 
+                        'side-nav-inner-class-sub': isSuboption,
+                        'transparent-button': true}"
+            aria-label="Example icon-button with heart icon">
+        <mat-icon [ngClass]="{'reduced-icon': isSuboption}">{{icon}}</mat-icon>
         <div>
             {{componentText}}
         </div>
     </button>
+    <div *ngIf="unfoldOptions">
+        <ng-content></ng-content>
+    </div>
+   
 </div>

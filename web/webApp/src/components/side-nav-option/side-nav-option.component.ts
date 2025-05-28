@@ -14,7 +14,11 @@ export class SideNavOptionComponent implements OnInit {
 
   @Input() icon: string = "";
   @Input() componentText: string = "";
+  @Input() isSuboption: boolean = false;
   @Output() buttonCallback: EventEmitter<any> = new EventEmitter();
+
+  unfoldOptions: boolean = false
+  
 
   constructor() { }
 
@@ -22,7 +26,15 @@ export class SideNavOptionComponent implements OnInit {
   }
 
   buttonCLick() : void {
-    this.buttonCallback.emit()
+    if(!this.buttonCallback.observers.length)
+    {
+      this.unfoldOptions = !this.unfoldOptions;
+    }
+    else
+    {
+      this.buttonCallback.emit()
+    }
+    
   }
 
 }
