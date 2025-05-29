@@ -45,9 +45,14 @@ export class NavbarComponent implements OnInit {
     this.mainScreenService.SelectScreen(MainScreenOptions.SENSORS, group)
   }
 
-  setStatusLOg()
+  setStatusLog()
   {
     this.mainScreenService.SelectScreen(MainScreenOptions.STATUS_LOG, null)
+  } 
+
+  setAlertScreen()
+  {
+    this.mainScreenService.SelectScreen(MainScreenOptions.ALERT_VIEW, null)
   } 
 
   toogleEdit()
