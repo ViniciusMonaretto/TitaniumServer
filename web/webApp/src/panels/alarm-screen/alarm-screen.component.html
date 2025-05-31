@@ -1,9 +1,11 @@
 <div class="main-div-display">
-    <div class="group-header">Alertas</div>
+    <div class="group-header">Alarmes</div>
     <mat-card style="height: calc(100% - 40px);">
         <mat-card-content style="height: 100%;">
             <div>
-                <io-cloud-table [headerInfo]="headerInfo" [models]="alarms">
+                <io-cloud-table [headerInfo]="headerInfo" 
+                                [models]="alarms"
+                                (addCallback)="addAlarm()">
                 </io-cloud-table>
             </div>
         </mat-card-content>

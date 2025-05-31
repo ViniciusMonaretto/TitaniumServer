@@ -143,6 +143,14 @@ export class ServerConectorService {
       let message = data["message"]
       this.uiPanelService.OnStatusInfoUpdate(message["data"].requestId, message["data"].info)
     }
+    else if (data["status"] == "alarmAdded") {
+      let message = data["message"]
+      //this.uiPanelService.OnStatusInfoUpdate(message["data"].requestId, message["data"].info)
+    }
+    else if (data["status"] == "alarmRemoved") {
+      let message = data["message"]
+      //this.uiPanelService.OnStatusInfoUpdate(message["data"].requestId, message["data"].info)
+    }
     else if (data["status"] == "error") {
       this.openErrorDialog(data["message"])
     }

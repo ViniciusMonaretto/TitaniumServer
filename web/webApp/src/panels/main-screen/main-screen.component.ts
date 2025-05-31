@@ -7,13 +7,13 @@ import { CommonModule } from '@angular/common';
 
 import { GraphViewComponent } from '../graph-view/graph-view.component';
 import { SensorGroupComponent } from '../sensor-group/sensor-group.component';
-import { AlertViewComponent } from '../alert-screen/alert-screen.component';
+import { AlarmViewComponent } from '../alarm-screen/alarm-screen.component';
 
 @Component({
     selector: 'app-main-screen',
     templateUrl: './main-screen.component.html',
     styleUrls: ['./main-screen.component.scss'],
-    imports: [CommonModule, GraphViewComponent, SensorGroupComponent, AlertViewComponent],
+    imports: [CommonModule, GraphViewComponent, SensorGroupComponent, AlarmViewComponent],
     standalone: true
 })
 export class MainScreenComponent implements OnInit {

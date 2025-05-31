@@ -4,6 +4,7 @@ import tornado.websocket
 import os
 import json
 import uuid
+from services.alarm_manager.alarm_manager_commands import AlarmManagerCommands
 from support.logger import Logger 
 
 from dataModules.panel import Panel
@@ -55,6 +56,10 @@ class VisualizationWebSocketHandler(tornado.websocket.WebSocketHandler):
                 self.remove_panel(payload)
             elif "getStatusHistory" in messageObj["commandName"]:
                 self.request_status(payload)
+            elif "addAlarm" in messageObj["commandName"]:
+                self.add_alarm(payload)
+            elif "removeAlarm" in messageObj["commandName"]:
+                self.remove_alarm(payload)
             else:
                 self._logger.error("VisualizationWebSocketHandler:: unknown command: " + messageObj["commandName"])
         except Exception as e:
@@ -101,6 +106,24 @@ class VisualizationWebSocketHandler(tornado.websocket.WebSocketHandler):
         del self._id_to_topic_map[panel_id]
 
         self.send_panel_info()
+    
+    def add_alarm(self, alarm_info):
+        self._middleware.send_command(AlarmManagerCommands.ADD_ALARM, alarm_info, 
+                                      lambda data: self.send_alarm_added(data),
+                                      lambda message: self.send_error_message(message))
+        
+    def remove_alarm(self, alarm_id):
+        self._middleware.send_command(AlarmManagerCommands.REMOVE_ALARM, {"id": alarm_id}, 
+                                      lambda data: self.send_alarm_removed(data),
+                                      lambda message: self.send_error_message(message))
+        
+    def send_alarm_added(self, data):
+        self._logger.info("Visualization.send_alarm_added: alarm added")
+        self.send_message_to_ui("alarmAdded", data)  
+
+    def send_alarm_removed(self, data):
+        self._logger.info("Visualization.send_alarm_removed: alarm removed")
+        self.send_message_to_ui("alarmRemoved", data)  
     
     def get_panel_topic(self, topic: Panel, gateway):
         return  gateway + "/" + topic
