@@ -13,3 +13,8 @@ export class SensorModule{
         
     }
 }
+
+export function GetTableName(gateway:string, table: string)
+{
+    return gateway == "*"?table:gateway + '-' + table
+}

@@ -11,6 +11,7 @@ import { MatInputModule } from '@angular/material/input';
 import { FormsModule } from '@angular/forms';
 
 import { ColorChromeModule } from 'ngx-color/chrome';
+import { GetTableName, SensorModule } from '../../models/sensor-module';
 
 
 
@@ -33,6 +34,7 @@ export class AlarmAddWindowComponent {
   public selectedGroup = ""
   public option = ""
   public alarmModule: AlarmModule = new AlarmModule()
+  public selectedSensor: SensorModule | null = null
   public alarmType = AlarmTypes;
   public alarmKeys = Object.keys(this.alarmType).filter(key => isNaN(Number(key))) as (keyof typeof AlarmTypes)[]
 
@@ -52,12 +54,18 @@ export class AlarmAddWindowComponent {
     return Object.keys(this.uiConfig);
   }
 
+  getFullTopicName()
+  {
+    return this.selectedSensor? GetTableName( this.selectedSensor?.gateway, this.selectedSensor?.topic):""
+  }
+
   getAlarmData() {
     return {
       "name": this.alarmModule.name,
-      "sensor": this.alarmModule.sensor,
-      "alarmType": this.alarmModule.alarmType,
-      "value": this.alarmModule.value
+      "topic":  this.getFullTopicName(),
+      "type": this.alarmModule.alarmType,
+      "threshold": this.alarmModule.threshold,
+      "panelId":  this.selectedSensor?.id
     }
   }
 
@@ -78,7 +86,7 @@ export class AlarmAddWindowComponent {
 
   validForm() {
     return this.selectedGroup != "" &&
-      (this.alarmModule.name != "" && this.alarmModule.sensor != "" && this.alarmModule.value != null)
+      (this.alarmModule.name != "" && this.getFullTopicName() != "" && this.alarmModule.threshold != null)
   }
 
   onAddCLick(): void {

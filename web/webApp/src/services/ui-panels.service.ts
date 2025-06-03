@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import {SensorModule} from "../models/sensor-module"
+import {GetTableName, SensorModule} from "../models/sensor-module"
 import { SensorTypesEnum } from '../enum/sensor-type';
 import { table } from 'console';
 
@@ -68,7 +68,7 @@ export class UiPanelService {
       for(var sensor of panel)
       {
         this.AddSensorToPanel(sensor, groupName);
-        let fullTopic = this.GetTableName(sensor.gateway, sensor.topic)
+        let fullTopic = GetTableName(sensor.gateway, sensor.topic)
         this.AddSubscription(fullTopic, sensor)
       }
     }
@@ -80,7 +80,7 @@ export class UiPanelService {
 
     GetCachedSelectedSensorInfo(topic: string, gateway: string)
     {
-      let tableName = this.GetTableName(gateway, topic)
+      let tableName = GetTableName(gateway, topic)
       if(tableName in this.sensorCachedCurrentInfo)
       {
         return this.sensorCachedCurrentInfo[tableName]
@@ -97,7 +97,7 @@ export class UiPanelService {
       let arr = []
       for(let sensorInfo of sensorInfos)
       {
-        let graphName = this.GetTableName(sensorInfo["gateway"], sensorInfo["topic"])
+        let graphName = GetTableName(sensorInfo["gateway"], sensorInfo["topic"])
         arr.push(graphName)
       }
       if(callback)
@@ -145,7 +145,7 @@ export class UiPanelService {
         {
           let info = {}
 
-          let panel = this.panels[obj.group].temperature.find(x=> this.GetTableName(x.gateway, x.topic) == tableName)
+          let panel = this.panels[obj.group].temperature.find(x=> GetTableName(x.gateway, x.topic) == tableName)
           if(panel)
           {
             info = {
@@ -173,7 +173,7 @@ export class UiPanelService {
     OnSubscriptionUpdate(topic: string, value: any)
     {
       let topicInfo = topic.split('/')
-      let tableFullName = this.GetTableName(topicInfo[0], topicInfo[1])
+      let tableFullName = GetTableName(topicInfo[0], topicInfo[1])
       
       if(tableFullName in this.subscriptioMap)
       {
@@ -200,11 +200,6 @@ export class UiPanelService {
           
         }
       }
-    }
-
-    GetTableName(gateway:string, table: string)
-    {
-      return gateway == "*"?table:gateway + '-' + table
     }
 
     public setSelectSensor(model: SensorModule|null)

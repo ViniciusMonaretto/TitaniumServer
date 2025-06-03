@@ -56,6 +56,8 @@ class VisualizationWebSocketHandler(tornado.websocket.WebSocketHandler):
                 self.remove_panel(payload)
             elif "getStatusHistory" in messageObj["commandName"]:
                 self.request_status(payload)
+            elif "requestAlarms" in messageObj["commandName"]:
+                self.request_alarms(payload)
             elif "addAlarm" in messageObj["commandName"]:
                 self.add_alarm(payload)
             elif "removeAlarm" in messageObj["commandName"]:
@@ -111,12 +113,20 @@ class VisualizationWebSocketHandler(tornado.websocket.WebSocketHandler):
         self._middleware.send_command(AlarmManagerCommands.ADD_ALARM, alarm_info, 
                                       lambda data: self.send_alarm_added(data),
                                       lambda message: self.send_error_message(message))
+    
+    def request_alarms(self, filter):
+        self._middleware.send_command(AlarmManagerCommands.GET_ALARMS, filter, 
+                                      lambda data: self.send_alarm_info(data),
+                                      lambda message: self.send_error_message(message))
+    
+    def send_alarm_info(self, data):
+        self.send_message_to_ui("alarmInfo", data) 
         
     def remove_alarm(self, alarm_id):
         self._middleware.send_command(AlarmManagerCommands.REMOVE_ALARM, {"id": alarm_id}, 
                                       lambda data: self.send_alarm_removed(data),
                                       lambda message: self.send_error_message(message))
-        
+     
     def send_alarm_added(self, data):
         self._logger.info("Visualization.send_alarm_added: alarm added")
         self.send_message_to_ui("alarmAdded", data)  

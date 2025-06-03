@@ -7,6 +7,7 @@ import { IoCloudTableComponent } from '../../components/io-cloud-table/io-cloud-
 import { MatDialog } from '@angular/material/dialog';
 import { AlarmAddWindowComponent } from '../../components/alarm-add-window/alarm-add-window.component';
 import { UiPanelService } from '../../services/ui-panels.service';
+import { AlarmManagerService } from '../../services/alarm-manager.service';
 
 @Component({
     selector: 'alert-screen',
@@ -19,26 +20,31 @@ import { UiPanelService } from '../../services/ui-panels.service';
     standalone: true
 })
 export class AlarmViewComponent implements OnInit {
-  headerInfo: string[][] = [["Panel", "Medição"], ["Trigger", "Trigger"], ["Value", "Valor"]]
-  alarms: any = []
+  headerInfo: string[][] = [["name", "Nome"], ["topic", "Medição"], ["type", "Trigger"], ["threshold", "Valor"]]
 
-  constructor(public dialog: MatDialog, private uiPanelService: UiPanelService)
+  constructor(public dialog: MatDialog, 
+    private uiPanelService: UiPanelService, 
+    private alarmService: AlarmManagerService)
   {
 
   }
 
   ngOnInit(): void {
-   
+   this.alarmService.requestAllAlarms()
   }
 
   addAlarm(): void {
       const dialogRef = this.dialog.open(AlarmAddWindowComponent, {
         width: '300px',
         data: {callback: (sensorData: any)=>{
-          
+          this.alarmService.addAlarm(sensorData)
         },
          uiConfig: this.uiPanelService.GetUiConfig()
       }
       });
+    }
+
+    getAlarms() {
+      return this.alarmService.getAlarms()
     }
 }

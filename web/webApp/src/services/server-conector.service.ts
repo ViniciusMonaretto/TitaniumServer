@@ -14,8 +14,10 @@ export class ServerConectorService {
 
   //private reconnectAttempts: number = 0;
   private reconnectDelay: number = 2000;
-
   private dialogRef: MatDialogRef<SpinnerComponent> | null = null;
+  private alarmRequest: ((alarms: any)=>void) | null = null;
+  private addAlarmRequest: ((alarms: any)=>void) | null = null;
+  private removeAlarmRequest: ((alarms: any)=>void) | null = null;
 
   constructor(private uiPanelService: UiPanelService, private dialog: MatDialog) {
     this.socket = null
@@ -23,6 +25,21 @@ export class ServerConectorService {
       this.connectToServer();
     }, 100)
 
+  }
+
+  public setAlarmInfoCallback(callback: (alarms: any)=>void): void
+  {
+    this.alarmRequest = callback;
+  }
+
+  public setAddAlarmCallback(callback: (alarm: any)=>void): void
+  {
+    this.addAlarmRequest = callback;
+  }
+
+  public setRemoveAlarmCallback(callback: (alarm: any)=>void): void
+  {
+    this.removeAlarmRequest = callback;
   }
 
   private connectToServer(): void {
@@ -143,13 +160,26 @@ export class ServerConectorService {
       let message = data["message"]
       this.uiPanelService.OnStatusInfoUpdate(message["data"].requestId, message["data"].info)
     }
+    else if (data["status"] == "alarmInfo") {
+      let message = data["message"]
+      if(this.alarmRequest)
+      {
+        this.alarmRequest(message)
+      }
+    }
     else if (data["status"] == "alarmAdded") {
       let message = data["message"]
-      //this.uiPanelService.OnStatusInfoUpdate(message["data"].requestId, message["data"].info)
+      if(this.addAlarmRequest)
+      {
+        this.addAlarmRequest(message)
+      }
     }
     else if (data["status"] == "alarmRemoved") {
       let message = data["message"]
-      //this.uiPanelService.OnStatusInfoUpdate(message["data"].requestId, message["data"].info)
+      if(this.removeAlarmRequest)
+      {
+        this.removeAlarmRequest(message)
+      }
     }
     else if (data["status"] == "error") {
       this.openErrorDialog(data["message"])

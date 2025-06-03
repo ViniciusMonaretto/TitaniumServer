@@ -10,7 +10,7 @@ from ..service_interface import ServiceInterface
 
 class AlarmManager(ServiceInterface):
     _alarms_info: dict[str, list[Alarm]] = {}
-    _status_subscribers: dict[str: StatuSubscribers]
+    _status_subscribers: dict[str: StatuSubscribers] = {}
 
     def __init__(self, middleware: ClientMiddleware, config_storage: ConfigStorage):
         self._logger = Logger()
@@ -37,6 +37,7 @@ class AlarmManager(ServiceInterface):
         commands = {
             AlarmManagerCommands.REMOVE_ALARM: self.remove_alarm_command,
             AlarmManagerCommands.ADD_ALARM: self.add_alarm_command,
+            AlarmManagerCommands.GET_ALARMS: self.get_alarm_command
             }
         self._middleware.add_commands(commands)
     
@@ -45,6 +46,15 @@ class AlarmManager(ServiceInterface):
             self._check_queue.put(status_info)
         except Exception as e:
             self._logger.error(f"AlarmManager::add_check_status: Error adding data to queue {e}")
+
+    def get_alarm_command(self, command):
+        alarms, result = self._config_storage.get_alarm_info()
+        if result:
+            self._middleware.send_command_answear( result, alarms, command["requestId"])
+        else:
+            self._middleware.send_command_answear( result, 
+                                                  f"Unable to get alarms", 
+                                                  command["requestId"])
 
     def add_alarm_command(self, command):
         result = self.add_alarm(command)
@@ -58,7 +68,7 @@ class AlarmManager(ServiceInterface):
 
     def add_alarm(self, alarm_info):
         try:
-            alarm = Alarm(alarm_info)
+            alarm = Alarm(alarm_info['data'])
             id = self._config_storage.add_alarm(alarm)
             if id != -1:
                 alarm._id = id

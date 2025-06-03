@@ -59,9 +59,10 @@ class ConfigStorage(ServiceInterface):
             cursor.execute("""
             CREATE TABLE IF NOT EXISTS Alarms (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL,
                 topic TEXT NOT NULL,
                 threshold REAL NOT NULL,
-                isUpper BOOLEAN NOT NULL,
+                type INTEGER NOT NULL,
                 panelId INTEGER NOT NULL,
                 FOREIGN KEY (panelId) REFERENCES Panels (id) ON DELETE CASCADE
             );
@@ -162,12 +163,14 @@ class ConfigStorage(ServiceInterface):
             cursor.execute("PRAGMA foreign_keys = ON;")
 
             cursor.execute('''
+                INSERT INTO Alarms (
+                name,
                 topic,
                 threshold,
-                isUpper,
-                panelId
-                VALUES (?, ?, ?, ?)
-            ''', (alarm._topic, alarm._threshold, alarm._is_upper, alarm._panel_id))
+                type,
+                panelId)
+                VALUES (?, ?, ?, ?, ?)
+            ''', (alarm._name, alarm._topic, alarm._threshold, alarm._type, alarm._panel_id))
 
             conn.commit()
             new_id = cursor.lastrowid
@@ -210,7 +213,7 @@ class ConfigStorage(ServiceInterface):
             self._middleware.send_command_answear( [], "Error Getting Alarms", command["requestId"])
         
 
-    def get_alarm_info(self, id = None, topic = None):
+    def get_alarm_info(self, id=None, topic=None):
         rows = []
         result = False
         try:
@@ -218,30 +221,31 @@ class ConfigStorage(ServiceInterface):
             conn.row_factory = sqlite3.Row
             cursor = conn.cursor()
 
-            values = None
-
             where_clause = ""
+            values = []
 
             if id or topic:
                 where_clause = " WHERE "
-                if id:
-                    where_clause += "id = ?"
-                    values = (id)
-                if topic:
-                    where_clause += " AND " if id else ""
-                    where_clause += "topic = ?"
-                    values  = (values, topic) if values else (topic)
+                conditions = []
+                if id is not None:
+                    conditions.append("id = ?")
+                    values.append(id)
+                if topic is not None:
+                    conditions.append("topic = ?")
+                    values.append(topic)
+                where_clause += " AND ".join(conditions)
 
-            table_command =  f"""SELECT *
-                                 FROM Alarms""" + where_clause
-            
-            cursor.execute(table_command, values)
+            table_command = f"""SELECT *
+                                FROM Alarms""" + where_clause
+
+            cursor.execute(table_command, tuple(values))
             rows = cursor.fetchall()
+            rows = [dict(row) for row in rows]
             result = True
 
         except Exception as e:
             self._logger.error(f"ConfigStorage::get_table_info_command: Error trying to fetch info from table {e}")
         finally:
             conn.close()
-        
+
         return rows, result

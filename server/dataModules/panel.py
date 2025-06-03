@@ -1,5 +1,3 @@
-import uuid
-
 class SensorTypes:
     Pressure = "Pressure"
     Temperature = "Temperature"
