@@ -36,12 +36,16 @@ export class AlarmViewComponent implements OnInit {
   addAlarm(): void {
       const dialogRef = this.dialog.open(AlarmAddWindowComponent, {
         width: '300px',
-        data: {callback: (sensorData: any)=>{
-          this.alarmService.addAlarm(sensorData)
+        data: {callback: (alarmData: any)=>{
+          this.alarmService.addAlarm(alarmData)
         },
          uiConfig: this.uiPanelService.GetUiConfig()
       }
       });
+    }
+
+  removeAlarm(id: number): void {
+       this.alarmService.removeAlarm(id)
     }
 
     getAlarms() {

@@ -5,7 +5,8 @@
             <div>
                 <io-cloud-table [headerInfo]="headerInfo" 
                                 [models]="getAlarms()"
-                                (addCallback)="addAlarm()">
+                                (addCallback)="addAlarm()"
+                                (deleteCallback)="removeAlarm($event)">
                 </io-cloud-table>
             </div>
         </mat-card-content>

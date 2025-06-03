@@ -91,7 +91,7 @@ class AlarmManager(ServiceInterface):
         self._alarms_info[alarm._topic].append(alarm)
 
     def remove_alarm_command(self, command):
-        result = self.remove_alarm(command["sensorId"])
+        result = self.remove_alarm(command['data']["id"])
         
         if result:
             self._middleware.send_command_answear( result, "sucess", command["requestId"])
@@ -101,7 +101,7 @@ class AlarmManager(ServiceInterface):
 
     def remove_alarm(self, alarm_id):
         try:
-            alarm_info = self._config_storage.get_alarm_info(alarm_id)
+            alarm_info, result = self._config_storage.get_alarm_info(alarm_id)
             if len(alarm_info) > 0:
                 topic = alarm_info[0]["topic"]
                 if topic in self._alarms_info:

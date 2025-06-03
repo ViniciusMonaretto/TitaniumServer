@@ -9,6 +9,8 @@ export class AlarmManagerService {
     private alarms: AlarmModule[] = []
     constructor(private connectorService: ServerConectorService) {
         this.connectorService.setAlarmInfoCallback((data) => {this.alarmInfoCallback(data)})
+        this.connectorService.setRemoveAlarmCallback((data) => {this.alarmRemoved(data)})
+        this.connectorService.setAddAlarmCallback((data) => {this.alarmAdded(data)})
     }
 
     private alarmInfoCallback(alarms: any){
@@ -22,6 +24,16 @@ export class AlarmManagerService {
 
     public requestAllAlarms() {
         this.connectorService.sendCommand("requestAlarms", {})
+    }
+
+    public removeAlarm(alarmId: number)
+    {
+        this.connectorService.sendCommand("removeAlarm", alarmId)
+    }
+
+    private alarmRemoved(alarmId: number)
+    {
+        this.alarms = this.alarms.filter(item => item.id !== alarmId);
     }
 
     public addAlarm(alarmInfo: AlarmModule)

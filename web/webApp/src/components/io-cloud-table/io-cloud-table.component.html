@@ -10,7 +10,7 @@
     
     <div class="rowTable">
         <div class="headerCell" *ngFor="let header of headerInfo"> {{header[1]}}</div>
-        <div *ngIf="editCallback.length > 0 || deleteCallback.length > 0" class="headerCell"></div>
+        <div *ngIf="editCallback.observers.length > 0 || deleteCallback.observers.length > 0" class="headerCell"></div>
     </div>
     <div class="rowTable" *ngFor="let model of models">
         <div class="bodyCell" *ngFor="let header of headerInfo"> {{getModelInfo(header[0], model)}}</div>
@@ -18,7 +18,7 @@
             <button *ngIf="editCallback.observers.length > 0" mat-icon-button class="example-icon" (click)="editCallback.emit()" aria-label="Edit">
                 <mat-icon>edit</mat-icon>
             </button>
-            <button *ngIf="deleteCallback.observers.length > 0" mat-icon-button class="example-icon" (click)="onDeleteCallback(model.Id)" aria-label="Delete">
+            <button *ngIf="deleteCallback.observers.length > 0" mat-icon-button class="example-icon" (click)="onDeleteCallback(model.id)" aria-label="Delete">
                 <mat-icon>delete</mat-icon>
             </button>
         </div>
