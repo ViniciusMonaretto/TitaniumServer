@@ -59,8 +59,8 @@ class AlarmManager(ServiceInterface):
     def add_alarm_command(self, command):
         result = self.add_alarm(command)
         
-        if result:
-            self._middleware.send_command_answear( result, "sucess", command["requestId"])
+        if result._id != '':
+            self._middleware.send_command_answear( True, result.to_json(), command["requestId"])
         else:
             self._middleware.send_command_answear( result, 
                                                   f"Unable to add alarm", 
@@ -76,7 +76,7 @@ class AlarmManager(ServiceInterface):
         except Exception as e:
             self._logger.error(f"AlarmManager::add_alarm error: {e}")
         
-        return True
+        return alarm
 
     def setup_alarm(self, alarm: Alarm):
         if alarm._topic not in self._status_subscribers:
@@ -92,9 +92,8 @@ class AlarmManager(ServiceInterface):
 
     def remove_alarm_command(self, command):
         result = self.remove_alarm(command['data']["id"])
-        
         if result:
-            self._middleware.send_command_answear( result, "sucess", command["requestId"])
+            self._middleware.send_command_answear( result, command['data']["id"], command["requestId"])
         else:
             self._middleware.send_command_answear( result, f"Unable to remove alarm {command['sensorId']}", 
                                                   command["requestId"])
@@ -108,7 +107,7 @@ class AlarmManager(ServiceInterface):
 
                     result = self._config_storage.remove_alarm(alarm_id)
                     if result:
-                        self.remove_alarm_internal_info(alarm_id)
+                        self.remove_alarm_internal_info(topic, alarm_id)
         except Exception as e:
             self._logger.error(f"AlarmManager::add_alarm error: {e}")
         
@@ -116,12 +115,12 @@ class AlarmManager(ServiceInterface):
 
     def remove_alarm_internal_info(self, topic, alarm_id):
         if( topic in self._alarms_info ):
-            alarm = next((obj for obj in self._alarms_info[topic] if obj.id == alarm_id), None)
+            alarm = next((obj for obj in self._alarms_info[topic] if obj._id == alarm_id), None)
             if alarm:
                 self._alarms_info[topic].remove(alarm)
-                if len(self._alarms_info[topic]) is 0:
+                if len(self._alarms_info[topic]) == 0:
                     self._middleware.remove_subscribe_from_status(self._status_subscribers[alarm._topic], alarm._topic)
-                    del self._alarms_info[alarm_id]
+                    del self._alarms_info[topic]
     
     
 

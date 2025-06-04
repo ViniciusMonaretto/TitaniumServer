@@ -4,6 +4,7 @@ import tornado.websocket
 import os
 import json
 import uuid
+from dataModules.alarm import Alarm
 from services.alarm_manager.alarm_manager_commands import AlarmManagerCommands
 from support.logger import Logger 
 
@@ -119,7 +120,7 @@ class VisualizationWebSocketHandler(tornado.websocket.WebSocketHandler):
                                       lambda data: self.send_alarm_info(data),
                                       lambda message: self.send_error_message(message))
     
-    def send_alarm_info(self, data):
+    def send_alarm_info(self, data: list[Alarm]):
         self.send_message_to_ui("alarmInfo", data) 
         
     def remove_alarm(self, alarm_id):
@@ -127,7 +128,7 @@ class VisualizationWebSocketHandler(tornado.websocket.WebSocketHandler):
                                       lambda data: self.send_alarm_removed(data),
                                       lambda message: self.send_error_message(message))
      
-    def send_alarm_added(self, data):
+    def send_alarm_added(self, data: Alarm):
         self._logger.info("Visualization.send_alarm_added: alarm added")
         self.send_message_to_ui("alarmAdded", data)  
 

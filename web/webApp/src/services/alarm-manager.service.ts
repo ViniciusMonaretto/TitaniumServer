@@ -14,7 +14,7 @@ export class AlarmManagerService {
     }
 
     private alarmInfoCallback(alarms: any){
-        this.alarms = JSON.parse(JSON.stringify(alarms["data"]));
+        this.alarms = alarms;
     }
 
     public getAlarms()

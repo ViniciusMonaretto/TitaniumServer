@@ -164,21 +164,21 @@ export class ServerConectorService {
       let message = data["message"]
       if(this.alarmRequest)
       {
-        this.alarmRequest(message)
+        this.alarmRequest(message['data'])
       }
     }
     else if (data["status"] == "alarmAdded") {
       let message = data["message"]
       if(this.addAlarmRequest)
       {
-        this.addAlarmRequest(message)
+        this.addAlarmRequest(message['data'])
       }
     }
     else if (data["status"] == "alarmRemoved") {
       let message = data["message"]
       if(this.removeAlarmRequest)
       {
-        this.removeAlarmRequest(message)
+        this.removeAlarmRequest(message['data'])
       }
     }
     else if (data["status"] == "error") {
