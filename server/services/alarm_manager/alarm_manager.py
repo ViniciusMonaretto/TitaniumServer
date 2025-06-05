@@ -1,7 +1,11 @@
+from datetime import datetime
+import threading
+from dataModules.sensor_info import SensorInfo
+from dataModules.event import EventModel
 from support.logger import Logger
 import queue
 import uuid
-from dataModules.alarm import Alarm
+from dataModules.alarm import Alarm, AlarmType
 from middleware.middleware import ClientMiddleware
 from middleware.status_subscriber import StatuSubscribers
 from services.alarm_manager.alarm_manager_commands import AlarmManagerCommands
@@ -32,6 +36,9 @@ class AlarmManager(ServiceInterface):
         if result:
             for alarm_info in alarms:
                 self.setup_alarm(Alarm(alarm_info))
+        
+        self._alarm_check_thread = threading.Thread(target=self.alarm_check_thread, daemon=True)
+        self._alarm_check_thread.start()
 
     def initialize_commands(self):
         commands = {
@@ -40,10 +47,47 @@ class AlarmManager(ServiceInterface):
             AlarmManagerCommands.GET_ALARMS: self.get_alarm_command
             }
         self._middleware.add_commands(commands)
+
+    def check_if_alarm_should_trigger(self, alarm: Alarm, value):
+        type = alarm._type
+        if type == AlarmType.Equal:
+            return value == alarm._threshold
+        if type == AlarmType.Higher:
+            return value > alarm._threshold
+        if type == AlarmType.Lower:
+            return value < alarm._threshold
+
+    def alarm_check_thread(self):
+        while True:
+            events_to_add: list[EventModel] = []
+            while not self._check_queue.empty():
+                try:
+                    sensor_info: SensorInfo = self._check_queue.get(timeout=1)
+                    sensor_info._timestamp = datetime.fromisoformat(sensor_info._timestamp)
+
+                    topic = sensor_info._sensor_full_topic.replace('-', '/')
+
+                    for alarm in self._alarms_info[topic]:
+                        if self.check_if_alarm_should_trigger(alarm, sensor_info._value):
+                            events_to_add.append(EventModel(alarm._id, 
+                                                            alarm._panel_id, 
+                                                            sensor_info._timestamp.timestamp(),
+                                                            sensor_info._value))
+                except KeyboardInterrupt:
+                    break
+                except Exception as e:
+                    self._logger.error(f"SensorDataStorage::write_sensor_data_loop: Error getting data from write queue {e}")
+                    break
+            if len(events_to_add) > 0:
+                self._config_storage.add_event_array(events_to_add)
+        
+            threading.Event().wait(1)
     
     def add_check_status(self, status_info):
         try:
-            self._check_queue.put(status_info)
+            self._check_queue.put(SensorInfo(status_info["subStatusName"].replace('/', '-'),
+                                             datetime.fromisoformat(status_info["data"]["timestamp"]),
+                                             status_info["data"]["data"]))
         except Exception as e:
             self._logger.error(f"AlarmManager::add_check_status: Error adding data to queue {e}")
 
@@ -79,16 +123,17 @@ class AlarmManager(ServiceInterface):
         return alarm
 
     def setup_alarm(self, alarm: Alarm):
-        if alarm._topic not in self._status_subscribers:
-            self._status_subscribers[alarm._topic] = StatuSubscribers(self.add_check_status, 
-                                                                      alarm._topic, 
+        topic = alarm._topic.replace("-","/")
+        if topic not in self._status_subscribers:
+            self._status_subscribers[topic] = StatuSubscribers(self.add_check_status, 
+                                                                      topic, 
                                                                       self.id + str(self._subscriptions_add))
-            self._middleware.add_subscribe_to_status(self._status_subscribers[alarm._topic], alarm._topic)
+            self._middleware.add_subscribe_to_status(self._status_subscribers[topic], topic)
             self._subscriptions_add+=1
 
-            self._alarms_info[alarm._topic] = []
+            self._alarms_info[topic] = []
 
-        self._alarms_info[alarm._topic].append(alarm)
+        self._alarms_info[topic].append(alarm)
 
     def remove_alarm_command(self, command):
         result = self.remove_alarm(command['data']["id"])
@@ -113,13 +158,14 @@ class AlarmManager(ServiceInterface):
         
         return True
 
-    def remove_alarm_internal_info(self, topic, alarm_id):
+    def remove_alarm_internal_info(self, topic_in: str, alarm_id):
+        topic = topic_in.replace("-","/")
         if( topic in self._alarms_info ):
             alarm = next((obj for obj in self._alarms_info[topic] if obj._id == alarm_id), None)
             if alarm:
                 self._alarms_info[topic].remove(alarm)
                 if len(self._alarms_info[topic]) == 0:
-                    self._middleware.remove_subscribe_from_status(self._status_subscribers[alarm._topic], alarm._topic)
+                    self._middleware.remove_subscribe_from_status(self._status_subscribers[topic], topic)
                     del self._alarms_info[topic]
     
     

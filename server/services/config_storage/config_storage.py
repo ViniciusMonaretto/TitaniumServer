@@ -10,6 +10,7 @@ import queue
 
 from dataModules.panel import Panel
 from dataModules.alarm import Alarm
+from dataModules.event import EventModel
 from support.logger import Logger
 from ..service_interface import ServiceInterface
 from .config_storage_commands import Commands
@@ -72,8 +73,9 @@ class ConfigStorage(ServiceInterface):
             CREATE TABLE IF NOT EXISTS Events (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 alarmId INTEGER NOT NULL,
-                name TEXT NOT NULL,
-                Timestamp REAL NOT NULL,
+                panelId INTEGER NOT NULL,
+                value FLOAT NOT NULL,
+                timestamp REAL NOT NULL,
                 FOREIGN KEY (alarmId) REFERENCES Alarms (id) ON DELETE CASCADE
             );
             """)
@@ -249,3 +251,57 @@ class ConfigStorage(ServiceInterface):
             conn.close()
 
         return rows, result
+    
+    def add_event_array(self, events: list[EventModel]):
+        result = False
+        try:
+            event_data = [
+            (e._alarm_id, e._panel_id, e._value, e._timestamp) 
+            for e in events
+        ]
+            conn = sqlite3.connect(DB_NAME)
+            cursor = conn.cursor()
+
+            cursor.execute("PRAGMA foreign_keys = ON;")
+
+            cursor.executemany('''
+                INSERT INTO Events (
+                alarmId,
+                panelId,
+                value,
+                timestamp)
+                VALUES (?, ?, ?, ?)
+            ''', event_data)
+
+            conn.commit()
+            result = True
+        except Exception as e:
+            self._logger.error(f"Panel Add error: {e}" )
+        finally:
+            conn.close()
+            
+        return result
+    
+    def remove_alarm(self, alarm_id: int):
+        result = False
+        try:
+            conn = sqlite3.connect(DB_NAME)
+            cursor = conn.cursor()
+
+            # Enable foreign key support
+            cursor.execute("PRAGMA foreign_keys = ON;")
+
+            # Delete the alarm
+            cursor.execute("DELETE FROM Alarms WHERE id = ?;", (alarm_id,))
+            conn.commit()
+
+            if cursor.rowcount == 0:
+                print(f"No panel found with id {alarm_id}.")
+            else:
+                result = True
+
+        except sqlite3.Error as e:
+            self._logger.error(f"remove_alarm error: {e}")
+        finally:
+            conn.close()
+        return result

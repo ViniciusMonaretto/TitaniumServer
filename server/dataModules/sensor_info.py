@@ -3,7 +3,7 @@ from datetime import datetime
 
 class SensorInfo:
     _sensor_full_topic = ""
-    _timestamp = 0
+    _timestamp: datetime
     _value = 0
 
     def __init__(self, 
