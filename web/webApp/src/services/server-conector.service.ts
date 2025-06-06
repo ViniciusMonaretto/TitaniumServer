@@ -87,7 +87,6 @@ export class ServerConectorService {
       //this.reconnectAttempts++;
       this.connectToServer();
     }, this.reconnectDelay);
-    this.reconnectDelay *= 2; // Exponential backoff
   }
 
   private openErrorDialog(message: string): void {

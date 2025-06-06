@@ -8,6 +8,7 @@ import { CommonModule } from '@angular/common';
 import { GraphViewComponent } from '../graph-view/graph-view.component';
 import { SensorGroupComponent } from '../sensor-group/sensor-group.component';
 import { AlarmViewComponent } from '../alarm-screen/alarm-screen.component';
+import { AlarmManagerService } from '../../services/alarm-manager.service';
 
 @Component({
     selector: 'app-main-screen',
@@ -18,7 +19,9 @@ import { AlarmViewComponent } from '../alarm-screen/alarm-screen.component';
 })
 export class MainScreenComponent implements OnInit {
 
-  constructor(private mainScreenSelectorServce: MainScreenSelector, private serverConnector: ServerConectorService) { }
+  constructor(private mainScreenSelectorServce: MainScreenSelector, 
+    private serverConnector: ServerConectorService,
+    private alarmService: AlarmManagerService) { }
 
   ngOnInit(): void {
   }

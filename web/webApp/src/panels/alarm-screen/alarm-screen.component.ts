@@ -30,7 +30,7 @@ export class AlarmViewComponent implements OnInit {
   }
 
   ngOnInit(): void {
-   this.alarmService.requestAllAlarms()
+
   }
 
   addAlarm(): void {

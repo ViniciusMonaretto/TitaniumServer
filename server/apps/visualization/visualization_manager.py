@@ -41,7 +41,8 @@ class VisualizationWebSocketHandler(tornado.websocket.WebSocketHandler):
         self._middleware.send_command(ConfigHandlerCommands.GET_PANEL_LIST, {}, 
                                       lambda data: self.add_subscribers(data["data"]),
                                       lambda message: self.send_error_message(message))
-    
+        self.request_alarms({})
+     
     def send_panel_info(self):
         self._middleware.send_command(ConfigHandlerCommands.GET_PANEL_LIST, {}, 
                                       lambda data: self.send_message_to_ui("uiConfig", data["data"]),
