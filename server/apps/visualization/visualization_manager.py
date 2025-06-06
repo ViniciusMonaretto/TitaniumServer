@@ -5,6 +5,7 @@ import os
 import json
 import uuid
 from dataModules.alarm import Alarm
+from services.config_storage.config_storage_commands import ConfigStorageCommand
 from services.alarm_manager.alarm_manager_commands import AlarmManagerCommands
 from support.logger import Logger 
 
@@ -57,6 +58,8 @@ class VisualizationWebSocketHandler(tornado.websocket.WebSocketHandler):
                 self.remove_panel(payload)
             elif "getStatusHistory" in messageObj["commandName"]:
                 self.request_status(payload)
+            elif "requestEvents" in messageObj["commandName"]:
+                self.request_events(payload)
             elif "requestAlarms" in messageObj["commandName"]:
                 self.request_alarms(payload)
             elif "addAlarm" in messageObj["commandName"]:
@@ -115,10 +118,18 @@ class VisualizationWebSocketHandler(tornado.websocket.WebSocketHandler):
                                       lambda data: self.send_alarm_added(data),
                                       lambda message: self.send_error_message(message))
     
+    def request_events(self, commands):
+        self._middleware.send_command(ConfigStorageCommand.GET_EVENTS_LIST, commands, 
+                                      lambda data: self.send_events(data),
+                                      lambda message: self.send_error_message(message))
+
     def request_alarms(self, filter):
         self._middleware.send_command(AlarmManagerCommands.GET_ALARMS, filter, 
                                       lambda data: self.send_alarm_info(data),
                                       lambda message: self.send_error_message(message))
+        
+    def send_events(self, data: list[Alarm]):
+        self.send_message_to_ui("eventInfo", data) 
     
     def send_alarm_info(self, data: list[Alarm]):
         self.send_message_to_ui("alarmInfo", data) 

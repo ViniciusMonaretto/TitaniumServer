@@ -13,7 +13,7 @@ from dataModules.alarm import Alarm
 from dataModules.event import EventModel
 from support.logger import Logger
 from ..service_interface import ServiceInterface
-from .config_storage_commands import Commands
+from .config_storage_commands import ConfigStorageCommand
 
 DB_CONFIG = "db_status_saves.json"
 DB_NAME = "titanium_server_db.db"
@@ -36,7 +36,8 @@ class ConfigStorage(ServiceInterface):
     
     def initialize_commands(self):
         commands = {
-            Commands.GET_ALARM_INFO: self.get_alarm_info_command
+            ConfigStorageCommand.GET_ALARM_INFO: self.get_alarm_info_command,
+            ConfigStorageCommand.GET_EVENTS_LIST: self.get_events_info_command
             }
         self._middleware.add_commands(commands)
 
@@ -251,6 +252,54 @@ class ConfigStorage(ServiceInterface):
             conn.close()
 
         return rows, result
+    
+    def get_events_info_command(self, command):
+        events, result = self.get_events_info(command["panelId"], command)
+        if(result):
+            self._middleware.send_command_answear( result, events, command["requestId"])
+        else:
+            self._middleware.send_command_answear( result, "Error Getting Events", command["requestId"])
+
+    def get_events_info(self, panel_id=None, alarm_id=None, limit=None):
+        rows = []
+        result = False
+        try:
+            conn = sqlite3.connect(DB_NAME)
+            conn.row_factory = sqlite3.Row
+            cursor = conn.cursor()
+
+            where_clause = ""
+            values = []
+
+            if panel_id or alarm_id:
+                where_clause = " WHERE "
+                conditions = []
+                if panel_id is not None:
+                    conditions.append("panelId = ?")
+                    values.append(panel_id)
+                if alarm_id is not None:
+                    conditions.append("alarmId = ?")
+                    values.append(alarm_id)
+                where_clause += " AND ".join(conditions)
+
+            limit_caluse = ""
+            if limit is not None:
+                limit_caluse = f" LIMIT {limit}"
+
+            table_command = f"""SELECT *
+                                FROM Alarms""" + where_clause + limit_caluse
+
+            cursor.execute(table_command, tuple(values))
+            rows = cursor.fetchall()
+            rows = [dict(row) for row in rows]
+            result = True
+        except Exception as e:
+            self._logger.error(f"ConfigStorage::get_events_info: Error trying to fetch info from table {e}")
+        finally:
+            conn.close()
+
+        return rows, result
+
     
     def add_event_array(self, events: list[EventModel]):
         result = False
