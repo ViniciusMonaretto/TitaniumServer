@@ -9,6 +9,7 @@ import { GroupOfSensorsComponent } from '../../components/group-of-sensors/group
 import { SensorTypesEnum } from '../../enum/sensor-type';
 import { SensorModule } from '../../models/sensor-module';
 import { MainScreenSelector } from '../../services/main-screen-selector.service';
+import { AlarmManagerService } from '../../services/alarm-manager.service';
 
 @Component({
     selector: 'sensor-groups',
@@ -19,7 +20,10 @@ import { MainScreenSelector } from '../../services/main-screen-selector.service'
 })
 export class SensorGroupComponent implements OnInit {
 
-  constructor(private UiPanelsService: UiPanelService, private mainScreenService: MainScreenSelector, private ServerConectorService: ServerConectorService) { }
+  constructor(private UiPanelsService: UiPanelService, 
+    private mainScreenService: MainScreenSelector, 
+    private ServerConectorService: ServerConectorService,
+    private AlarmManagerService: AlarmManagerService ) { }
 
   ngOnInit(): void {
   }
@@ -53,6 +57,16 @@ export class SensorGroupComponent implements OnInit {
   getSensorSelected(): SensorModule | null
   {
     return this.UiPanelsService.GetSelectedSensor()
+  }
+
+  getSelectedSensorEvents()
+  {
+    var sensor = this.getSensorSelected()
+    if (sensor)
+    {
+      return this.AlarmManagerService.getEvents(sensor.id) ?? []
+    }
+    return []
   }
 
   getSelectedSensorTableInfo()
@@ -92,7 +106,12 @@ export class SensorGroupComponent implements OnInit {
                                                          startDate,
                                                          endDate)
     }
-   
+
+    var sensor = this.getSensorSelected()
+    if (sensor)
+    {
+      this.ServerConectorService.sendRequestEventList(sensor.id, 30)
+    }
   }
 
 }

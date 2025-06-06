@@ -254,9 +254,10 @@ class ConfigStorage(ServiceInterface):
         return rows, result
     
     def get_events_info_command(self, command):
-        events, result = self.get_events_info(command["panelId"], command)
+        data = command["data"]
+        events, result = self.get_events_info(data["panelId"], None, data["limit"])
         if(result):
-            self._middleware.send_command_answear( result, events, command["requestId"])
+            self._middleware.send_command_answear( result, {'events':events, 'panelId': data["panelId"]}, command["requestId"])
         else:
             self._middleware.send_command_answear( result, "Error Getting Events", command["requestId"])
 
@@ -287,11 +288,14 @@ class ConfigStorage(ServiceInterface):
                 limit_caluse = f" LIMIT {limit}"
 
             table_command = f"""SELECT *
-                                FROM Alarms""" + where_clause + limit_caluse
+                                FROM Events""" + where_clause + limit_caluse
 
             cursor.execute(table_command, tuple(values))
             rows = cursor.fetchall()
             rows = [dict(row) for row in rows]
+            local_tz = pytz.timezone("America/Sao_Paulo")
+            for row in rows:
+                row["timestamp"] = datetime.fromtimestamp(row["timestamp"], local_tz).isoformat()
             result = True
         except Exception as e:
             self._logger.error(f"ConfigStorage::get_events_info: Error trying to fetch info from table {e}")

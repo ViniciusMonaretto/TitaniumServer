@@ -7,10 +7,12 @@ import { AlarmModule } from '../models/alarm-module';
 })
 export class AlarmManagerService {
     private alarms: AlarmModule[] = []
+    private events: {[id: number]: Array<any>} = {}
     constructor(private connectorService: ServerConectorService) {
         this.connectorService.setAlarmInfoCallback((data) => {this.alarmInfoCallback(data)})
         this.connectorService.setRemoveAlarmCallback((data) => {this.alarmRemoved(data)})
         this.connectorService.setAddAlarmCallback((data) => {this.alarmAdded(data)})
+        this.connectorService.setReceivedEventsCallback((data) => {this.receiveEventsCallback(data["panelId"], data["events"])})
     }
 
     private alarmInfoCallback(alarms: any){
@@ -41,8 +43,22 @@ export class AlarmManagerService {
         this.connectorService.sendCommand("addAlarm", alarmInfo)
     }
 
+    public getEvents(panelId: number)
+    {
+        if(panelId in this.events)
+        {
+            return this.events[panelId]
+        }
+        return null
+    }
+
     private alarmAdded(alarmInfo: AlarmModule)
     {
         this.alarms.push(alarmInfo)
+    }
+
+    private receiveEventsCallback(panelId: number, events: Array<any>)
+    {
+        this.events[panelId] = events
     }
 }

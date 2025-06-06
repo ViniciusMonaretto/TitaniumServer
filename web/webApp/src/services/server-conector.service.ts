@@ -15,9 +15,10 @@ export class ServerConectorService {
   //private reconnectAttempts: number = 0;
   private reconnectDelay: number = 2000;
   private dialogRef: MatDialogRef<SpinnerComponent> | null = null;
-  private alarmRequest: ((alarms: any)=>void) | null = null;
-  private addAlarmRequest: ((alarms: any)=>void) | null = null;
-  private removeAlarmRequest: ((alarms: any)=>void) | null = null;
+  private alarmRequest: ((alarms: any) => void) | null = null;
+  private addAlarmRequest: ((alarms: any) => void) | null = null;
+  private removeAlarmRequest: ((alarms: any) => void) | null = null;
+  private receivedEventsCallback: ((events: any) => void) | null = null;
 
   constructor(private uiPanelService: UiPanelService, private dialog: MatDialog) {
     this.socket = null
@@ -27,19 +28,20 @@ export class ServerConectorService {
 
   }
 
-  public setAlarmInfoCallback(callback: (alarms: any)=>void): void
-  {
+  public setAlarmInfoCallback(callback: (alarms: any) => void): void {
     this.alarmRequest = callback;
   }
 
-  public setAddAlarmCallback(callback: (alarm: any)=>void): void
-  {
+  public setAddAlarmCallback(callback: (alarm: any) => void): void {
     this.addAlarmRequest = callback;
   }
 
-  public setRemoveAlarmCallback(callback: (alarm: any)=>void): void
-  {
+  public setRemoveAlarmCallback(callback: (alarm: any) => void): void {
     this.removeAlarmRequest = callback;
+  }
+
+  public setReceivedEventsCallback(callback: (data: any) => void): void {
+    this.receivedEventsCallback = callback;
   }
 
   private connectToServer(): void {
@@ -113,12 +115,19 @@ export class ServerConectorService {
     return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}.${milliseconds}${microseconds}`;
   }
 
+  public sendRequestEventList(panelId: number,
+                              limit: number) {
+    let obj: any = { "panelId": panelId, "limit": limit }
+    this.sendCommand("requestEvents", obj)
+  }
+
+
 
   public sendRequestForTableInfo(sensorInfos: Array<any>,
-    group: string,
-    beginDate?: Date | null, 
-    endDate?: Date | null,
-    callback?: Function) {
+                                 group: string,
+                                 beginDate?: Date | null,
+                                 endDate?: Date | null,
+                                 callback?: Function) {
     const requestId = uuidv4();
     let obj: any = { "sensorInfos": sensorInfos, "requestId": requestId }
     if (beginDate) {
@@ -161,23 +170,20 @@ export class ServerConectorService {
     }
     else if (data["status"] == "alarmInfo") {
       let message = data["message"]
-      if(this.alarmRequest)
-      {
+      if (this.alarmRequest) {
         this.alarmRequest(message['data'])
       }
     }
     else if (data["status"] == "alarmAdded") {
       let message = data["message"]
-      if(this.addAlarmRequest)
-      {
+      if (this.addAlarmRequest) {
         this.addAlarmRequest(message['data'])
       }
     }
-    else if (data["status"] == "alarmRemoved") {
+    else if (data["status"] == "eventInfo") {
       let message = data["message"]
-      if(this.removeAlarmRequest)
-      {
-        this.removeAlarmRequest(message['data'])
+      if (this.receivedEventsCallback) {
+        this.receivedEventsCallback(message['data'])
       }
     }
     else if (data["status"] == "error") {
