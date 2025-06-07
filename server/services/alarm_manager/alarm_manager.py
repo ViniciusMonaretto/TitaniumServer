@@ -147,7 +147,7 @@ class AlarmManager(ServiceInterface):
         try:
             alarm_info, result = self._config_storage.get_alarm_info(alarm_id)
             if len(alarm_info) > 0:
-                topic = alarm_info[0]["topic"]
+                topic = alarm_info[0]["topic"].replace("-","/")
                 if topic in self._alarms_info:
 
                     result = self._config_storage.remove_alarm(alarm_id)
