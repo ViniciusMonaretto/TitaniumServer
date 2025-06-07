@@ -127,7 +127,7 @@ class ConfigStorage(ServiceInterface):
             conn.commit()
 
             if cursor.rowcount == 0:
-                print(f"No panel found with id {panel_id}.")
+                self._logger.warning(f"No panel found with id {panel_id}.")
             else:
                 result = True
 
