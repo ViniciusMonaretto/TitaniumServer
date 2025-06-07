@@ -85,19 +85,19 @@ class ConfigHandler(ServiceInterface):
         message = ""
         panel = Panel(panel_info)
 
-        group_name = panel._group
+        group_name = panel.group
 
         if group_name not in self._panels_info:
             self.add_group(group_name)
         
         index = -1
-        if(not panel._id):
+        if(not panel.id):
             index = self._config_storage.add_panel(panel)
         else:
-            index = panel._id
+            index = panel.id
         if( index != -1):
-            panel._id = index
-            result, message = self._sensor_data_storage.add_new_subscription(panel._topic, panel._gateway)
+            panel.id = index
+            result, message = self._sensor_data_storage.add_new_subscription(panel.topic, panel.gateway)
         
             if result:
                 self._panels_info[group_name].append(panel)

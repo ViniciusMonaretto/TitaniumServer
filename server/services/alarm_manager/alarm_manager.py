@@ -49,13 +49,13 @@ class AlarmManager(ServiceInterface):
         self._middleware.add_commands(commands)
 
     def check_if_alarm_should_trigger(self, alarm: Alarm, value):
-        type = alarm._type
+        type = alarm.type
         if type == AlarmType.Equal:
-            return value == alarm._threshold
+            return value == alarm.threshold
         if type == AlarmType.Higher:
-            return value > alarm._threshold
+            return value > alarm.threshold
         if type == AlarmType.Lower:
-            return value < alarm._threshold
+            return value < alarm.threshold
 
     def alarm_check_thread(self):
         while True:
@@ -69,8 +69,8 @@ class AlarmManager(ServiceInterface):
 
                     for alarm in self._alarms_info[topic]:
                         if self.check_if_alarm_should_trigger(alarm, sensor_info._value):
-                            events_to_add.append(EventModel(alarm._id, 
-                                                            alarm._panel_id, 
+                            events_to_add.append(EventModel(alarm.id, 
+                                                            alarm.panel_id, 
                                                             sensor_info._timestamp.timestamp(),
                                                             sensor_info._value))
                 except KeyboardInterrupt:
@@ -103,7 +103,7 @@ class AlarmManager(ServiceInterface):
     def add_alarm_command(self, command):
         result = self.add_alarm(command)
         
-        if result._id != '':
+        if result.id != '':
             self._middleware.send_command_answear( True, result.to_json(), command["requestId"])
         else:
             self._middleware.send_command_answear( result, 
@@ -115,7 +115,7 @@ class AlarmManager(ServiceInterface):
             alarm = Alarm(alarm_info['data'])
             id = self._config_storage.add_alarm(alarm)
             if id != -1:
-                alarm._id = id
+                alarm.id = id
                 self.setup_alarm(alarm)
         except Exception as e:
             self._logger.error(f"AlarmManager::add_alarm error: {e}")
@@ -123,7 +123,7 @@ class AlarmManager(ServiceInterface):
         return alarm
 
     def setup_alarm(self, alarm: Alarm):
-        topic = alarm._topic.replace("-","/")
+        topic = alarm.topic.replace("-","/")
         if topic not in self._status_subscribers:
             self._status_subscribers[topic] = StatuSubscribers(self.add_check_status, 
                                                                       topic, 
@@ -161,7 +161,7 @@ class AlarmManager(ServiceInterface):
     def remove_alarm_internal_info(self, topic_in: str, alarm_id):
         topic = topic_in.replace("-","/")
         if( topic in self._alarms_info ):
-            alarm = next((obj for obj in self._alarms_info[topic] if obj._id == alarm_id), None)
+            alarm = next((obj for obj in self._alarms_info[topic] if obj.id == alarm_id), None)
             if alarm:
                 self._alarms_info[topic].remove(alarm)
                 if len(self._alarms_info[topic]) == 0:

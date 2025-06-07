@@ -16,36 +16,36 @@ class SensorTypes:
         return cls.Unknow
 
 class Panel:
-    _id = None
-    _name = ""
-    _gateway = ""
-    _topic = ""
-    _color = ""
-    _group = ""
-    _sensor_type = SensorTypes.Unknow
+    id = None
+    name = ""
+    gateway = ""
+    topic = ""
+    color = ""
+    group = ""
+    sensor_type = SensorTypes.Unknow
     def __init__(self, obj):
         if "id" in obj:
-            self._id = obj["id"]
-        self._name = obj["name"]
-        self._gateway = obj["gateway"]
-        self._topic = obj["topic"]
-        self._color = obj["color"]
+            self.id = obj["id"]
+        self.name = obj["name"]
+        self.gateway = obj["gateway"]
+        self.topic = obj["topic"]
+        self.color = obj["color"]
         if "panelGroup" in obj:
-            self._group = obj["panelGroup"]
+            self.group = obj["panelGroup"]
         else:
-            self._group = obj["group"]
-        self._sensor_type = SensorTypes.GetType(obj["sensorType"])
+            self.group = obj["group"]
+        self.sensor_type = SensorTypes.GetType(obj["sensorType"])
     
     def get_full_name(self):
-        return self._gateway + "-" + self._topic
+        return self.gateway + "-" + self.topic
     
     def to_json(self):
         return {
-            "id": self._id,
-            "name": self._name,
-            "gateway": self._gateway,
-            "topic": self._topic,
-            "color": self._color,
-            "group": self._group,
-            "sensorType": self._sensor_type,
+            "id": self.id,
+            "name": self.name,
+            "gateway": self.gateway,
+            "topic": self.topic,
+            "color": self.color,
+            "group": self.group,
+            "sensorType": self.sensor_type,
         }

@@ -1,0 +1,22 @@
+{
+  // Enable Pylint for linting
+  "python.linting.enabled": true,
+  "python.linting.pylintEnabled": true,
+
+  // Pylint arguments to disable some warnings
+  "python.linting.pylintArgs": [
+    "--disable=C0114,C0115,C0116" // disable missing docstring warnings
+  ],
+
+  // Use Black as the code formatter
+  "python.formatting.provider": "black",
+
+  // Format code on save
+  "editor.formatOnSave": true,
+
+  // Optional: trim trailing whitespace on save (set to false to disable)
+  "files.trimTrailingWhitespace": false,
+
+  // Optional: insert final newline at the end of files
+  "files.insertFinalNewline": true
+}

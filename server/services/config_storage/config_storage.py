@@ -1,12 +1,9 @@
 import sqlite3
-import pytz
 from datetime import datetime
-from typing import Union
-from middleware.status_subscriber import StatuSubscribers
-from middleware.middleware import ClientMiddleware
 import uuid
-import threading
-import queue
+import pytz
+from middleware.middleware import ClientMiddleware
+
 
 from dataModules.panel import Panel
 from dataModules.alarm import Alarm
@@ -89,12 +86,6 @@ class ConfigStorage(ServiceInterface):
             self._logger.error(message)
             return False, message
         
-    def drop_reading(self, topic, gateway, panel_id) ->  Union[bool, str]: 
-        if not self.remove_panel(panel_id):
-            return False, "Panel not found on DB"
-        self.remove_subscription_to_status(gateway, topic)
-        return True, ""
-        
     def add_panel(self, panel: Panel):
         new_id = -1
         try:
@@ -104,7 +95,7 @@ class ConfigStorage(ServiceInterface):
             cursor.execute('''
                 INSERT INTO Panels (name, gateway, topic, color, panelGroup, sensorType)
                 VALUES (?, ?, ?, ?, ?, ?)
-            ''', (panel._name, panel._gateway, panel._topic, panel._color, panel._group, panel._sensor_type))
+            ''', (panel.name, panel.gateway, panel.topic, panel.color, panel.group, panel.sensor_type))
 
             conn.commit()
             new_id = cursor.lastrowid
@@ -171,7 +162,7 @@ class ConfigStorage(ServiceInterface):
                 type,
                 panelId)
                 VALUES (?, ?, ?, ?, ?)
-            ''', (alarm._name, alarm._topic, alarm._threshold, alarm._type, alarm._panel_id))
+            ''', (alarm.name, alarm.topic, alarm.threshold, alarm.type, alarm.panel_id))
 
             conn.commit()
             new_id = cursor.lastrowid
@@ -214,7 +205,7 @@ class ConfigStorage(ServiceInterface):
             self._middleware.send_command_answear( [], "Error Getting Alarms", command["requestId"])
         
 
-    def get_alarm_info(self, id=None, topic=None):
+    def get_alarm_info(self, alarm_id=None, topic=None):
         rows = []
         result = False
         try:
@@ -225,18 +216,18 @@ class ConfigStorage(ServiceInterface):
             where_clause = ""
             values = []
 
-            if id or topic:
+            if alarm_id or topic:
                 where_clause = " WHERE "
                 conditions = []
-                if id is not None:
+                if alarm_id is not None:
                     conditions.append("id = ?")
-                    values.append(id)
+                    values.append(alarm_id)
                 if topic is not None:
                     conditions.append("topic = ?")
                     values.append(topic)
                 where_clause += " AND ".join(conditions)
 
-            table_command = f"""SELECT *
+            table_command = """SELECT *
                                 FROM Alarms""" + where_clause
 
             cursor.execute(table_command, tuple(values))
@@ -285,7 +276,7 @@ class ConfigStorage(ServiceInterface):
             if limit is not None:
                 limit_caluse = f" LIMIT {limit}"
 
-            table_command = f"""SELECT 
+            table_command = """SELECT 
                                 Events.alarmId,
                                 Events.panelId,
                                 Events.value,
@@ -337,28 +328,4 @@ class ConfigStorage(ServiceInterface):
         finally:
             conn.close()
             
-        return result
-    
-    def remove_alarm(self, alarm_id: int):
-        result = False
-        try:
-            conn = sqlite3.connect(DB_NAME)
-            cursor = conn.cursor()
-
-            # Enable foreign key support
-            cursor.execute("PRAGMA foreign_keys = ON;")
-
-            # Delete the alarm
-            cursor.execute("DELETE FROM Alarms WHERE id = ?;", (alarm_id,))
-            conn.commit()
-
-            if cursor.rowcount == 0:
-                print(f"No panel found with id {alarm_id}.")
-            else:
-                result = True
-
-        except sqlite3.Error as e:
-            self._logger.error(f"remove_alarm error: {e}")
-        finally:
-            conn.close()
         return result

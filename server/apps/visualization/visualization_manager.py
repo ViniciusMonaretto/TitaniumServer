@@ -159,7 +159,7 @@ class VisualizationWebSocketHandler(tornado.websocket.WebSocketHandler):
         self.send_panel_info()
 
     def add_panel_subscriber_command(self, panel: Panel):
-        self.add_panel_subscriber(panel._topic, panel._gateway, panel._id)
+        self.add_panel_subscriber(panel.topic, panel.gateway, panel.id)
         self.send_panel_info()
 
     def add_panel_subscriber(self, topic: str, gateway: str, id: int):
