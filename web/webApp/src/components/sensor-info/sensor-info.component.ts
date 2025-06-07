@@ -36,12 +36,7 @@ export class SensorInfoComponent implements OnInit {
   @Output() onLoad: EventEmitter<any> = new EventEmitter()
   @Output() onExit: EventEmitter<any> = new EventEmitter()
 
-  headerInfo: string[][] = [["eventType", "Tipo de Alarme"], ["value", "Medição"], ["timestamp", "Data"]]
-  info: any[] = [{
-    eventType: "Temperatura muito alta",
-    value: 26,
-    timestamp: new Date().toDateString()
-  }]
+  headerInfo: string[][] = [["name", "Tipo de Alarme"], ["value", "Medição"], ["timestamp", "Data"]]
 
   offset = 10
   slope = 3

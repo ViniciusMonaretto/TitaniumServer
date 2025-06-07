@@ -276,10 +276,10 @@ class ConfigStorage(ServiceInterface):
                 where_clause = " WHERE "
                 conditions = []
                 if panel_id is not None:
-                    conditions.append("panelId = ?")
+                    conditions.append("Events.panelId = ?")
                     values.append(panel_id)
                 if alarm_id is not None:
-                    conditions.append("alarmId = ?")
+                    conditions.append("Events.alarmId = ?")
                     values.append(alarm_id)
                 where_clause += " AND ".join(conditions)
 
@@ -287,8 +287,14 @@ class ConfigStorage(ServiceInterface):
             if limit is not None:
                 limit_caluse = f" LIMIT {limit}"
 
-            table_command = f"""SELECT *
-                                FROM Events""" + where_clause + limit_caluse
+            table_command = f"""SELECT 
+                                Events.alarmId,
+                                Events.panelId,
+                                Events.value,
+                                Events.timestamp,
+                                Alarms.Name
+                                FROM Events
+                                JOIN Alarms ON Alarms.id = Events.alarmId""" + where_clause + limit_caluse
 
             cursor.execute(table_command, tuple(values))
             rows = cursor.fetchall()
