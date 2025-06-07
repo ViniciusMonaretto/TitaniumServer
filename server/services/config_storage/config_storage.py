@@ -121,10 +121,8 @@ class ConfigStorage(ServiceInterface):
             conn = sqlite3.connect(DB_NAME)
             cursor = conn.cursor()
 
-            # Enable foreign key support
             cursor.execute("PRAGMA foreign_keys = ON;")
-
-            # Delete the alarm
+            
             cursor.execute("DELETE FROM Panels WHERE id = ?;", (panel_id,))
             conn.commit()
 

@@ -126,10 +126,12 @@ class ConfigHandler(ServiceInterface):
                                                                     None,
                                                                     lambda a,b : wait_flag.set())
                         wait_flag.wait(180)
-                            
-                        del panels[idx]
-                        
-                        return True, "Painél Removido"
+
+                        result = self._config_storage.remove_panel(panel_id)
+
+                        if (result):   
+                            del panels[idx]
+                            return True, "Painél Removido"
         except Exception as e:
             Logger.error(f"ConfigHandler::remove_panel: Error while removing panel {e}")
         
