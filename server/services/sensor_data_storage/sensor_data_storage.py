@@ -88,7 +88,7 @@ class SensorDataStorage(ServiceInterface):
             while not self._write_queue.empty():
                 try:
                     sensor_info: SensorInfo = self._write_queue.get(timeout=1)
-                    sensor_info._timestamp = datetime.fromisoformat(sensor_info._timestamp)
+                    sensor_info.timestamp = datetime.fromisoformat(sensor_info.timestamp)
                     
                     sensor_infos.append(sensor_info.to_json())
                 except KeyboardInterrupt:

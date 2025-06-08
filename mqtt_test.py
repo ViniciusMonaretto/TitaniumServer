@@ -1,8 +1,8 @@
-import paho.mqtt.client as mqtt
 import time
 import random
 import json
 from datetime import datetime
+import paho.mqtt.client as mqtt
 
 # Define the broker and port
 BROKER = "mqtt.eclipseprojects.io"

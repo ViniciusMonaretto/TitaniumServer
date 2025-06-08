@@ -304,7 +304,7 @@ class ConfigStorage(ServiceInterface):
         result = False
         try:
             event_data = [
-            (e._alarm_id, e._panel_id, e._value, e._timestamp) 
+            (e.alarm_id, e.panel_id, e.value, e.timestamp) 
             for e in events
         ]
             conn = sqlite3.connect(DB_NAME)

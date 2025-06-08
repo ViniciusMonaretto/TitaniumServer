@@ -2,21 +2,21 @@ from datetime import datetime
 
 
 class SensorInfo:
-    _sensor_full_topic = ""
-    _timestamp: datetime
-    _value = 0
+    sensor_full_topic = ""
+    timestamp: datetime
+    value = 0
 
     def __init__(self, 
                  sensor_full_topic: str,
                  timestamp: datetime,
                  value: int):
-        self._sensor_full_topic = sensor_full_topic
-        self._timestamp = timestamp.isoformat()
-        self._value = value
+        self.sensor_full_topic = sensor_full_topic
+        self.timestamp = timestamp.isoformat()
+        self.value = value
     
     def to_json(self):
         return {
-            "SensorFullTopic": self._sensor_full_topic,
-            "Timestamp": self._timestamp.timestamp(),
-            "Value": self._value
+            "SensorFullTopic": self.sensor_full_topic,
+            "Timestamp": self.timestamp.timestamp(),
+            "Value": self.value
         }

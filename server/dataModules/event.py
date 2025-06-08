@@ -7,8 +7,8 @@ class EventModel:
     _panel_id = -1
     _timestamp: datetime = 0
 
-    def __init__(self, alarm_id: int, panel_id: int, timestamp: datetime, value: int,  id = -1):
-        self._id = id
+    def __init__(self, alarm_id: int, panel_id: int, timestamp: datetime, value: int,  event_id = -1):
+        self._id = event_id
         self._alarm_id = alarm_id
         self._panel_id = panel_id
         self._timestamp = timestamp

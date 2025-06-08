@@ -1,19 +1,15 @@
-import sqlite3
 import json
 import os
-from datetime import datetime
 import threading
 from typing import Union
-from middleware.status_subscriber import StatuSubscribers
 from middleware.middleware import ClientMiddleware
-import uuid
 
 from dataModules.panel import Panel
 from services.sensor_data_storage.sensor_data_storage import SensorDataStorage
+from support.logger import Logger
+
 
 from .config_handler_command import ConfigHandlerCommands
-
-from support.logger import Logger
 from ..service_interface import ServiceInterface
 
 from ..config_storage.config_storage import ConfigStorage
@@ -45,7 +41,7 @@ class ConfigHandler(ServiceInterface):
     def read_default_config(self):
         script_directory = os.path.dirname(os.path.abspath(__file__))
         json_directory = os.path.join(script_directory, "..", "..", "config",  "ui_config.json")
-        with open(json_directory, 'r') as json_file:
+        with open(json_directory, 'r', encoding='utf-8') as json_file:
             try:
                 data = json.load(json_file)  # Load the JSON data
                 # Process the JSON data (replace this with your logic)
@@ -119,7 +115,7 @@ class ConfigHandler(ServiceInterface):
         try: 
             for panels in self._panels_info.values():
                 for idx, panel in enumerate(panels):
-                    if panel._id == panel_id:
+                    if panel.id == panel_id:
                         wait_flag = threading.Event()
                         self._sensor_data_storage.erase_sensor_info([panel.get_full_name()], 
                                                                     None,
@@ -133,7 +129,7 @@ class ConfigHandler(ServiceInterface):
                             del panels[idx]
                             return True, "Painél Removido"
         except Exception as e:
-            Logger.error(f"ConfigHandler::remove_panel: Error while removing panel {e}")
+            self._logger.error(f"ConfigHandler::remove_panel: Error while removing panel {e}")
         
         return False, "Remove panel error: Panel not found"
     
