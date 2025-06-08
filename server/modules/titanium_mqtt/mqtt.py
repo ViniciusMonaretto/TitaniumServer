@@ -1,13 +1,9 @@
-import paho.mqtt.client as mqtt
-import os
 import threading
-
 import queue
+import paho.mqtt.client as mqtt
 
 from support.logger import Logger
 
-from .gateway_object import GatewayObject
-from .translators.protobus.gateway_protobuf_factory import GatewayProtobufFactory
 from .translators.direct_translator import DirectTranslator
 from .translators.translator_model import PayloadTranslator
  
@@ -27,6 +23,8 @@ class TitaniumMqtt:
     world_count_rev = 0
     world_count2 = 0
     world_count2_rev = 0
+
+    _client: mqtt.Client
     def __init__(self, middleware):
         self._logger = Logger()
         self._subscribe_topic_list = SUBSCRIBE_TOPIC_LIST
@@ -43,11 +41,11 @@ class TitaniumMqtt:
 
         self._messages_handler = threading.Thread(target=self.handle_incoming_messages, daemon=True)
 
-    def on_connect(self, client, userdata, flags, rc):
+    def on_connect(self, client, userdata, _flags, rc):
         self._logger.info(f"MqqtServer: Connected with result code {rc}")
         client.subscribe(userdata['subscribe_topics'])
             
-    def on_message(self, client, userdata, msg):
+    def on_message(self, _c, _u, msg):
         self._logger.debug(f"Received message: {msg.topic} {msg.payload}")
         self.world_count+=1
         # if(self.world_count == 40):
@@ -61,26 +59,26 @@ class TitaniumMqtt:
     def run(self):
         self.world_count = 0
         self.world_count2 = 0
-        self.client = mqtt.Client()
+        self._client = mqtt.Client()
 
         user_data = {}
         user_data['subscribe_topics'] = self._subscribe_topic_list 
         user_data['publish_topics'] = self._publish_topics_list
-        self.client.user_data_set(user_data)
+        self._client.user_data_set(user_data)
 
-        self.client.on_connect = self.on_connect
-        self.client.on_message = self.on_message
+        self._client.on_connect = self.on_connect
+        self._client.on_message = self.on_message
         try:
 
-            self.client.connect(MQTT_SERVER, MQTT_PORT, 60)
+            self._client.connect(MQTT_SERVER, MQTT_PORT, 60)
             self._messages_handler.start()
-            self.client.loop_start()
+            self._client.loop_start()
         except Exception as e:
             self._logger.error(f"Error Connecting to Mqtt: {e}")
     
     def execute(self, command):
         topic = self.get_topic_from_command(command.name)
-        self.client.publish(topic, command.message)
+        self._client.publish(topic, command.message)
     
     def handle_incoming_messages(self):
         while(not self._end_thread):
@@ -92,8 +90,8 @@ class TitaniumMqtt:
                 if not len(msg_split) == 5:
                     self._logger.error(f"TitaniumMqtt::on_message: mqtt topic {msg.topic} not valid")
                 else:
-                    id = str(msg_split[2])
-                    cls = self._translator.translate_payload(msg_split[3], msg.payload, id)
+                    msg_id = str(msg_split[2])
+                    cls = self._translator.translate_payload(msg_split[3], msg.payload, msg_id)
 
                     self._logger.debug(f"Received message: {msg.topic} {cls}")
 
@@ -101,7 +99,7 @@ class TitaniumMqtt:
                     self.world_count2 += 1
 
                     self._middleware.send_status(topic_name, {'data': cls['data'], 'timestamp':cls['timestamp']})
-            except queue.Empty as exc:
+            except queue.Empty:
                 pass
             except Exception as e:
                 self._logger.error(f"Mqtt.handle_incoming_messages: Error Parsing messages {e}")
@@ -110,13 +108,13 @@ class TitaniumMqtt:
     
     def stop(self):
         self._end_thread = True
-        self.client.loop_stop()
-        self.client.disconnect()
+        self._client.loop_stop()
+        self._client.disconnect()
         self._messages_handler.join()
 
     def get_topic_from_command(self, command):
         if command in  self._publish_topics_list:
-            return self._publish_topics_list["command"]
+            return self._publish_topics_list[command]
         return command
 
     @staticmethod
