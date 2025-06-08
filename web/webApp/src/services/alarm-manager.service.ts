@@ -7,12 +7,12 @@ import { AlarmModule } from '../models/alarm-module';
 })
 export class AlarmManagerService {
     private alarms: AlarmModule[] = []
-    private events: {[id: number]: Array<any>} = {}
+    private events: {[id: number]: {requestMade: boolean, eventList: Array<any>}} = {}
     constructor(private connectorService: ServerConectorService) {
         this.connectorService.setAlarmInfoCallback((data) => {this.alarmInfoCallback(data)})
         this.connectorService.setRemoveAlarmCallback((data) => {this.alarmRemoved(data)})
         this.connectorService.setAddAlarmCallback((data) => {this.alarmAdded(data)})
-        this.connectorService.setReceivedEventsCallback((data) => {this.receiveEventsCallback(data["panelId"], data["events"])})
+        this.connectorService.setReceivedEventsCallback((data, replace) => {this.receiveEventsCallback(data["panelId"], data["events"], replace)})
     }
 
     private alarmInfoCallback(alarms: any){
@@ -43,11 +43,20 @@ export class AlarmManagerService {
         this.connectorService.sendCommand("addAlarm", alarmInfo)
     }
 
+    public isPanelEventsRequested(panelId: number)
+    {
+        if(panelId in this.events)
+        {
+            return this.events[panelId].requestMade
+        }
+        return false
+    }
+
     public getEvents(panelId: number)
     {
         if(panelId in this.events)
         {
-            return this.events[panelId]
+            return this.events[panelId].eventList
         }
         return null
     }
@@ -57,8 +66,21 @@ export class AlarmManagerService {
         this.alarms.push(alarmInfo)
     }
 
-    private receiveEventsCallback(panelId: number, events: Array<any>)
+    private receiveEventsCallback(panelId: number, events: Array<any>, replaceInfo: boolean)
     {
-        this.events[panelId] = events
+        if(panelId in this.events)
+        {
+            this.events[panelId] = {requestMade: false, eventList: []}
+        }
+
+        if(replaceInfo)
+        {
+            this.events[panelId].eventList = events
+            this.events[panelId].requestMade = true
+        }
+        else
+        {
+            this.events[panelId].eventList = [...this.events[panelId].eventList, ...events]
+        }
     }
 }

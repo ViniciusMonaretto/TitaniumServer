@@ -1,24 +1,24 @@
 from datetime import datetime
 
 class EventModel:
-    _id = "" 
-    _alarm_id = -1
-    _value = 0
-    _panel_id = -1
-    _timestamp: datetime = 0
+    event_id = "" 
+    alarm_id = -1
+    value = 0
+    panel_id = -1
+    timestamp: datetime = 0
 
     def __init__(self, alarm_id: int, panel_id: int, timestamp: datetime, value: int,  event_id = -1):
-        self._id = event_id
-        self._alarm_id = alarm_id
-        self._panel_id = panel_id
-        self._timestamp = timestamp
-        self._value = value
+        self.event_id = event_id
+        self.alarm_id = alarm_id
+        self.panel_id = panel_id
+        self.timestamp = timestamp
+        self.value = value
     
     def to_json(self):
         return {
-            "id": self._id,
-            "alarmId": self._alarm_id,
-            "panelId": self._panel_id,
-            "timestamp": self._timestamp,
-            "value": self._value
+            "id": self.event_id,
+            "alarmId": self.alarm_id,
+            "panelId": self.panel_id,
+            "timestamp": self.timestamp,
+            "value": self.value
         }

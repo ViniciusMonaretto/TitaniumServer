@@ -1,28 +1,25 @@
-from support.logger import Logger
-from .data_converter.data_converter import DataConverter
-from .subscriber_interface import SubscriberInterface
 import threading
 import multiprocessing
 import uuid
-from typing import List
 from collections.abc import Callable
+from support.logger import Logger
+from .data_converter.data_converter import DataConverter
+from .subscriber_interface import SubscriberInterface
 
 class SubscriberManager:
-   
-
-    def __init__(self, status, lock):
+    def __init__(self, status):
         self._status_name = status._status
         self._subscriber_map = {}
     
     def add_subscriber(self, subscriber: SubscriberInterface):
         self._subscriber_map[subscriber.get_id()] = subscriber
 
-    def remove_subscriber(self, id):
-        if(not (id in self._subscriber_map)):
-            print("Middleware::add_subscribe_from_status-> Error, subscriber {self._id} non subscribing {status_name}")
+    def remove_subscriber(self, subscriber_id):
+        if(not (subscriber_id in self._subscriber_map)):
+            print(f"Middleware::add_subscribe_from_status-> Error, subscriber {subscriber_id} non subscribing {self._status_name}")
             return
 
-        del self._subscriber_map[id]
+        del self._subscriber_map[subscriber_id]
 
     def send_status(self, status_name, data):
         for subscriber_id in self._subscriber_map:
@@ -68,7 +65,7 @@ class ClientMiddleware:
         self._subscribers: dict[str, SubscriberManager] = {}
         self._transfer_queue:  multiprocessing.Queue = middleware.add_new_middleware_listener()
         self._request_queue: dict[str, tuple[Callable, Callable]] = {}
-        self._middleware = middleware
+        self._global_middleware = middleware
         self._commands_available: dict[str, Callable] = {}
     
     def add_commands(self, commands_available: dict[str, Callable[[dict], None]]):
@@ -77,26 +74,26 @@ class ClientMiddleware:
     def add_subscribe_to_status(self, subscriber: SubscriberInterface, status_name):
         self._lock.acquire()
         if(not (status_name in self._subscribers)):
-            self._subscribers[status_name] = SubscriberManager(subscriber, self._lock)
+            self._subscribers[status_name] = SubscriberManager(subscriber)
         
         self._subscribers[status_name].add_subscriber(subscriber)
         self._lock.release()
 
     def remove_subscribe_from_status(self, subscriber, status_name):
         self._lock.acquire()
-        id = subscriber.get_id()
+        subscriber_id = subscriber.get_id()
         if(not (status_name in self._subscribers)):
-            self._logger.info("Middleware::add_subscribe_from_status-> Error, subscriber {id} non existant")
+            self._logger.info(f"Middleware::add_subscribe_from_status-> Error, subscriber {subscriber_id} non existant")
             return
         
-        self._subscribers[status_name].remove_subscriber(id)
+        self._subscribers[status_name].remove_subscriber(subscriber_id)
         self._lock.release()
 
     def send_command(self, command_name, data, callback_handler = None, error_handler = None):
-        self._request_queue[self._middleware.send_command(command_name, data)] = (callback_handler, error_handler)
+        self._request_queue[self._global_middleware.send_command(command_name, data)] = (callback_handler, error_handler)
 
     def send_command_answear(self, result, data, request_id):
-        self._middleware.send_command_answear("", result, data, request_id)
+        self._global_middleware.send_command_answear("", result, data, request_id)
     
     def run_middleware_update(self):
         while(not self._transfer_queue.empty()):
@@ -114,7 +111,7 @@ class ClientMiddleware:
                 else:
                     self.command_update(new_info)
             else:
-                self.status_update(new_info)
+                self._status_update(new_info)
 
     def command_update(self, new_command):
         command_name = new_command["name"]
@@ -128,8 +125,11 @@ class ClientMiddleware:
         bGatewayMatch = (sub_info[0] == '*') or (sub_info[0] == status_info[0])
         bTopicMatch = (sub_info[1] == '*') or (sub_info[1] == status_info[1])
         return bGatewayMatch and bTopicMatch
+    
+    def send_status(self, topic: str, new_status):
+        self._global_middleware.send_status(topic, new_status)
 
-    def status_update(self, new_status):
+    def _status_update(self, new_status):
         status_name = new_status["name"]
         data = new_status["data"]
 

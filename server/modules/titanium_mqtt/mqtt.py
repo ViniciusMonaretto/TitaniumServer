@@ -95,7 +95,7 @@ class TitaniumMqtt:
 
                     self._logger.debug(f"Received message: {msg.topic} {cls}")
 
-                    topic_name = TitaniumMqtt.get_topic_from_mosquitto_obj(id, cls)
+                    topic_name = TitaniumMqtt.get_topic_from_mosquitto_obj(msg_id, cls)
                     self.world_count2 += 1
 
                     self._middleware.send_status(topic_name, {'data': cls['data'], 'timestamp':cls['timestamp']})

@@ -69,20 +69,26 @@ class AlarmManager(ServiceInterface):
 
                     for alarm in self._alarms_info[topic]:
                         if self.check_if_alarm_should_trigger(alarm, sensor_info.value):
-                            events_to_add.append(EventModel(alarm.id, 
-                                                            alarm.panel_id, 
-                                                            sensor_info.timestamp.timestamp(),
-                                                            sensor_info.value))
+                            event_added = EventModel(alarm.id, 
+                                                     alarm.panel_id, 
+                                                     sensor_info.timestamp.timestamp(),
+                                                     sensor_info.value)
+                            events_to_add.append(event_added)
                 except KeyboardInterrupt:
                     break
                 except Exception as e:
                     self._logger.error(f"SensorDataStorage::write_sensor_data_loop: Error getting data from write queue {e}")
                     break
             if len(events_to_add) > 0:
-                self._config_storage.add_event_array(events_to_add)
+                if self._config_storage.add_event_array(events_to_add):
+                    self._send_event_status(events_to_add)
         
             threading.Event().wait(1)
     
+    def _send_event_status(self, event_list: list[EventModel]):
+        for event_model in event_list:
+            self._middleware.send_status("Alarm/newevent", event_model)
+
     def add_check_status(self, status_info):
         try:
             self._check_queue.put(SensorInfo(status_info["subStatusName"].replace('/', '-'),

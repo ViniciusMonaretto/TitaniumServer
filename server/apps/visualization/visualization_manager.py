@@ -33,6 +33,8 @@ class VisualizationWebSocketHandler(tornado.websocket.WebSocketHandler):
     _status_subscribers: dict[str, SubscriberInterface] = {}
     _logger: Logger
 
+    _event_subscriber: SubscriberInterface = None
+
     def check_origin(self, origin):
         return True
     
@@ -44,6 +46,7 @@ class VisualizationWebSocketHandler(tornado.websocket.WebSocketHandler):
         self._id = str(uuid.uuid4())
         self._middleware  = middleware
         self._status_subscribers = {}
+        self.initialize_event_sub()
     
     def open(self, *args, **kwargs):
         self._logger.debug("WebSocket opened")
@@ -60,25 +63,25 @@ class VisualizationWebSocketHandler(tornado.websocket.WebSocketHandler):
 
     def on_message(self, message):
         self._logger.debug("You said: " + message)
-        messageObj = json.loads(message)
-        payload = messageObj["payload"]
+        message_obj = json.loads(message)
+        payload = message_obj["payload"]
         try:
-            if("addPanel" in messageObj["commandName"]):
+            if("addPanel" in message_obj["commandName"]):
                 self.add_panel_request(payload)
-            elif "removePanel" in messageObj["commandName"]:
+            elif "removePanel" in message_obj["commandName"]:
                 self.remove_panel(payload)
-            elif "getStatusHistory" in messageObj["commandName"]:
+            elif "getStatusHistory" in message_obj["commandName"]:
                 self.request_status(payload)
-            elif "requestEvents" in messageObj["commandName"]:
+            elif "requestEvents" in message_obj["commandName"]:
                 self.request_events(payload)
-            elif "requestAlarms" in messageObj["commandName"]:
+            elif "requestAlarms" in message_obj["commandName"]:
                 self.request_alarms(payload)
-            elif "addAlarm" in messageObj["commandName"]:
+            elif "addAlarm" in message_obj["commandName"]:
                 self.add_alarm(payload)
-            elif "removeAlarm" in messageObj["commandName"]:
+            elif "removeAlarm" in message_obj["commandName"]:
                 self.remove_alarm(payload)
             else:
-                self._logger.error("VisualizationWebSocketHandler:: unknown command: " + messageObj["commandName"])
+                self._logger.error("VisualizationWebSocketHandler:: unknown command: " + message_obj["commandName"])
         except Exception as e:
             self._logger.error(f"Exception occured on panel message: {e}")
 
@@ -140,7 +143,7 @@ class VisualizationWebSocketHandler(tornado.websocket.WebSocketHandler):
                                       self.send_error_message)
         
     def send_events(self, data: list[Alarm]):
-        self.send_message_to_ui("eventInfo", data) 
+        self.send_message_to_ui("eventListResponse", data) 
     
     def send_alarm_info(self, data: list[Alarm]):
         self.send_message_to_ui("alarmInfo", data) 
@@ -161,6 +164,10 @@ class VisualizationWebSocketHandler(tornado.websocket.WebSocketHandler):
     def get_panel_topic(self, topic: Panel, gateway):
         return  gateway + "/" + topic
     
+    def initialize_event_sub(self):
+        self._event_subscriber = StatuSubscribers(self.send_event, "Alarm/newevent", str(uuid.uuid4()) )
+        self._middleware.add_subscribe_to_status( self._event_subscriber, "Alarm/newevent")
+
     def add_subscribers(self, panels_info: dict[str: list[object]]):
         for panels in panels_info.values():
             for panel in panels:
@@ -182,9 +189,6 @@ class VisualizationWebSocketHandler(tornado.websocket.WebSocketHandler):
             self._middleware.add_subscribe_to_status(self._status_subscribers[panel_topic], panel_topic)
         self._status_subscribers[panel_topic].add_count()
         self._panels_count+=1
-
-        
-    
         
     def send_error_message(self, message: str):
         self.send_message_to_ui("error", message)
@@ -200,6 +204,9 @@ class VisualizationWebSocketHandler(tornado.websocket.WebSocketHandler):
 
     def send_status(self, status_data):
         self.send_message_to_ui("sensorUpdate", status_data)
+
+    def send_event(self, event_data):
+        self.send_message_to_ui("eventInfoUpdate", event_data)
 
     def on_close(self):
         self._logger.debug("WebSocket closed")

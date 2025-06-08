@@ -18,7 +18,7 @@ export class ServerConectorService {
   private alarmRequest: ((alarms: any) => void) | null = null;
   private addAlarmRequest: ((alarms: any) => void) | null = null;
   private removeAlarmRequest: ((alarms: any) => void) | null = null;
-  private receivedEventsCallback: ((events: any) => void) | null = null;
+  private receivedEventsCallback: ((events: any[], replaceValue: boolean) => void) | null = null;
 
   constructor(private uiPanelService: UiPanelService, private dialog: MatDialog) {
     this.socket = null
@@ -40,7 +40,7 @@ export class ServerConectorService {
     this.removeAlarmRequest = callback;
   }
 
-  public setReceivedEventsCallback(callback: (data: any) => void): void {
+  public setReceivedEventsCallback(callback: (data: any, replace: boolean) => void): void {
     this.receivedEventsCallback = callback;
   }
 
@@ -180,10 +180,22 @@ export class ServerConectorService {
         this.addAlarmRequest(message['data'])
       }
     }
-    else if (data["status"] == "eventInfo") {
+     else if (data["status"] == "alarmRemoved") {
+      let message = data["message"]
+      if (this.removeAlarmRequest) {
+        this.removeAlarmRequest(message['data'])
+      }
+    }
+    else if (data["status"] == "eventListResponse") {
       let message = data["message"]
       if (this.receivedEventsCallback) {
-        this.receivedEventsCallback(message['data'])
+        this.receivedEventsCallback(message['data'], true)
+      }
+    }
+    else if (data["status"] == "eventInfoUpdate") {
+      let message = data["message"]
+      if (this.receivedEventsCallback) {
+        this.receivedEventsCallback(message['data'], false)
       }
     }
     else if (data["status"] == "error") {
