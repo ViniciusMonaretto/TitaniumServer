@@ -1,36 +1,37 @@
+import os
 from threading import Thread
-from time import sleep
+import tornado.web
+
+from support.logger import Logger
 from .visualization.visualization_manager import Visualization, VisualizationWebSocketHandler
 
 from middleware.middleware import ClientMiddleware
-
-import tornado.web
-import os
 
 class AppManager:
     def __init__(self, middleware):
         self._middleware = ClientMiddleware(middleware)
         self.m_Server = AppServer(self._middleware)
-        self.thread = Thread(target = self.threaded_function, args = (10, ))   
+        self._thread = Thread(target = self.threaded_function, args = (10, ))   
 
     def threaded_function(self, args):
         self.m_Server.run()
     
     def run(self):
-        self.thread.start()
+        self._thread.start()
 
     def join(self):
-        self.thread.join()
+        self._thread.join()
 
 class AppServer:
+    _logger: Logger
     def __init__(self, middleware: ClientMiddleware):
         self._middleware = middleware
-        self.app = self.make_app()       
+        self.app = self.make_app()
+        self._logger = Logger()       
 
     def run(self):
-        self.value = 10
         self.app.listen(8888)  # Listen on port 8888
-        print("Server is running on http://localhost:8888")
+        self._logger.info("Server is running on http://localhost:8888")
         tornado.ioloop.PeriodicCallback(self.send_test_messages, 200).start()
         tornado.ioloop.IOLoop.current().start()
 

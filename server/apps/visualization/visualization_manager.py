@@ -1,9 +1,8 @@
-import tornado.ioloop
-import tornado.web
-import tornado.websocket
-import os
 import json
 import uuid
+import tornado.web
+import tornado.websocket
+
 from dataModules.alarm import Alarm
 from services.config_storage.config_storage_commands import ConfigStorageCommand
 from services.alarm_manager.alarm_manager_commands import AlarmManagerCommands
@@ -21,32 +20,43 @@ class Visualization(tornado.web.RequestHandler):
     def get(self):
         self.render("../../webApp/browser/index.html")
 
+    def data_received(self, chunk: bytes):
+        raise NotImplementedError()
+
 class VisualizationWebSocketHandler(tornado.websocket.WebSocketHandler):
+    _id: str = ""
+    _middleware:ClientMiddleware
     _panels_count = 1
+    _is_init = False
+
     _id_to_topic_map: dict[str, str] = {}
     _status_subscribers: dict[str, SubscriberInterface] = {}
+    _logger: Logger
 
     def check_origin(self, origin):
         return True
+    
+    def data_received(self, chunk: bytes):
+        raise NotImplementedError()
 
     def initialize(self, middleware):
         self._logger = Logger()
-        self.id = str(uuid.uuid4())
-        self._middleware:ClientMiddleware  = middleware
+        self._id = str(uuid.uuid4())
+        self._middleware  = middleware
         self._status_subscribers = {}
     
-    def open(self):
+    def open(self, *args, **kwargs):
         self._logger.debug("WebSocket opened")
         self._is_init = True
         self._middleware.send_command(ConfigHandlerCommands.GET_PANEL_LIST, {}, 
                                       lambda data: self.add_subscribers(data["data"]),
-                                      lambda message: self.send_error_message(message))
+                                      self.send_error_message)
         self.request_alarms({})
      
     def send_panel_info(self):
         self._middleware.send_command(ConfigHandlerCommands.GET_PANEL_LIST, {}, 
                                       lambda data: self.send_message_to_ui("uiConfig", data["data"]),
-                                      lambda message: self.send_error_message(message))
+                                      self.send_error_message)
 
     def on_message(self, message):
         self._logger.debug("You said: " + message)
@@ -92,12 +102,12 @@ class VisualizationWebSocketHandler(tornado.websocket.WebSocketHandler):
     def add_panel_request(self, panel_info):
         self._middleware.send_command(ConfigHandlerCommands.ADD_PANEL, panel_info, 
                                       lambda data: (self.add_panel_subscriber_command(data["data"]), self.send_panel_info()),
-                                      lambda message: self.send_error_message(message))
+                                      self.send_error_message)
         
     def remove_panel(self, panel_id):
         self._middleware.send_command(ConfigHandlerCommands.REMOVE_PANEL, {"id": panel_id}, 
                                       lambda data: self.remove_panel_subscriber(panel_id),
-                                      lambda message: self.send_error_message(message))
+                                      self.send_error_message)
     
     def remove_panel_subscriber(self, panel_id):
         panel_topic = self._id_to_topic_map[panel_id]
@@ -116,18 +126,18 @@ class VisualizationWebSocketHandler(tornado.websocket.WebSocketHandler):
     
     def add_alarm(self, alarm_info):
         self._middleware.send_command(AlarmManagerCommands.ADD_ALARM, alarm_info, 
-                                      lambda data: self.send_alarm_added(data),
-                                      lambda message: self.send_error_message(message))
+                                      self.send_alarm_added,
+                                      self.send_error_message)
     
     def request_events(self, commands):
         self._middleware.send_command(ConfigStorageCommand.GET_EVENTS_LIST, commands, 
-                                      lambda data: self.send_events(data),
-                                      lambda message: self.send_error_message(message))
+                                      self.send_events,
+                                      self.send_error_message)
 
-    def request_alarms(self, filter):
-        self._middleware.send_command(AlarmManagerCommands.GET_ALARMS, filter, 
-                                      lambda data: self.send_alarm_info(data),
-                                      lambda message: self.send_error_message(message))
+    def request_alarms(self, alarm_filter):
+        self._middleware.send_command(AlarmManagerCommands.GET_ALARMS, alarm_filter, 
+                                      self.send_alarm_info,
+                                      self.send_error_message)
         
     def send_events(self, data: list[Alarm]):
         self.send_message_to_ui("eventInfo", data) 
@@ -137,8 +147,8 @@ class VisualizationWebSocketHandler(tornado.websocket.WebSocketHandler):
         
     def remove_alarm(self, alarm_id):
         self._middleware.send_command(AlarmManagerCommands.REMOVE_ALARM, {"id": alarm_id}, 
-                                      lambda data: self.send_alarm_removed(data),
-                                      lambda message: self.send_error_message(message))
+                                      self.send_alarm_removed,
+                                      self.send_error_message)
      
     def send_alarm_added(self, data: Alarm):
         self._logger.info("Visualization.send_alarm_added: alarm added")
@@ -162,13 +172,13 @@ class VisualizationWebSocketHandler(tornado.websocket.WebSocketHandler):
         self.add_panel_subscriber(panel.topic, panel.gateway, panel.id)
         self.send_panel_info()
 
-    def add_panel_subscriber(self, topic: str, gateway: str, id: int):
+    def add_panel_subscriber(self, topic: str, gateway: str, panel_id: int):
         panel_topic = self.get_panel_topic(topic, gateway)
 
-        self._id_to_topic_map[id] = panel_topic
+        self._id_to_topic_map[panel_id] = panel_topic
 
         if(panel_topic not in self._status_subscribers):
-            self._status_subscribers[panel_topic] = StatuSubscribers(self.send_status, panel_topic, self.id + str(self._panels_count) )
+            self._status_subscribers[panel_topic] = StatuSubscribers(self.send_status, panel_topic, self._id + str(self._panels_count) )
             self._middleware.add_subscribe_to_status(self._status_subscribers[panel_topic], panel_topic)
         self._status_subscribers[panel_topic].add_count()
         self._panels_count+=1
