@@ -69,11 +69,12 @@ class AlarmManager(ServiceInterface):
 
                     for alarm in self._alarms_info[topic]:
                         if self.check_if_alarm_should_trigger(alarm, sensor_info.value):
-                            event_added = EventModel(alarm.id, 
-                                                     alarm.panel_id, 
-                                                     sensor_info.timestamp.timestamp(),
-                                                     sensor_info.value)
-                            events_to_add.append(event_added)
+                            evt = EventModel(alarm.id, 
+                                             alarm.panel_id, 
+                                             sensor_info.timestamp,
+                                             sensor_info.value)
+                            evt.name = alarm.name
+                            events_to_add.append(evt)
                 except KeyboardInterrupt:
                     break
                 except Exception as e:
@@ -87,7 +88,7 @@ class AlarmManager(ServiceInterface):
     
     def _send_event_status(self, event_list: list[EventModel]):
         for event_model in event_list:
-            self._middleware.send_status("Alarm/newevent", event_model)
+            self._middleware.send_status("Alarm/newevent", event_model.to_json())
 
     def add_check_status(self, status_info):
         try:

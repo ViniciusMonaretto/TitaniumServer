@@ -7,7 +7,7 @@
       </div>
       <div class="sensor-info-datacontainer">
         <div class="info-card-internal" style="width: 70%; height: 100%;">
-          <mat-card  style="height: 100%; width: 100%;">
+          <mat-card style="height: 100%; width: 100%;">
             <mat-card-title class="info-title-card">Medição da última hora</mat-card-title>
             <mat-card-content class="interior-container-card">
               <ng-container *ngIf="lineChartData && lineChartData.length > 0; else noSize">
@@ -42,11 +42,11 @@
           <mat-card style="width: 100%; height: calc(100% - 240px)">
             <mat-card-title class="info-title-card">Alarmes</mat-card-title>
             <mat-card-content class="interior-container-card">
-                <io-cloud-table
-                  [headerInfo]="headerInfo"
-                  [models]="events"
-                >
+              <div style="height: calc(100% - 60px);">
+                <io-cloud-table style="height: 100%;" [headerInfo]="headerInfo" [models]="events">
                 </io-cloud-table>
+              </div>
+
             </mat-card-content>
           </mat-card>
         </div>

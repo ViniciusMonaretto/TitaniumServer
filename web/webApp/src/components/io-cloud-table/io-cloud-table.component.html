@@ -1,28 +1,32 @@
 <div style="width: 100%; height: 100%;">
     <div style="display: flex; justify-content: space-between;padding-bottom: 30px;">
         <div *ngIf="title" style=" display: flex; align-items: center; font-size: xx-large;">
-        {{title}}
+            {{title}}
         </div>
-        <button *ngIf="addCallback.observers.length" mat-icon-button class="example-icon" (click)="addCallback.emit()" aria-label="Edit">
+        <button *ngIf="addCallback.observers.length" mat-icon-button class="example-icon" (click)="addCallback.emit()"
+            aria-label="Edit">
             <mat-icon>add</mat-icon>
         </button>
     </div>
-    
+
     <div class="rowTable">
         <div class="headerCell" *ngFor="let header of headerInfo"> {{header[1]}}</div>
         <div *ngIf="editCallback.observers.length > 0 || deleteCallback.observers.length > 0" class="headerCell"></div>
     </div>
-    <div class="rowTable" *ngFor="let model of models">
-        <div class="bodyCell" *ngFor="let header of headerInfo"> {{getModelInfo(header[0], model)}}</div>
-        <div *ngIf="editCallback.observers.length > 0 || deleteCallback.observers.length > 0" class="bodyCell">
-            <button *ngIf="editCallback.observers.length > 0" mat-icon-button class="example-icon" (click)="editCallback.emit()" aria-label="Edit">
-                <mat-icon>edit</mat-icon>
-            </button>
-            <button *ngIf="deleteCallback.observers.length > 0" mat-icon-button class="example-icon" (click)="onDeleteCallback(model.id)" aria-label="Delete">
-                <mat-icon>delete</mat-icon>
-            </button>
+    <div class="rowsContainer">
+        <div class="rowTable" *ngFor="let model of models">
+            <div class="bodyCell" *ngFor="let header of headerInfo"> {{getModelInfo(header[0], model)}}</div>
+            <div *ngIf="editCallback.observers.length > 0 || deleteCallback.observers.length > 0" class="bodyCell">
+                <button *ngIf="editCallback.observers.length > 0" mat-icon-button class="example-icon"
+                    (click)="editCallback.emit()" aria-label="Edit">
+                    <mat-icon>edit</mat-icon>
+                </button>
+                <button *ngIf="deleteCallback.observers.length > 0" mat-icon-button class="example-icon"
+                    (click)="onDeleteCallback(model.id)" aria-label="Delete">
+                    <mat-icon>delete</mat-icon>
+                </button>
+            </div>
         </div>
-        
-        
     </div>
+
 </div>

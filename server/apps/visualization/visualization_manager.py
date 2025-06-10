@@ -200,13 +200,19 @@ class VisualizationWebSocketHandler(tornado.websocket.WebSocketHandler):
             "status": status,
             "message": message
         }
-        self.write_message(obj)
+        tornado.ioloop.IOLoop.current().add_callback(self.safe_write_message, obj)
 
     def send_status(self, status_data):
         self.send_message_to_ui("sensorUpdate", status_data)
 
     def send_event(self, event_data):
-        self.send_message_to_ui("eventInfoUpdate", event_data)
+        self.send_message_to_ui("eventInfoUpdate", event_data["data"])
+
+    def safe_write_message(self, obj):
+        try:
+            self.write_message(obj)
+        except Exception as e:
+            self._logger.error(f"Failed to write message to UI: {e}")
 
     def on_close(self):
         self._logger.debug("WebSocket closed")

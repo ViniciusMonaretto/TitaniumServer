@@ -68,7 +68,7 @@ export class AlarmManagerService {
 
     private receiveEventsCallback(panelId: number, events: Array<any>, replaceInfo: boolean)
     {
-        if(panelId in this.events)
+        if(!(panelId in this.events))
         {
             this.events[panelId] = {requestMade: false, eventList: []}
         }

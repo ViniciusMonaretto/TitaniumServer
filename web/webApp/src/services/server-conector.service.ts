@@ -18,7 +18,7 @@ export class ServerConectorService {
   private alarmRequest: ((alarms: any) => void) | null = null;
   private addAlarmRequest: ((alarms: any) => void) | null = null;
   private removeAlarmRequest: ((alarms: any) => void) | null = null;
-  private receivedEventsCallback: ((events: any[], replaceValue: boolean) => void) | null = null;
+  private receivedEventsCallback: ((events: {panelId: number, events: any[]}, replaceValue: boolean) => void) | null = null;
 
   constructor(private uiPanelService: UiPanelService, private dialog: MatDialog) {
     this.socket = null
@@ -195,7 +195,7 @@ export class ServerConectorService {
     else if (data["status"] == "eventInfoUpdate") {
       let message = data["message"]
       if (this.receivedEventsCallback) {
-        this.receivedEventsCallback(message['data'], false)
+        this.receivedEventsCallback({panelId: message['data']["panelId"], events: [message['data']]}, false)
       }
     }
     else if (data["status"] == "error") {
