@@ -56,7 +56,9 @@ export class AlarmAddWindowComponent {
 
   getFullTopicName()
   {
-    return this.selectedSensor? GetTableName( this.selectedSensor?.gateway, this.selectedSensor?.topic):""
+    return this.selectedSensor? GetTableName( this.selectedSensor?.gateway, 
+      this.selectedSensor?.topic, 
+      this.selectedSensor?.indicator.toString()):""
   }
 
   getAlarmData() {

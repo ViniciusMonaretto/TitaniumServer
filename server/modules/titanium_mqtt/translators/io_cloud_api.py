@@ -16,7 +16,7 @@ class IoCloudApiTranslator(PayloadTranslator):
 
         msg_split = topic.split('/')
 
-        if not len(msg_split) == 5:
+        if not len(msg_split) == 4:
             logger.error(f"IoCloudApiTranslator::translate_payload: mqtt topic {topic} not valid")
             return None
         

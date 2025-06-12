@@ -92,7 +92,7 @@ class ConfigStorage(ServiceInterface):
             cursor.execute('''
                 INSERT INTO Panels (name, gateway, topic, color, panelGroup, indicator, sensorType)
                 VALUES (?, ?, ?, ?, ?, ?, ?)
-            ''', (panel.name, panel.gateway, panel.topic, panel.color, panel.group, panel.sensor_type))
+            ''', (panel.name, panel.gateway, panel.topic, panel.color, panel.group, panel.indicator, panel.sensor_type))
 
             conn.commit()
             new_id = cursor.lastrowid

@@ -68,7 +68,7 @@ export class UiPanelService {
       for(var sensor of panel)
       {
         this.AddSensorToPanel(sensor, groupName);
-        let fullTopic = GetTableName(sensor.gateway, sensor.topic)
+        let fullTopic = GetTableName(sensor.gateway, sensor.topic, sensor.indicator.toString())
         this.AddSubscription(fullTopic, sensor)
       }
     }
@@ -78,9 +78,9 @@ export class UiPanelService {
       this.subscriptioMap[tableName].splice(indexToRemove, 1);
     }
 
-    GetCachedSelectedSensorInfo(topic: string, gateway: string)
+    GetCachedSelectedSensorInfo(topic: string, gateway: string, indicator: number)
     {
-      let tableName = GetTableName(gateway, topic)
+      let tableName = GetTableName(gateway, topic, indicator.toString())
       if(tableName in this.sensorCachedCurrentInfo)
       {
         return this.sensorCachedCurrentInfo[tableName]
@@ -97,7 +97,7 @@ export class UiPanelService {
       let arr = []
       for(let sensorInfo of sensorInfos)
       {
-        let graphName = GetTableName(sensorInfo["gateway"], sensorInfo["topic"])
+        let graphName = GetTableName(sensorInfo["gateway"], sensorInfo["topic"], sensorInfo["indicator"])
         arr.push(graphName)
       }
       if(callback)
@@ -145,7 +145,9 @@ export class UiPanelService {
         {
           let info = {}
 
-          let panel = this.panels[obj.group].temperature.find(x=> GetTableName(x.gateway, x.topic) == tableName)
+          let panel = this.panels[obj.group].temperature.find(x=> GetTableName(x.gateway, 
+                                                                               x.topic, 
+                                                                               x.indicator.toString()) == tableName)
           if(panel)
           {
             info = {
@@ -170,10 +172,10 @@ export class UiPanelService {
       }
     }
 
-    OnSubscriptionUpdate(topic: string, value: any)
+    OnSubscriptionUpdate(topic: string, status_update: any)
     {
-      let topicInfo = topic.split('/')
-      let tableFullName = GetTableName(topicInfo[0], topicInfo[1])
+      let topicInfo = topic.split('-')
+      let tableFullName = GetTableName(topicInfo[0], topicInfo[1], topicInfo[2])
       
       if(tableFullName in this.subscriptioMap)
       {
@@ -181,12 +183,12 @@ export class UiPanelService {
         {
           if("topic" in callbackObj )
           {
-            callbackObj.value = value.data
+            callbackObj.value = status_update.value
             if(tableFullName in this.sensorCachedCurrentInfo)
             {
               this.sensorCachedCurrentInfo[tableFullName].push({
-                timestamp: value["timestamp"],
-                value: value["data"],
+                timestamp: status_update["timestamp"],
+                value: status_update["data"],
               })
               let filterDate = new Date()
               filterDate.setHours(filterDate.getHours() - 1)
@@ -195,7 +197,7 @@ export class UiPanelService {
           }
           else
           {
-            callbackObj(tableFullName, value)
+            callbackObj(tableFullName, status_update)
           }
           
         }

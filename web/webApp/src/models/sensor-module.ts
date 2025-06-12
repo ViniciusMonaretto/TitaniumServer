@@ -6,6 +6,7 @@ export class SensorModule{
     public gateway: string = "";
     public topic: string = "";
     public color: string = "#000000"
+    public indicator: number = 0
     public sensorType: SensorTypesEnum = SensorTypesEnum.PREASSURE
     public value: Number|null = null
 
@@ -14,7 +15,7 @@ export class SensorModule{
     }
 }
 
-export function GetTableName(gateway:string, table: string)
+export function GetTableName(gateway:string, table: string, indicator: string)
 {
-    return gateway == "*"?table:gateway + '-' + table
+    return gateway == "*"?table:gateway + '-' + table + '-' + indicator
 }

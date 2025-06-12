@@ -12,6 +12,10 @@
     <mat-label>Tópico</mat-label>
     <input matInput [(ngModel)]="sensorModule.topic" />
   </mat-form-field>
+  <mat-form-field appearance="fill">
+    <mat-label>Indicador</mat-label>
+    <input matInput type="number" [(ngModel)]="sensorModule.indicator" />
+  </mat-form-field>
   <mat-form-field appearance="fill" *ngIf="!this.settedType">
     <mat-label>Tipo</mat-label>
     <mat-select  [(ngModel)]="sensorModule.sensorType">

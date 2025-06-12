@@ -57,6 +57,7 @@ export class SensorAddWindowComponent {
       "topic": this.sensorModule.topic,
       "sensorType": this.sensorModule.sensorType,
       "group": this.group,
+      "indicator": this.sensorModule.indicator,
       "color": this.sensorModule.color
     }
   }
@@ -65,7 +66,8 @@ export class SensorAddWindowComponent {
   {
     return this.sensorModule.name != "" &&
            this.sensorModule.gateway != "" &&
-           this.sensorModule.topic != "" 
+           this.sensorModule.topic != "" &&
+           this.sensorModule.indicator >= 0 
   }
 
   onAddCLick(): void{

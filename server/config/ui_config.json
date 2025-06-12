@@ -11,7 +11,7 @@
         },
         {
             "name": "Temp2",
-            "gateway": "1C692031BE05",
+            "gateway": "1C692031BE04",
             "topic": "temperature",
             "color": "#a83244",
             "sensorType": "Temperature",
@@ -20,7 +20,7 @@
         },
         {
             "name": "Temp3",
-            "gateway": "1C692031BE06",
+            "gateway": "1C692031BE04",
             "topic": "temperature",
             "color": "#a83295",
             "sensorType": "Temperature",
@@ -29,7 +29,7 @@
         },
         {
             "name": "Temp4",
-            "gateway": "1C692031BE07",
+            "gateway": "1C692031BE04",
             "topic": "temperature",
             "color": "#32a88b",
             "sensorType": "Temperature",
@@ -38,7 +38,7 @@
         },
         {
             "name": "Temp5",
-            "gateway": "1C692031BE08",
+            "gateway": "1C692031BE04",
             "topic": "temperature",
             "color": "#d61515",
             "sensorType": "Temperature",
@@ -47,7 +47,7 @@
         },
         {
             "name": "Temp6",
-            "gateway": "1C692031BE09",
+            "gateway": "1C692031BE04",
             "topic": "temperature",
             "color": "#15d6bc",
             "sensorType": "Temperature",
@@ -56,7 +56,7 @@
         },
         {
             "name": "Temp7",
-            "gateway": "1C692031BE10",
+            "gateway": "1C692031BE04",
             "topic": "temperature",
             "color": "",
             "sensorType": "Temperature",
@@ -65,7 +65,7 @@
         },
         {
             "name": "Temp8",
-            "gateway": "1C692031BE11",
+            "gateway": "1C692031BE04",
             "topic": "temperature",
             "color": "#151fd6",
             "sensorType": "Temperature",
@@ -74,7 +74,7 @@
         },
         {
             "name": "Temp9",
-            "gateway": "1C692031BE12",
+            "gateway": "1C692031BE04",
             "topic": "temperature",
             "color": "#7f15d6",
             "sensorType": "Temperature",
@@ -83,7 +83,7 @@
         },
         {
             "name": "Temp10",
-            "gateway": "1C692031BE13",
+            "gateway": "1C692031BE04",
             "topic": "temperature",
             "color": "#d615d0",
             "sensorType": "Temperature",
@@ -92,7 +92,7 @@
         },
         {
             "name": "Temp11",
-            "gateway": "1C692031BE14",
+            "gateway": "1C692031BE04",
             "topic": "temperature",
             "color": "#d6d015",
             "sensorType": "Temperature",
@@ -101,7 +101,7 @@
         },
         {
             "name": "Temp12",
-            "gateway": "1C692031BE15",
+            "gateway": "1C692031BE04",
             "topic": "temperature",
             "color": "#1fd615",
             "sensorType": "Temperature",
@@ -110,7 +110,7 @@
         },
         {
             "name": "Temp13",
-            "gateway": "1C692031BE16",
+            "gateway": "1C692031BE04",
             "topic": "temperature",
             "color": "#15d68c",
             "sensorType": "Temperature",
@@ -119,7 +119,7 @@
         },
         {
             "name": "Temp14",
-            "gateway": "1C692031BE17",
+            "gateway": "1C692031BE04",
             "topic": "temperature",
             "color": "#156cd6",
             "sensorType": "Temperature",
@@ -128,7 +128,7 @@
         },
         {
             "name": "Temp15",
-            "gateway": "1C692031BE18",
+            "gateway": "1C692031BE04",
             "topic": "temperature",
             "color": "#d61599",
             "sensorType": "Temperature",
@@ -137,7 +137,7 @@
         },
         {
             "name": "Temp16",
-            "gateway": "1C692031BE19",
+            "gateway": "1C692031BE04",
             "topic": "temperature",
             "color": "#b6d615",
             "sensorType": "Temperature",
@@ -146,7 +146,7 @@
         },
         {
             "name": "Temp17",
-            "gateway": "1C692031BE20",
+            "gateway": "1C692031BE04",
             "topic": "temperature",
             "color": "#15d659",
             "sensorType": "Temperature",
@@ -155,7 +155,7 @@
         },
         {
             "name": "Temp18",
-            "gateway": "1C692031BE21",
+            "gateway": "1C692031BE04",
             "topic": "temperature",
             "color": "#d64f15",
             "sensorType": "Temperature",
@@ -164,7 +164,7 @@
         },
         {
             "name": "Temp19",
-            "gateway": "1C692031BE22",
+            "gateway": "1C692031BE04",
             "topic": "temperature",
             "color": "#1599d6",
             "sensorType": "Temperature",
@@ -173,7 +173,7 @@
         },
         {
             "name": "Temp20",
-            "gateway": "1C692031BE23",
+            "gateway": "1C692031BE04",
             "topic": "temperature",
             "color": "#1542d6",
             "sensorType": "Temperature",

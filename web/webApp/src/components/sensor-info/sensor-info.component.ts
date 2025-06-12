@@ -96,7 +96,7 @@ export class SensorInfoComponent implements OnInit {
   getStatusHistory()
   {
     let gtw = this.sensorInfo?.gateway=="*"?"":this.sensorInfo?.gateway 
-    this.onLoad.emit({"gateway": gtw, "table": this.sensorInfo?.topic})
+    this.onLoad.emit({"gateway": gtw, "table": this.sensorInfo?.topic, "indicator": this.sensorInfo?.indicator})
   }
 
 }

@@ -74,7 +74,7 @@ export class SensorGroupComponent implements OnInit {
     let sensor = this.getSensorSelected()
     if(sensor)
     {
-      return this.UiPanelsService.GetCachedSelectedSensorInfo(sensor.topic, sensor.gateway)
+      return this.UiPanelsService.GetCachedSelectedSensorInfo(sensor.topic, sensor.gateway, sensor.indicator)
     }
     return []
     
@@ -92,7 +92,7 @@ export class SensorGroupComponent implements OnInit {
 
   loadInfo(tableInfo:any)
   {
-    let info = this.UiPanelsService.GetCachedSelectedSensorInfo(tableInfo['topic'], tableInfo['gateway'])
+    let info = this.UiPanelsService.GetCachedSelectedSensorInfo(tableInfo['topic'], tableInfo['gateway'], tableInfo['indicator'])
     if(info.length == 0)
     {
       var endDate = new Date();

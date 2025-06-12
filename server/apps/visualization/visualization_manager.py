@@ -159,13 +159,13 @@ class VisualizationWebSocketHandler(tornado.websocket.WebSocketHandler):
         self.send_message_to_ui("alarmRemoved", data)  
     
     def initialize_event_sub(self):
-        self._event_subscriber = StatuSubscribers(self.send_event, "Alarm/newevent" )
-        self._middleware.add_subscribe_to_status( self._event_subscriber, "Alarm/newevent")
+        self._event_subscriber = StatuSubscribers(self.send_event, "alarm-newevent-*" )
+        self._middleware.add_subscribe_to_status( self._event_subscriber, "alarm-newevent-*")
 
-    def add_subscribers(self, panels_info: dict[str: list[Panel]]):
+    def add_subscribers(self, panels_info: dict[str: list[any]]):
         for panels in panels_info.values():
             for panel in panels:
-                self.add_panel_subscriber(panel)
+                self.add_panel_subscriber(Panel(panel))
         
         self.send_panel_info()
 

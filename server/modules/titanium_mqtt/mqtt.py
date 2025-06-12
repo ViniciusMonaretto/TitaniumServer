@@ -10,7 +10,7 @@ from support.logger import Logger
 from .translators.translator_model import PayloadTranslator
  
 
-SUBSCRIBE_TOPIC_LIST = [("/titanium/#", 0)]
+SUBSCRIBE_TOPIC_LIST = [("1C692031BE04/#", 0)]
 
 PUBLISH_TOPIC_LIST =   ["GetLevel", "titanium/level"]
 
@@ -76,13 +76,11 @@ class TitaniumMqtt:
 
                 if (mqtt_message):
                     topic_name = TitaniumMqtt.get_topic_from_mosquitto_obj(mqtt_message)
-                    self._middleware.send_status(topic_name, mqtt_message)
+                    self._middleware.send_status(topic_name, mqtt_message.payload)
             except queue.Empty:
                 pass
             except Exception as e:
                 self._logger.error(f"Mqtt.handle_incoming_messages: Error Parsing messages {e}")
-        
-        
     
     def stop(self):
         self._end_thread = True

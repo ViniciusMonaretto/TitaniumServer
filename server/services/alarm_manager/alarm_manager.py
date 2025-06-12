@@ -87,7 +87,7 @@ class AlarmManager(ServiceInterface):
     
     def _send_event_status(self, event_list: list[EventModel]):
         for event_model in event_list:
-            self._middleware.send_status("Alarm/newevent", event_model.to_json())
+            self._middleware.send_status("alarm-newevent-*", event_model.to_json())
 
     def add_check_status(self, status_info):
         try:
