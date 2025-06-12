@@ -1,0 +1,15 @@
+from enum import Enum
+from typing import Any
+
+
+class MqttActions(Enum):
+    READ = "read"
+    CALIBRATE = "calibrate"
+    STATUS = "status"
+
+class MqttPayloadModel:
+    gateway: str = ""
+    subtopic: str = ""
+    indicator: int = 0
+    action: MqttActions = MqttActions.READ
+    payload: Any = {}
