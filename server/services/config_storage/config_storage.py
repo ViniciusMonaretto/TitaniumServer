@@ -2,8 +2,7 @@ import sqlite3
 from datetime import datetime
 import uuid
 import pytz
-from middleware.middleware import ClientMiddleware
-
+from middleware.client_middleware import ClientMiddleware
 
 from dataModules.panel import Panel
 from dataModules.alarm import Alarm
@@ -27,9 +26,6 @@ class ConfigStorage(ServiceInterface):
         self.create_db()
 
         self._logger.info("ConfigStorage initialized")
-        
-    def get_panel_topic(self, gateway, status_name):
-        return gateway + "/" + status_name
     
     def initialize_commands(self):
         commands = {
@@ -51,6 +47,7 @@ class ConfigStorage(ServiceInterface):
                 topic TEXT NOT NULL,
                 color TEXT NOT NULL,
                 panelGroup TEXT NOT NULL,
+                indicator TEXT NOT NULL,
                 sensorType TEXT NOT NULL
             );
             """)
@@ -93,8 +90,8 @@ class ConfigStorage(ServiceInterface):
             cursor = conn.cursor()
 
             cursor.execute('''
-                INSERT INTO Panels (name, gateway, topic, color, panelGroup, sensorType)
-                VALUES (?, ?, ?, ?, ?, ?)
+                INSERT INTO Panels (name, gateway, topic, color, panelGroup, indicator, sensorType)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
             ''', (panel.name, panel.gateway, panel.topic, panel.color, panel.group, panel.sensor_type))
 
             conn.commit()

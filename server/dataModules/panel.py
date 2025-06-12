@@ -22,6 +22,7 @@ class Panel:
     topic = ""
     color = ""
     group = ""
+    indicator = ""
     sensor_type = SensorTypes.Unknow
     def __init__(self, obj):
         if "id" in obj:
@@ -30,6 +31,7 @@ class Panel:
         self.gateway = obj["gateway"]
         self.topic = obj["topic"]
         self.color = obj["color"]
+        self.indicator = obj["indicator"]
         if "panelGroup" in obj:
             self.group = obj["panelGroup"]
         else:
@@ -47,5 +49,6 @@ class Panel:
             "topic": self.topic,
             "color": self.color,
             "group": self.group,
+            "indicator": self.indicator,
             "sensorType": self.sensor_type,
         }

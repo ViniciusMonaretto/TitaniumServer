@@ -5,7 +5,7 @@ import tornado.web
 from support.logger import Logger
 from .visualization.visualization_manager import Visualization, VisualizationWebSocketHandler
 
-from middleware.middleware import ClientMiddleware
+from middleware.client_middleware import ClientMiddleware
 
 class AppManager:
     def __init__(self, middleware):

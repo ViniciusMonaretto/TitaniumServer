@@ -8,7 +8,7 @@ from services.sensor_data_storage.sensor_data_storage import SensorDataStorage
 from .config_handler.config_handler import ConfigHandler
 from support.logger import Logger
 
-from middleware.middleware import ClientMiddleware
+from middleware.client_middleware import ClientMiddleware
 
 from .config_storage.config_storage import ConfigStorage
 

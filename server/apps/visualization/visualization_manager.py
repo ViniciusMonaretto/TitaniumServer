@@ -1,5 +1,4 @@
 import json
-import uuid
 import tornado.web
 import tornado.websocket
 
@@ -11,7 +10,7 @@ from support.logger import Logger
 from dataModules.panel import Panel
 from middleware.subscriber_interface import SubscriberInterface
 from middleware.status_subscriber import StatuSubscribers
-from middleware.middleware import ClientMiddleware
+from middleware.client_middleware import ClientMiddleware
 from services.sensor_data_storage.sensor_data_storage_commands import SensorDataStorageCommands
 
 from services.config_handler.config_handler_command import ConfigHandlerCommands
@@ -26,7 +25,6 @@ class Visualization(tornado.web.RequestHandler):
 class VisualizationWebSocketHandler(tornado.websocket.WebSocketHandler):
     _id: str = ""
     _middleware:ClientMiddleware
-    _panels_count = 1
     _is_init = False
 
     _id_to_topic_map: dict[str, str] = {}
@@ -43,7 +41,6 @@ class VisualizationWebSocketHandler(tornado.websocket.WebSocketHandler):
 
     def initialize(self, middleware):
         self._logger = Logger()
-        self._id = str(uuid.uuid4())
         self._middleware  = middleware
         self._status_subscribers = {}
         self.initialize_event_sub()
@@ -161,34 +158,30 @@ class VisualizationWebSocketHandler(tornado.websocket.WebSocketHandler):
         self._logger.info("Visualization.send_alarm_removed: alarm removed")
         self.send_message_to_ui("alarmRemoved", data)  
     
-    def get_panel_topic(self, topic: Panel, gateway):
-        return  gateway + "/" + topic
-    
     def initialize_event_sub(self):
-        self._event_subscriber = StatuSubscribers(self.send_event, "Alarm/newevent", str(uuid.uuid4()) )
+        self._event_subscriber = StatuSubscribers(self.send_event, "Alarm/newevent" )
         self._middleware.add_subscribe_to_status( self._event_subscriber, "Alarm/newevent")
 
-    def add_subscribers(self, panels_info: dict[str: list[object]]):
+    def add_subscribers(self, panels_info: dict[str: list[Panel]]):
         for panels in panels_info.values():
             for panel in panels:
-                self.add_panel_subscriber(panel["topic"], panel["gateway"], panel["id"])
+                self.add_panel_subscriber(panel)
         
         self.send_panel_info()
 
     def add_panel_subscriber_command(self, panel: Panel):
-        self.add_panel_subscriber(panel.topic, panel.gateway, panel.id)
+        self.add_panel_subscriber(panel)
         self.send_panel_info()
 
-    def add_panel_subscriber(self, topic: str, gateway: str, panel_id: int):
-        panel_topic = self.get_panel_topic(topic, gateway)
+    def add_panel_subscriber(self, panel: Panel):
+        panel_topic = ClientMiddleware.get_status_topic(panel.gateway, panel.topic, panel.indicator)
 
-        self._id_to_topic_map[panel_id] = panel_topic
+        self._id_to_topic_map[panel.id] = panel_topic
 
         if(panel_topic not in self._status_subscribers):
-            self._status_subscribers[panel_topic] = StatuSubscribers(self.send_status, panel_topic, self._id + str(self._panels_count) )
+            self._status_subscribers[panel_topic] = StatuSubscribers(self.send_status, panel_topic )
             self._middleware.add_subscribe_to_status(self._status_subscribers[panel_topic], panel_topic)
         self._status_subscribers[panel_topic].add_count()
-        self._panels_count+=1
         
     def send_error_message(self, message: str):
         self.send_message_to_ui("error", message)

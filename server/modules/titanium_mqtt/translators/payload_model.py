@@ -10,6 +10,6 @@ class MqttActions(Enum):
 class MqttPayloadModel:
     gateway: str = ""
     subtopic: str = ""
-    indicator: int = 0
+    indicator: str = ""
     action: MqttActions = MqttActions.READ
     payload: Any = {}

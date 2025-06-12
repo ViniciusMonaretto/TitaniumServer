@@ -6,7 +6,7 @@ from support.logger import Logger
 import queue
 import uuid
 from dataModules.alarm import Alarm, AlarmType
-from middleware.middleware import ClientMiddleware
+from middleware.client_middleware import ClientMiddleware
 from middleware.status_subscriber import StatuSubscribers
 from services.alarm_manager.alarm_manager_commands import AlarmManagerCommands
 from services.config_storage.config_storage import ConfigStorage
@@ -21,7 +21,6 @@ class AlarmManager(ServiceInterface):
         self._middleware = middleware
         self._config_storage = config_storage
 
-        self.id = str(uuid.uuid4())
         self._subscriptions_add = 1
 
         self._check_queue = queue.Queue()
@@ -132,9 +131,7 @@ class AlarmManager(ServiceInterface):
     def setup_alarm(self, alarm: Alarm):
         topic = alarm.topic.replace("-","/")
         if topic not in self._status_subscribers:
-            self._status_subscribers[topic] = StatuSubscribers(self.add_check_status, 
-                                                                      topic, 
-                                                                      self.id + str(self._subscriptions_add))
+            self._status_subscribers[topic] = StatuSubscribers(self.add_check_status, topic)
             self._middleware.add_subscribe_to_status(self._status_subscribers[topic], topic)
             self._subscriptions_add+=1
 

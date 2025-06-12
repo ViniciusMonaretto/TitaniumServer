@@ -2,7 +2,7 @@ import json
 import os
 import threading
 from typing import Union
-from middleware.middleware import ClientMiddleware
+from middleware.client_middleware import ClientMiddleware
 
 from dataModules.panel import Panel
 from services.sensor_data_storage.sensor_data_storage import SensorDataStorage
@@ -93,7 +93,7 @@ class ConfigHandler(ServiceInterface):
             index = panel.id
         if( index != -1):
             panel.id = index
-            result, message = self._sensor_data_storage.add_new_subscription(panel.topic, panel.gateway)
+            result, message = self._sensor_data_storage.add_new_subscription(panel.topic, panel.gateway, panel.indicator)
         
             if result:
                 self._panels_info[group_name].append(panel)

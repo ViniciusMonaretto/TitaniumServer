@@ -4,6 +4,7 @@ import paho.mqtt.client as mqtt
 
 from modules.titanium_mqtt.translators.io_cloud_api import IoCloudApiTranslator
 from modules.titanium_mqtt.translators.payload_model import MqttPayloadModel
+from middleware.client_middleware import ClientMiddleware
 from support.logger import Logger
 
 from .translators.translator_model import PayloadTranslator
@@ -72,7 +73,7 @@ class TitaniumMqtt:
             try:
                 msg = self._read_queue.get_nowait()
                 mqtt_message = self._translator.translate_incoming_message(msg.topic, msg.payload)
-                
+
                 if (mqtt_message):
                     topic_name = TitaniumMqtt.get_topic_from_mosquitto_obj(mqtt_message)
                     self._middleware.send_status(topic_name, mqtt_message)
@@ -96,4 +97,4 @@ class TitaniumMqtt:
 
     @staticmethod
     def get_topic_from_mosquitto_obj(mqtt_message: MqttPayloadModel):
-        return mqtt_message.gateway + '-' + mqtt_message.subtopic + "-" + mqtt_message.indicator
+        return ClientMiddleware.get_status_topic( mqtt_message.gateway, mqtt_message.subtopic, mqtt_message.indicator)

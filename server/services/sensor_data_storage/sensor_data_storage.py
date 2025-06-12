@@ -1,21 +1,25 @@
-from datetime import datetime
+# Standard library imports
+import threading
 import queue
-from typing import Union
 import uuid
+from datetime import datetime
 
+# Third-party imports
 import pytz
-from middleware.middleware import ClientMiddleware
+from motor.motor_asyncio import AsyncIOMotorClient
+from pymongo import ASCENDING
+from typing import Union
+
+# Local application imports
+from middleware.client_middleware import ClientMiddleware
 from dataModules.sensor_info import SensorInfo
 from middleware.status_subscriber import StatuSubscribers
 from services.sensor_data_storage.async_loop_thread import AsyncioLoopThread
 from services.sensor_data_storage.sensor_data_storage_commands import SensorDataStorageCommands
 from services.service_interface import ServiceInterface
 from support.logger import Logger
-from pymongo import ASCENDING  # Needed for specifying index order
 
-from motor.motor_asyncio import AsyncIOMotorClient
-import asyncio
-import threading
+
 
 
 MONGO_DB_URI = "mongodb://root:example@localhost:27017/"
@@ -102,18 +106,15 @@ class SensorDataStorage(ServiceInterface):
             threading.Event().wait(1)
 
 
-    def add_new_subscription(self, topic: str, gateway: str) ->  Union[bool, str]:
+    def add_new_subscription(self, topic: str, gateway: str, indicator: str) ->  Union[bool, str]:
         try:
-            self.subscribe_to_status(gateway, topic)
+            self.subscribe_to_status(gateway, topic, indicator)
             return True, ""
         
         except Exception as e:
             message = f"SensorDataStorage::add_new_subscription: Exceptio creating new table {e}"
             self._logger.error(message)
             return False, message
-    
-    def get_panel_topic(self, gateway, status_name):
-        return gateway + "/" + status_name
 
     def add_sensor_data_to_queue(self, status_info):
         try:
@@ -123,20 +124,18 @@ class SensorDataStorage(ServiceInterface):
         except Exception as e:
             self._logger.error(f"SensorDataStorage::add_sensor_data_to_queue: Error adding data to queue {e}")
     
-    def subscribe_to_status(self, gateway, status_name):
-        topic = self.get_panel_topic(gateway, status_name)
+    def subscribe_to_status(self, gateway, status_name, indicator):
+        topic = ClientMiddleware.get_status_topic(gateway, status_name, indicator)
         if(not topic in self._status_subscribers):
-            self._status_subscribers[topic] = StatuSubscribers(self.add_sensor_data_to_queue, topic, self.id + str(self._subscriptions_add))
+            self._status_subscribers[topic] = StatuSubscribers(self.add_sensor_data_to_queue, topic)
             self._middleware.add_subscribe_to_status(self._status_subscribers[topic], topic)
             self._subscriptions_add+=1
 
-    def remove_subscription_to_status(self, gateway, status_name):
-        topic = self.get_panel_topic(gateway, status_name)
+    def remove_subscription_from_status(self, gateway, status_name, indicator):
+        topic = ClientMiddleware.get_status_topic(gateway, status_name, indicator)
         if(topic in self._status_subscribers):
             self._middleware.remove_subscribe_from_status(self._status_subscribers[topic], topic)
             del self._status_subscribers[topic]
-
-    
 
     def add_sensor_info_command(self, command):
         data_info = command["data"]

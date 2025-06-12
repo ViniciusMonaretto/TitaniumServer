@@ -6,6 +6,7 @@
             "topic": "temperature",
             "color": "#32a852",
             "sensorType": "Temperature",
+            "indicator": "0",
             "group": "camera 1"
         },
         {
@@ -14,6 +15,7 @@
             "topic": "temperature",
             "color": "#a83244",
             "sensorType": "Temperature",
+            "indicator": "1",
             "group": "camera 1"
         },
         {
@@ -22,6 +24,7 @@
             "topic": "temperature",
             "color": "#a83295",
             "sensorType": "Temperature",
+            "indicator": "2",
             "group": "camera 1"
         },
         {
@@ -30,6 +33,7 @@
             "topic": "temperature",
             "color": "#32a88b",
             "sensorType": "Temperature",
+            "indicator": "3",
             "group": "camera 1"
         },
         {
@@ -38,6 +42,7 @@
             "topic": "temperature",
             "color": "#d61515",
             "sensorType": "Temperature",
+            "indicator": "4",
             "group": "camera 1"
         },
         {
@@ -46,6 +51,7 @@
             "topic": "temperature",
             "color": "#15d6bc",
             "sensorType": "Temperature",
+            "indicator": "5",
             "group": "camera 1"
         },
         {
@@ -54,6 +60,7 @@
             "topic": "temperature",
             "color": "",
             "sensorType": "Temperature",
+            "indicator": "6",
             "group": "camera 1"
         },
         {
@@ -62,6 +69,7 @@
             "topic": "temperature",
             "color": "#151fd6",
             "sensorType": "Temperature",
+            "indicator": "7",
             "group": "camera 1"
         },
         {
@@ -70,6 +78,7 @@
             "topic": "temperature",
             "color": "#7f15d6",
             "sensorType": "Temperature",
+            "indicator": "8",
             "group": "camera 1"
         },
         {
@@ -78,6 +87,7 @@
             "topic": "temperature",
             "color": "#d615d0",
             "sensorType": "Temperature",
+            "indicator": "9",
             "group": "camera 1"
         },
         {
@@ -86,6 +96,7 @@
             "topic": "temperature",
             "color": "#d6d015",
             "sensorType": "Temperature",
+            "indicator": "10",
             "group": "camera 1"
         },
         {
@@ -94,6 +105,7 @@
             "topic": "temperature",
             "color": "#1fd615",
             "sensorType": "Temperature",
+            "indicator": "11",
             "group": "camera 1"
         },
         {
@@ -102,6 +114,7 @@
             "topic": "temperature",
             "color": "#15d68c",
             "sensorType": "Temperature",
+            "indicator": "12",
             "group": "camera 1"
         },
         {
@@ -110,6 +123,7 @@
             "topic": "temperature",
             "color": "#156cd6",
             "sensorType": "Temperature",
+            "indicator": "13",
             "group": "camera 1"
         },
         {
@@ -118,6 +132,7 @@
             "topic": "temperature",
             "color": "#d61599",
             "sensorType": "Temperature",
+            "indicator": "14",
             "group": "camera 1"
         },
         {
@@ -126,6 +141,7 @@
             "topic": "temperature",
             "color": "#b6d615",
             "sensorType": "Temperature",
+            "indicator": "15",
             "group": "camera 1"
         },
         {
@@ -134,6 +150,7 @@
             "topic": "temperature",
             "color": "#15d659",
             "sensorType": "Temperature",
+            "indicator": "16",
             "group": "camera 1"
         },
         {
@@ -142,6 +159,7 @@
             "topic": "temperature",
             "color": "#d64f15",
             "sensorType": "Temperature",
+            "indicator": "17",
             "group": "camera 1"
         },
         {
@@ -150,6 +168,7 @@
             "topic": "temperature",
             "color": "#1599d6",
             "sensorType": "Temperature",
+            "indicator": "18",
             "group": "camera 1"
         },
         {
@@ -158,6 +177,7 @@
             "topic": "temperature",
             "color": "#1542d6",
             "sensorType": "Temperature",
+            "indicator": "19",
             "group": "camera 1"
         },
         {
@@ -166,6 +186,7 @@
             "topic": "123",
             "color": "#000000",
             "sensorType": "Power",
+            "indicator": "0",
             "group": "camera 1"
         },
         {
@@ -174,6 +195,7 @@
             "topic": "123",
             "color": "#000000",
             "sensorType": "Pressure",
+            "indicator": "0",
             "group": "camera 1"
         }
     ]
