@@ -100,7 +100,8 @@ export class SensorGroupComponent implements OnInit {
       startDate.setMinutes(endDate.getMinutes() - 30)
       this.ServerConectorService.sendRequestForTableInfo([{
                                                           "gateway": tableInfo['gateway'],
-                                                          "topic": tableInfo['table']
+                                                          "topic": tableInfo['table'],
+                                                          "indicator": tableInfo['indicator']
                                                         }],
                                                          this.getGroupSelected(),
                                                          startDate,

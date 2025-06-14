@@ -174,8 +174,8 @@ class SensorDataStorage(ServiceInterface):
         for index, info in enumerate(sensor_infos):
             table_name = info["topic"]
             gateway = info["gateway"]
-            if(gateway):
-                table_name = gateway + '-' + table_name
+            indicator = info["indicator"]
+            table_name = ClientMiddleware.get_status_topic( gateway, table_name, indicator)
             
             query["SensorFullTopic"]["$in"] = query["SensorFullTopic"]["$in"] + [table_name]
         
@@ -217,8 +217,8 @@ class SensorDataStorage(ServiceInterface):
         for index, info in enumerate(sensor_infos):
             table_name = info["topic"]
             gateway = info["gateway"]
-            if(gateway):
-                table_name = gateway + '-' + table_name
+            indicator = info["indicator"]
+            table_name = ClientMiddleware.get_status_topic( gateway, table_name, indicator)
             
             sensors_ids = sensors_ids + [table_name]
         

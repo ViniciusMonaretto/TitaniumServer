@@ -110,7 +110,8 @@ export class GraphRequestWindowComponent implements OnInit {
     for (let panel of this.selectedSensors) {
       selectedPanels.push({
         "gateway": panel.gateway,
-        "topic": panel.topic
+        "topic": panel.topic,
+        "indicator": panel.indicator
       })
     }
 
