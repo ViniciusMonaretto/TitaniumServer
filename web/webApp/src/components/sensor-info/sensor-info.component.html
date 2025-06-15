@@ -10,9 +10,18 @@
           <mat-card style="height: 100%; width: 100%;">
             <mat-card-title class="info-title-card">Medição da última hora</mat-card-title>
             <mat-card-content class="interior-container-card">
+              <div class="graph-options-header">
+                <button mat-icon-button class="example-icon" aria-label="Example icon-button with menu icon"
+                  (click)="resizeTrigger = !resizeTrigger">
+                  <mat-icon>zoom_out_map</mat-icon>
+                </button>
+              </div>
               <ng-container *ngIf="lineChartData && lineChartData.length > 0; else noSize">
-                <div style="height: 100%;">
-                  <graph style="height: 100%;" [blockFitAll]="true" [inputInfo]="$any(lineChartData)">
+                <div style="height: calc(100% - 40px);">
+                  <graph style="height: 100%;" 
+                        [blockFitAll]="true" 
+                        [inputInfo]="$any(lineChartData)"
+                        [resize]="resizeTrigger">
                   </graph>
                 </div>
               </ng-container>

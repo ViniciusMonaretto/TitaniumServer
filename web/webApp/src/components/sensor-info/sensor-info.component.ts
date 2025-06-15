@@ -9,6 +9,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { FormsModule } from '@angular/forms';
 import { IoCloudTableComponent } from '../io-cloud-table/io-cloud-table.component';
+import { MatIconModule } from '@angular/material/icon';
 
 @Component({
     selector: 'sensor-info',
@@ -21,7 +22,8 @@ import { IoCloudTableComponent } from '../io-cloud-table/io-cloud-table.componen
               MatSelectModule,
               MatInputModule,
               IoCloudTableComponent,
-              FormsModule ], // Add MatCardModule to imports
+              FormsModule,
+              MatIconModule ], // Add MatCardModule to imports
     standalone: true
 })
 export class SensorInfoComponent implements OnInit {
@@ -35,6 +37,8 @@ export class SensorInfoComponent implements OnInit {
 
   @Output() onLoad: EventEmitter<any> = new EventEmitter()
   @Output() onExit: EventEmitter<any> = new EventEmitter()
+
+  resizeTrigger: boolean = false
 
   headerInfo: string[][] = [["name", "Tipo de Alarme"], ["value", "Medição"], ["timestamp", "Data"]]
 

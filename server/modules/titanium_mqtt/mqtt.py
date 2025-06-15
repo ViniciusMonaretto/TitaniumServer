@@ -10,7 +10,7 @@ from support.logger import Logger
 from .translators.translator_model import PayloadTranslator
  
 
-SUBSCRIBE_TOPIC_LIST = [("1C692031BE04/#", 0)]
+SUBSCRIBE_TOPIC_LIST = [("iocloud/#", 0)]
 
 PUBLISH_TOPIC_LIST =   ["GetLevel", "titanium/level"]
 

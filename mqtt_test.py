@@ -7,11 +7,8 @@ import paho.mqtt.client as mqtt
 # Define the broker and port
 BROKER = "mqtt.eclipseprojects.io"
 PORT = 1883
-TOPIC = "1C692031BE04/status/temperature/0"
-TOPIC2 = "1C692031BE04/status/temperature/1"
-TOPIC3 = "1C692031BE04/status/temperature/2"
 
-MESSAGES_TO_SEND = 1
+MESSAGES_TO_SEND = 20
 
 # Callback for successful connection
 def on_connect(client, userdata, flags, rc):
@@ -41,7 +38,7 @@ try:
             # print(f"Sending message /titanium/1C692031BE{(i + 4):02}/temperature/response")
             # Generate a random temperature value
             temperature = round(random.uniform(20.0, 30.0), 2)  # Random float between 20.0 and 30.0
-            topic = f"1C692031BE04/status/temperature/{i}"
+            topic = f"iocloud/1C692031BE04/status/temperature/{i}"
             # Create a JSON payload
             payload = {
                 "value":   round(random.uniform(22.0, 22.5), 2),
