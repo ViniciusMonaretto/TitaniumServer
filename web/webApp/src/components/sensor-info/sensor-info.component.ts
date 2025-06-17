@@ -34,6 +34,7 @@ export class SensorInfoComponent implements OnInit {
     this.setLineData(data)
   }
   @Input() events: Array<any> = []
+  @Input() enableEdit: boolean = false
 
   @Output() onLoad: EventEmitter<any> = new EventEmitter()
   @Output() onExit: EventEmitter<any> = new EventEmitter()

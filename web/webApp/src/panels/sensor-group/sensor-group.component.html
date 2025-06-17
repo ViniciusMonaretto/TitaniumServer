@@ -2,6 +2,7 @@
     <sensor-info style="height: 100%;" *ngIf="getSensorSelected()" [sensorInfo]="getSensorSelected()"
         [currentReading]="getSensorSelected()?.value" [sensorData]="getSelectedSensorTableInfo()"
         [events]="getSelectedSensorEvents()"
+        [enableEdit]="CanEdit()"
         (onExit)="diselectSensor()" (onLoad)="loadInfo($event)"></sensor-info>
     <div style="height: 100%;" *ngIf="!getSensorSelected()">
         <div class="group-header">{{getGroupSelected()}}</div>
