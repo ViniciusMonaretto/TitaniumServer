@@ -5,6 +5,8 @@ import paho.mqtt.client as mqtt
 from modules.titanium_mqtt.translators.io_cloud_api import IoCloudApiTranslator
 from modules.titanium_mqtt.translators.payload_model import MqttPayloadModel
 from middleware.client_middleware import ClientMiddleware
+from middleware.middleware import Middleware
+from modules.titanium_mqtt.mqtt_commands import MqttCommands
 from support.logger import Logger
 
 from .translators.translator_model import PayloadTranslator
@@ -22,7 +24,7 @@ MQTT_PORT = 1883
 
 class TitaniumMqtt:
     _client: mqtt.Client
-    def __init__(self, middleware):
+    def __init__(self, middleware: ClientMiddleware):
         self._logger = Logger()
         self._subscribe_topic_list = SUBSCRIBE_TOPIC_LIST
         self._publish_topics_list = PUBLISH_TOPIC_LIST
@@ -36,7 +38,26 @@ class TitaniumMqtt:
 
         self._read_queue = queue.Queue()
 
+        self._command_handler = threading.Thread(target=self.handle_incoming_messages, daemon=True)
         self._messages_handler = threading.Thread(target=self.handle_incoming_messages, daemon=True)
+
+    def initialize_commands(self):
+        commands = {
+            MqttCommands.CALIBRATION: self.calibrate_command
+            }
+        self._middleware.add_commands(commands)
+
+    def calibrate_command(self, command):
+        if(not self._client or not self._client.is_connected()):
+           self._middleware.send_command_answear( False, "calibrate_command: Mqtt not connected", 
+                                                  command["requestId"])
+        topic = f"ioCloud/{command.gateway}/request/{command.sensor_type}/{command.sensor_indicator}"
+        payload = {
+            "action": "start",
+            "reference_value": command.reference
+        }
+        self._client.publish(topic, payload)
+        self._middleware.send_command_answear( True, "sucess", command["requestId"])
 
     def on_connect(self, client, userdata, _flags, rc):
         self._logger.info(f"MqqtServer: Connected with result code {rc}")

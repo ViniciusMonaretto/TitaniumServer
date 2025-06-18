@@ -31,7 +31,7 @@ class ServiceManager:
     def threaded_function(self, args):
         while True:
             self._middleware.run_middleware_update()
-            sleep(1)
+            sleep(0.1)
 
     def join(self):
         self._status_saver_thread.join()

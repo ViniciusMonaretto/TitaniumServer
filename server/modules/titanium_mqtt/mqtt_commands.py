@@ -1,0 +1,2 @@
+class MqttCommands:
+    CALIBRATION = "Calibration"
