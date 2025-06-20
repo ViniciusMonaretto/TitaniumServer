@@ -88,7 +88,7 @@ class TitaniumMqtt:
     def execute(self, command):
         topic = self.get_topic_from_command(command.name)
         self._client.publish(topic, command.message)
-    
+
     def handle_incoming_messages(self):
         while(not self._end_thread):
             try:

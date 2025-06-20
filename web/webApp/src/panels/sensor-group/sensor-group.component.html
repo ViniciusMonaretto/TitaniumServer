@@ -1,10 +1,5 @@
 <div class="group-div-display">
-    <sensor-info style="height: 100%;" *ngIf="getSensorSelected()" [sensorInfo]="getSensorSelected()"
-        [currentReading]="getSensorSelected()?.value" [sensorData]="getSelectedSensorTableInfo()"
-        [events]="getSelectedSensorEvents()"
-        [enableEdit]="CanEdit()"
-        (onExit)="diselectSensor()" (onLoad)="loadInfo($event)"></sensor-info>
-    <div style="height: 100%;" *ngIf="!getSensorSelected()">
+    <div style="height: 100%;">
         <div class="group-header">{{getGroupSelected()}}</div>
         <mat-card style="height: calc(100% - 40px);">
             <mat-card-content style="height: 100%;">

@@ -6,7 +6,7 @@
              *ngFor="let sensor of sensorArray" 
               [sensorInfo]="sensor" 
               [canEdit]="canEdit"
-              (clickCallback)="selectSensor($event)" 
+              (clickCallback)="openSensorDialog($event)" 
               (deleteCallback)="removeSensorCallback($event)">
       </sensor>
       <div *ngIf="canEdit">

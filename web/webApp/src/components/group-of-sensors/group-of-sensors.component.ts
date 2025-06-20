@@ -10,6 +10,7 @@ import {ServerConectorService} from "../../services/server-conector.service"
 import {UiPanelService} from "../../services/ui-panels.service"
 import { SensorTypesEnum } from '../../enum/sensor-type';
 import { MatIconModule } from '@angular/material/icon';
+import { SensorInfoDialogComponent } from '../sensor_info_dialog/sensor_info_dialog.component';
 
 @Component({
     selector: 'group-of-sensors',
@@ -26,7 +27,7 @@ export class GroupOfSensorsComponent implements OnInit {
   @Input() type: string = "";
   @Input() sensorArray: Array<SensorModule> = [];
 
-  constructor(public dialog: MatDialog, private serverConnector: ServerConectorService, private UiPanelsService: UiPanelService) { }
+  constructor(public dialog: MatDialog, private serverConnector: ServerConectorService) { }
 
   ngOnInit(): void {
   }
@@ -53,8 +54,13 @@ export class GroupOfSensorsComponent implements OnInit {
     this.serverConnector.sendCommand("removePanel", sensorData)
   }
 
-  selectSensor(sensorInfo: any)
+  openSensorDialog(sensorInfo: SensorModule)
   {
-    this.UiPanelsService.setSelectSensor(sensorInfo)
+    const dialogRef = this.dialog.open(SensorInfoDialogComponent, {
+      width: '450px',
+      data: {sensorInfo: sensorInfo,
+      sensorType: this.type
+    }
+    });
   }
 }
