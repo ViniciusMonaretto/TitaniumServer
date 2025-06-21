@@ -18,7 +18,7 @@ export class ServerConectorService {
   private alarmRequest: ((alarms: any) => void) | null = null;
   private addAlarmRequest: ((alarms: any) => void) | null = null;
   private removeAlarmRequest: ((alarms: any) => void) | null = null;
-  private receivedEventsCallback: ((events: {panelId: number, events: any[]}, replaceValue: boolean) => void) | null = null;
+  private receivedEventsCallback: ((events: { panelId: number, events: any[] }, replaceValue: boolean) => void) | null = null;
 
   constructor(private uiPanelService: UiPanelService, private dialog: MatDialog) {
     this.socket = null
@@ -115,19 +115,11 @@ export class ServerConectorService {
     return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}.${milliseconds}${microseconds}`;
   }
 
-  public sendRequestEventList(panelId: number,
-                              limit: number) {
-    let obj: any = { "panelId": panelId, "limit": limit }
-    this.sendCommand("requestEvents", obj)
-  }
-
-
-
   public sendRequestForTableInfo(sensorInfos: Array<any>,
-                                 group: string,
-                                 beginDate?: Date | null,
-                                 endDate?: Date | null,
-                                 callback?: Function) {
+    group: string,
+    beginDate?: Date | null,
+    endDate?: Date | null,
+    callback?: Function) {
     const requestId = uuidv4();
     let obj: any = { "sensorInfos": sensorInfos, "requestId": requestId }
     if (beginDate) {
@@ -180,7 +172,7 @@ export class ServerConectorService {
         this.addAlarmRequest(message['data'])
       }
     }
-     else if (data["status"] == "alarmRemoved") {
+    else if (data["status"] == "alarmRemoved") {
       let message = data["message"]
       if (this.removeAlarmRequest) {
         this.removeAlarmRequest(message['data'])
@@ -195,7 +187,7 @@ export class ServerConectorService {
     else if (data["status"] == "eventInfoUpdate") {
       let message = data["message"]
       if (this.receivedEventsCallback) {
-        this.receivedEventsCallback({panelId: message['data']["panelId"], events: [message['data']]}, false)
+        this.receivedEventsCallback({ panelId: message['data']["panelId"], events: [message['data']] }, false)
       }
     }
     else if (data["status"] == "error") {

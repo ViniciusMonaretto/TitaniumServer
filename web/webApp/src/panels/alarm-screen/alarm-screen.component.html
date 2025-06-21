@@ -4,9 +4,7 @@
         <mat-card-content style="height: 100%;">
             <div>
                 <io-cloud-table [headerInfo]="headerInfo" 
-                                [models]="getAlarms()"
-                                (addCallback)="addAlarm()"
-                                (deleteCallback)="removeAlarm($event)">
+                                [models]="getEvents()">
                 </io-cloud-table>
             </div>
         </mat-card-content>

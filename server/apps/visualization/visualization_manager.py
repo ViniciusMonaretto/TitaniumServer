@@ -71,8 +71,6 @@ class VisualizationWebSocketHandler(tornado.websocket.WebSocketHandler):
                 self.request_status(payload)
             elif "requestEvents" in message_obj["commandName"]:
                 self.request_events(payload)
-            elif "requestAlarms" in message_obj["commandName"]:
-                self.request_alarms(payload)
             elif "addAlarm" in message_obj["commandName"]:
                 self.add_alarm(payload)
             elif "removeAlarm" in message_obj["commandName"]:

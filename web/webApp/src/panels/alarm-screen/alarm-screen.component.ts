@@ -7,10 +7,10 @@ import { IoCloudTableComponent } from '../../components/io-cloud-table/io-cloud-
 import { MatDialog } from '@angular/material/dialog';
 import { AlarmAddWindowComponent } from '../../components/alarm-add-window/alarm-add-window.component';
 import { UiPanelService } from '../../services/ui-panels.service';
-import { AlarmManagerService } from '../../services/alarm-manager.service';
+import { EventAlarmManagerService } from '../../services/event-alarm-manager.service';
 
 @Component({
-    selector: 'alert-screen',
+    selector: 'event-screen',
     templateUrl: './alarm-screen.component.html',
     styleUrls: ['./alarm-screen.component.scss'],
     imports: [CommonModule, 
@@ -24,7 +24,7 @@ export class AlarmViewComponent implements OnInit {
 
   constructor(public dialog: MatDialog, 
     private uiPanelService: UiPanelService, 
-    private alarmService: AlarmManagerService)
+    private eventsService: EventAlarmManagerService)
   {
 
   }
@@ -33,22 +33,7 @@ export class AlarmViewComponent implements OnInit {
 
   }
 
-  addAlarm(): void {
-      const dialogRef = this.dialog.open(AlarmAddWindowComponent, {
-        width: '300px',
-        data: {callback: (alarmData: any)=>{
-          this.alarmService.addAlarm(alarmData)
-        },
-         uiConfig: this.uiPanelService.GetUiConfig()
-      }
-      });
-    }
-
-  removeAlarm(id: number): void {
-       this.alarmService.removeAlarm(id)
-    }
-
-    getAlarms() {
-      return this.alarmService.getAlarms()
-    }
+  getEvents() {
+    return this.eventsService.getEvents()
+  }
 }

@@ -1,3 +1,6 @@
+from .alarm import Alarm
+
+
 class SensorTypes:
     Pressure = "Pressure"
     Temperature = "Temperature"
@@ -23,6 +26,8 @@ class Panel:
     color = ""
     group = ""
     indicator = ""
+    min_alarm: Alarm = None
+    max_alarm: Alarm = None
     sensor_type = SensorTypes.Unknow
     def __init__(self, obj):
         if "id" in obj:
@@ -36,6 +41,12 @@ class Panel:
             self.group = obj["panelGroup"]
         else:
             self.group = obj["group"]
+
+        if "minAlarm" in obj and "alarmId" in obj:
+            self.min_alarm = Alarm(obj["minAlarm"])
+        
+        if "maxAlarm" in obj and "alarmId" in obj:
+            self.max_alarm = Alarm(obj["maxAlarm"])
         self.sensor_type = SensorTypes.GetType(obj["sensorType"])
     
     def get_full_name(self):
@@ -51,4 +62,6 @@ class Panel:
             "group": self.group,
             "indicator": self.indicator,
             "sensorType": self.sensor_type,
+            "minAlarm": (self.min_alarm.to_json() if self.min_alarm else {}),
+            "maxAlarm": (self.max_alarm.to_json() if self.max_alarm else {})
         }

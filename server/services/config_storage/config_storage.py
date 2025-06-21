@@ -5,7 +5,7 @@ import pytz
 from middleware.client_middleware import ClientMiddleware
 
 from dataModules.panel import Panel
-from dataModules.alarm import Alarm
+from dataModules.alarm import Alarm, AlarmType
 from dataModules.event import EventModel
 from support.logger import Logger
 from ..service_interface import ServiceInterface
@@ -125,14 +125,80 @@ class ConfigStorage(ServiceInterface):
             conn.close()
         return result
     
-    def get_panels(self):
+    def get_panels(self) -> list[object]:
         try:
             conn = sqlite3.connect(DB_NAME)
             conn.row_factory = sqlite3.Row  # So we can access columns by name
             cursor = conn.cursor()
 
-            cursor.execute("SELECT * FROM Panels")
+            query = """
+                    WITH FirstAlarms AS (
+                        SELECT
+                            id AS alarmId,
+                            name AS alarmName,
+                            topic AS alarmTopic,
+                            threshold,
+                            type AS alarmType,
+                            panelId,
+                            ROW_NUMBER() OVER (PARTITION BY panelId, type ORDER BY id) as rn
+                        FROM Alarms
+                    )
+                    SELECT
+                        p.id AS panelId,
+                        p.name AS panelName,
+                        p.gateway,
+                        p.topic AS panelTopic,
+                        p.color,
+                        p.panelGroup,
+                        p.indicator,
+                        p.sensorType,
+                        
+                        a.alarmId,
+                        a.alarmName,
+                        a.alarmTopic,
+                        a.threshold AS alarmThreshold,
+                        a.alarmType
+
+                    FROM Panels p
+                    LEFT JOIN FirstAlarms a ON p.id = a.panelId AND a.rn = 1
+
+                    ORDER BY p.id, a.alarmType
+                    """
+
+            cursor.execute(query)
             rows = cursor.fetchall()
+
+            panels: list[Panel] =[]
+            last_panel_id = -1
+            for row in rows:
+                info = dict(row)
+
+                if last_panel_id != info['panelId']:
+                    panel =  {
+                        'id': info['panelId'],
+                        'name': row['panelName'],
+                        'gateway': row['gateway'],
+                        'topic': row['panelTopic'],
+                        'color': row['color'],
+                        'panelGroup': row['panelGroup'],
+                        'indicator': row['indicator'],
+                        'sensorType': row['sensorType']
+                    }
+                    panels.append(panel)
+                    last_panel_id = info['panelId']
+
+                if row['alarmId'] is not None:
+                    alarm = {
+                        'id': info['alarmId'],
+                        'name': info['alarmName'],
+                        'topic': info['alarmTopic'],
+                        'threshold': info['alarmThreshold'],
+                        'type': info['alarmType']
+                    }
+                    if info['alarmType'] == AlarmType.Higher:
+                        panels[-1]['maxAlarm'] = alarm
+                    elif info['alarmType'] == AlarmType.Lower:
+                        panels[-1]['minAlarm'] = alarm
 
             panels = [dict(row) for row in rows]  # Convert each row to a dict
             return panels
@@ -142,6 +208,7 @@ class ConfigStorage(ServiceInterface):
             return []
         finally:
             conn.close()
+            return []
     
     def add_alarm(self, alarm: Alarm):
         new_id = -1
@@ -241,7 +308,7 @@ class ConfigStorage(ServiceInterface):
     
     def get_events_info_command(self, command):
         data = command["data"]
-        events, result = self.get_events_info(data["panelId"], None, data["limit"])
+        events, result = self.get_events_info()
         if(result):
             self._middleware.send_command_answear( result, {'events':events, 'panelId': data["panelId"]}, command["requestId"])
         else:
