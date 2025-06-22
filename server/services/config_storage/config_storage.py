@@ -48,7 +48,9 @@ class ConfigStorage(ServiceInterface):
                 color TEXT NOT NULL,
                 panelGroup TEXT NOT NULL,
                 indicator TEXT NOT NULL,
-                sensorType TEXT NOT NULL
+                sensorType TEXT NOT NULL,
+                gain FLOAT,
+                offset FLOAT
             );
             """)
 

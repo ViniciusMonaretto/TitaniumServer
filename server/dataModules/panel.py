@@ -26,6 +26,8 @@ class Panel:
     color = ""
     group = ""
     indicator = ""
+    offset: float = None
+    gain: float = None
     min_alarm: Alarm = None
     max_alarm: Alarm = None
     sensor_type = SensorTypes.Unknow
@@ -41,6 +43,11 @@ class Panel:
             self.group = obj["panelGroup"]
         else:
             self.group = obj["group"]
+
+        if "offset" in obj:
+            self.offset = obj["offset"]
+        if "gain" in obj:
+            self.offset = obj["gain"]
 
         if "minAlarm" in obj and "alarmId" in obj:
             self.min_alarm = Alarm(obj["minAlarm"])

@@ -54,7 +54,8 @@ class TitaniumMqtt:
         topic = f"ioCloud/{command.gateway}/request/{command.sensor_type}/{command.sensor_indicator}"
         payload = {
             "action": "start",
-            "reference_value": command.reference
+            "offset": command.offset,
+            "gain": command.gain
         }
         self._client.publish(topic, payload)
         self._middleware.send_command_answear( True, "sucess", command["requestId"])
