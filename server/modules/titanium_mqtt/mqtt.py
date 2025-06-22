@@ -5,7 +5,6 @@ import paho.mqtt.client as mqtt
 from modules.titanium_mqtt.translators.io_cloud_api import IoCloudApiTranslator
 from modules.titanium_mqtt.translators.payload_model import MqttPayloadModel
 from middleware.client_middleware import ClientMiddleware
-from middleware.middleware import Middleware
 from modules.titanium_mqtt.mqtt_commands import MqttCommands
 from support.logger import Logger
 
@@ -117,4 +116,9 @@ class TitaniumMqtt:
 
     @staticmethod
     def get_topic_from_mosquitto_obj(mqtt_message: MqttPayloadModel):
-        return ClientMiddleware.get_status_topic( mqtt_message.gateway, mqtt_message.subtopic, mqtt_message.indicator)
+        if mqtt_message.action is "calibrateresponse":
+            return ClientMiddleware.get_calibrate_topic( mqtt_message.gateway, mqtt_message.subtopic, mqtt_message.indicator)
+        elif mqtt_message.action is "status":
+            return ClientMiddleware.get_status_topic( mqtt_message.gateway, mqtt_message.subtopic, mqtt_message.indicator)
+        else:
+            Logger().warning(f"TitaniumMqtt::get_topic_from_mosquitto_obj: Mqtt message action not supported: {mqtt_message.action}")

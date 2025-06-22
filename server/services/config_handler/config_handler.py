@@ -5,6 +5,7 @@ from typing import Union
 from middleware.client_middleware import ClientMiddleware
 
 from dataModules.panel import Panel
+from middleware.status_subscriber import StatuSubscribers
 from services.sensor_data_storage.sensor_data_storage import SensorDataStorage
 from support.logger import Logger
 
@@ -19,6 +20,8 @@ DB_NAME = "titanium_server_db.db"
 
 class ConfigHandler(ServiceInterface):
     _panels_info: dict[str: list[Panel]] = {}
+    _status_subscribers = {}
+
     def __init__(self, middleware: ClientMiddleware, config_storage: ConfigStorage, sensor_data_storage: SensorDataStorage):
         self._logger = Logger()
         self._middleware = middleware
@@ -61,6 +64,19 @@ class ConfigHandler(ServiceInterface):
             self.read_default_config()
         else:
             self.initialize_panels_from_db(panels_infos)
+
+    def calibration_update_received(self, status_info, panel: Panel):
+        data = status_info["data"]
+
+        panel.offset = data["offset"]
+        panel.gain = data["gain"]
+        self._config_storage.update_panel(panel)
+
+    def subscribe_to_status(self, gateway, status_name, indicator, panel):
+        topic = ClientMiddleware.get_status_topic(gateway, status_name, indicator)
+        if(not topic in self._status_subscribers):
+            self._status_subscribers[topic] = StatuSubscribers(lambda status_info : self.calibration_update_received(status_info, panel), topic)
+            self._middleware.add_subscribe_to_status(self._status_subscribers[topic], topic)
 
 
     def add_group(self, group_name) -> Union[bool, str]:

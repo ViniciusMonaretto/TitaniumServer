@@ -38,7 +38,6 @@ class SensorDataStorage(ServiceInterface):
         self.initialize_commands()
         self.initialize_system()
         self.id = str(uuid.uuid4())
-        self._subscriptions_add = 0
 
         self._info_wrything_thread = threading.Thread(target=self.write_sensor_data_loop, daemon=True)
         self._info_wrything_thread.start()
@@ -129,7 +128,6 @@ class SensorDataStorage(ServiceInterface):
         if(not topic in self._status_subscribers):
             self._status_subscribers[topic] = StatuSubscribers(self.add_sensor_data_to_queue, topic)
             self._middleware.add_subscribe_to_status(self._status_subscribers[topic], topic)
-            self._subscriptions_add+=1
 
     def remove_subscription_from_status(self, gateway, status_name, indicator):
         topic = ClientMiddleware.get_status_topic(gateway, status_name, indicator)

@@ -127,6 +127,53 @@ class ConfigStorage(ServiceInterface):
             conn.close()
         return result
     
+    def update_panel(self, panel: Panel):
+        result = False
+        try:
+            conn = sqlite3.connect(DB_NAME)
+            cursor = conn.cursor()
+
+            cursor.execute("PRAGMA foreign_keys = ON;")
+
+            update_query = """
+                UPDATE Panels
+                SET
+                    name = ?,
+                    gateway = ?,
+                    topic = ?,
+                    color = ?,
+                    panelGroup = ?,
+                    indicator = ?,
+                    sensorType = ?,
+                    gain = ?,
+                    offset = ?
+                WHERE id = ?;
+                """
+            
+            new_values = (
+                panel.name,           # name
+                panel.gateway,        # gateway
+                panel.topic,          # topic
+                panel.color,                # color
+                panel.group,             # panelGroup
+                panel.indicator,         # indicator
+                panel.sensor_type,        # sensorType
+                panel.gain,                  # gain
+                panel.offset,                  # offset
+                panel.id                     # id (which row to update)
+            )
+            
+            cursor.execute(update_query, new_values)
+            conn.commit()
+
+            result = True
+
+        except sqlite3.Error as e:
+            self._logger.error(f"update_panel error: {e}")
+        finally:
+            conn.close()
+        return result
+    
     def get_panels(self) -> list[object]:
         try:
             conn = sqlite3.connect(DB_NAME)

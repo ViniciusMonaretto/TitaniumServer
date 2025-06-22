@@ -19,6 +19,11 @@ class ClientMiddleware:
         self._global_middleware = middleware
         self._commands_available: dict[str, Callable] = {}
 
+
+    @staticmethod
+    def get_calibrate_topic(gateway, topic, indicator):
+        return gateway + '-' + topic + "-" + indicator + "calibrate"
+
     @staticmethod
     def get_status_topic(gateway, topic, indicator):
         return gateway + '-' + topic + "-" + indicator
