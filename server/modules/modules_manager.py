@@ -5,6 +5,7 @@ from support.logger import Logger
 from .titanium_mqtt.mqtt import TitaniumMqtt
 
 class ModulesManager:
+    _finish = False
     def __init__(self, middleware):
         self._logger = Logger()
         self._client_middleware = ClientMiddleware(middleware)
@@ -15,12 +16,15 @@ class ModulesManager:
     def run(self):
         self._logger.info("Modules Manager start")
         self._titanium_mqtt.run()
+        self._command_handler_thread.start()
 
     def join(self):
+        self._finish = True
         self._titanium_mqtt.stop()
+        self._command_handler_thread.join()
 
     def threaded_function(self):
-        while True:
-            self._middleware.run_middleware_update()
+        while not self._finish:
+            self._client_middleware.run_middleware_update()
             sleep(0.1)
 

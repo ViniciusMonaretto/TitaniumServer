@@ -11,20 +11,6 @@ export class EventAlarmManagerService {
         this.connectorService.setReceivedEventsCallback((data, replace) => {this.receiveEventsCallback(data["events"], replace)})
     }
 
-    public requestAllAlarms() {
-        this.connectorService.sendCommand("requestEvents", {})
-    }
-
-    public removeAlarm(alarmId: number)
-    {
-        this.connectorService.sendCommand("removeAlarm", alarmId)
-    }
-
-    public addAlarm(alarmInfo: AlarmModule)
-    {
-        this.connectorService.sendCommand("addAlarm", alarmInfo)
-    }
-
     public getEvents()
     {
         return this.events

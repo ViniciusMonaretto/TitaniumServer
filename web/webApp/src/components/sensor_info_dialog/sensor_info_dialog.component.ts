@@ -7,9 +7,10 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatInputModule } from '@angular/material/input';
 import { FormsModule } from '@angular/forms';
 import { SensorModule } from '../../models/sensor-module';
+import { Action } from 'rxjs/internal/scheduler/Action';
 
 @Component({
-  selector: 'sensor_info_dialog',
+  selector: 'sensor-info-dialog',
   templateUrl: './sensor_info_dialog.component.html',
   styleUrls: ['./sensor_info_dialog.component.scss'],
   imports: [CommonModule,
@@ -29,12 +30,27 @@ export class SensorInfoDialogComponent {
   public maxAlarm: number = 0
   public minAlarm: number = 0
 
+  private gateway = ""
+  private topic = ""
+  private indicator = 0
+
+  private onApplyAction: ((obj: any) => void)|null = null
+
   uiConfig: { [id: string]: any } = {}
 
   constructor(public dialogRef: MatDialogRef<SensorInfoDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: {sensorInfo: SensorModule}
+    @Inject(MAT_DIALOG_DATA) public data: {sensorInfo: SensorModule, callback: ((obj: any) => void)}
   ) {
     this.sensorName = data.sensorInfo.name
+    this.gain = data.sensorInfo.gain
+    this.offset = data.sensorInfo.offset
+    this.maxAlarm = 0
+    this.minAlarm = 0
+
+    this.gateway = data.sensorInfo.gateway
+    this.topic = data.sensorInfo.topic
+    this.indicator = data.sensorInfo.indicator
+    this.onApplyAction = data.callback;
   }
 
   validForm() {
@@ -42,11 +58,28 @@ export class SensorInfoDialogComponent {
            (!this.enableAlarms || (this.maxAlarm != 0 && this.minAlarm != 0))
   }
 
+  getChangeInfoPanel()
+  {
+    return {
+      "gain": this.gain,
+      "offset": this.offset,
+      "maxAlarm": this.maxAlarm,
+      "minAlarm": this.minAlarm,
+      "gateway": this.gateway,
+      "topic": this.topic,
+      "indicator": this.indicator
+    }
+  }
+
   onCancel(): void {
     this.dialogRef.close();
   }
 
   onApply(): void {
+    if (this.onApplyAction)
+    {
+      this.onApplyAction(this.getChangeInfoPanel())
+    }
     this.dialogRef.close();
   }
 

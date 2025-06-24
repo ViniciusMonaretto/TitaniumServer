@@ -9,6 +9,8 @@ export class SensorModule{
     public indicator: number = 0
     public sensorType: SensorTypesEnum = SensorTypesEnum.PREASSURE
     public value: Number|null = null
+    public gain: number = 0
+    public offset: number = 0
 
     constructor(){
         

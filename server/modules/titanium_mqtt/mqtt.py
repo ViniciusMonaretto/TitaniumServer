@@ -1,3 +1,4 @@
+import json
 import threading
 import queue
 import paho.mqtt.client as mqtt
@@ -34,6 +35,7 @@ class TitaniumMqtt:
         self._middleware = middleware
         self._translator: PayloadTranslator = IoCloudApiTranslator()
         self._translator.initialize()
+        self.initialize_commands()
 
         self._read_queue = queue.Queue()
 
@@ -47,16 +49,17 @@ class TitaniumMqtt:
         self._middleware.add_commands(commands)
 
     def calibrate_command(self, command):
+        command_data = command["data"]
         if(not self._client or not self._client.is_connected()):
            self._middleware.send_command_answear( False, "calibrate_command: Mqtt not connected", 
-                                                  command["requestId"])
-        topic = f"ioCloud/{command.gateway}/request/{command.sensor_type}/{command.sensor_indicator}"
+                                                  command_data["requestId"])
+        topic = f"iocloudresponse/{command_data['gateway']}/request/{command_data['topic']}/{command_data['indicator']}"
         payload = {
             "action": "start",
-            "offset": command.offset,
-            "gain": command.gain
+            "offset": command_data["offset"],
+            "gain": command_data["gain"]
         }
-        self._client.publish(topic, payload)
+        self._client.publish(topic, json.dumps(payload))
         self._middleware.send_command_answear( True, "sucess", command["requestId"])
 
     def on_connect(self, client, userdata, _flags, rc):
@@ -116,9 +119,9 @@ class TitaniumMqtt:
 
     @staticmethod
     def get_topic_from_mosquitto_obj(mqtt_message: MqttPayloadModel):
-        if mqtt_message.action is "calibrateresponse":
+        if mqtt_message.action == "calibrateresponse":
             return ClientMiddleware.get_calibrate_topic( mqtt_message.gateway, mqtt_message.subtopic, mqtt_message.indicator)
-        elif mqtt_message.action is "status":
+        elif mqtt_message.action == "status":
             return ClientMiddleware.get_status_topic( mqtt_message.gateway, mqtt_message.subtopic, mqtt_message.indicator)
         else:
             Logger().warning(f"TitaniumMqtt::get_topic_from_mosquitto_obj: Mqtt message action not supported: {mqtt_message.action}")

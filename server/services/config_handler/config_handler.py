@@ -71,6 +71,7 @@ class ConfigHandler(ServiceInterface):
         panel.offset = data["offset"]
         panel.gain = data["gain"]
         self._config_storage.update_panel(panel)
+        self.send_ui_update_action()
 
     def subscribe_to_status(self, gateway, status_name, indicator, panel):
         topic = ClientMiddleware.get_status_topic(gateway, status_name, indicator)
@@ -169,3 +170,6 @@ class ConfigHandler(ServiceInterface):
     
     def get_panels_list_command(self, command):
         self._middleware.send_command_answear( True, self.create_object_from_panels_info(), command["requestId"])
+
+    def send_ui_update_action(self):
+        self._middleware.send_status("ui-update-*", self.create_object_from_panels_info()) 
