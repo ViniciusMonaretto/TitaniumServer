@@ -4,13 +4,13 @@
     <div>
         <div>Ganho</div>
         <mat-form-field style="width: 100%;" appearance="fill">
-            <input matInput type="number" [(ngModel)]="gain">
+            <input matInput type="number" step="0.01" [(ngModel)]="gain">
         </mat-form-field>
     </div>
     <div>
         <div>Offset:</div>
         <mat-form-field style="width: 100%;" appearance="fill">
-            <input matInput type="number" [(ngModel)]="offset">
+            <input matInput type="number" step="0.01" [(ngModel)]="offset">
         </mat-form-field>
     </div>
     <div class="border-t pt-4">

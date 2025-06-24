@@ -42,8 +42,8 @@ export class SensorInfoDialogComponent {
     @Inject(MAT_DIALOG_DATA) public data: {sensorInfo: SensorModule, callback: ((obj: any) => void)}
   ) {
     this.sensorName = data.sensorInfo.name
-    this.gain = data.sensorInfo.gain
-    this.offset = data.sensorInfo.offset
+    this.gain = data.sensorInfo.gain ?? 0
+    this.offset = data.sensorInfo.offset ?? 0
     this.maxAlarm = 0
     this.minAlarm = 0
 
