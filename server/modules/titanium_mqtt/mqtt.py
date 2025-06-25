@@ -53,7 +53,7 @@ class TitaniumMqtt:
         if(not self._client or not self._client.is_connected()):
            self._middleware.send_command_answear( False, "calibrate_command: Mqtt not connected", 
                                                   command_data["requestId"])
-        topic = f"iocloudresponse/{command_data['gateway']}/request/{command_data['topic']}/{command_data['indicator']}"
+        topic = f"iocloudcommand/{command_data['gateway']}/request/{command_data['topic']}/{command_data['indicator']}"
         payload = {
             "action": "start",
             "offset": command_data["offset"],
