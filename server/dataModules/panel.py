@@ -47,7 +47,7 @@ class Panel:
         if "offset" in obj:
             self.offset = obj["offset"]
         if "gain" in obj:
-            self.offset = obj["gain"]
+            self.gain = obj["gain"]
 
         if "minAlarm" in obj and "alarmId" in obj:
             self.min_alarm = Alarm(obj["minAlarm"])
@@ -67,6 +67,8 @@ class Panel:
             "topic": self.topic,
             "color": self.color,
             "group": self.group,
+            "gain": self.gain,
+            "offset": self.offset,
             "indicator": self.indicator,
             "sensorType": self.sensor_type,
             "minAlarm": (self.min_alarm.to_json() if self.min_alarm else {}),

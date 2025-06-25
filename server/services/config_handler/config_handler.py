@@ -65,18 +65,19 @@ class ConfigHandler(ServiceInterface):
         else:
             self.initialize_panels_from_db(panels_infos)
 
-    def calibration_update_received(self, status_info, panel: Panel):
+    def calibration_update_received(self, status_info, group, index):
         data = status_info["data"]
 
+        panel: Panel = self._panels_info[group][index]
         panel.offset = data["offset"]
         panel.gain = data["gain"]
         self._config_storage.update_panel(panel)
         self.send_ui_update_action()
 
-    def subscribe_to_status(self, gateway, status_name, indicator, panel):
-        topic = ClientMiddleware.get_status_topic(gateway, status_name, indicator)
+    def subscribe_to_status(self, gateway, status_name, indicator, group, index):
+        topic = ClientMiddleware.get_calibrate_topic(gateway, status_name, indicator)
         if(not topic in self._status_subscribers):
-            self._status_subscribers[topic] = StatuSubscribers(lambda status_info : self.calibration_update_received(status_info, panel), topic)
+            self._status_subscribers[topic] = StatuSubscribers(lambda status_info : self.calibration_update_received(status_info, group, index), topic)
             self._middleware.add_subscribe_to_status(self._status_subscribers[topic], topic)
 
 
@@ -114,6 +115,11 @@ class ConfigHandler(ServiceInterface):
         
             if result:
                 self._panels_info[group_name].append(panel)
+                self.subscribe_to_status(panel.gateway, 
+                                         panel.topic, 
+                                         panel.indicator, 
+                                         group_name,
+                                         len(self._panels_info[group_name])-1)
 
         return result, message
     
@@ -134,7 +140,9 @@ class ConfigHandler(ServiceInterface):
                 for idx, panel in enumerate(panels):
                     if panel.id == panel_id:
                         wait_flag = threading.Event()
-                        self._sensor_data_storage.erase_sensor_info([panel.get_full_name()], 
+                        self._sensor_data_storage.erase_sensor_info([ClientMiddleware.get_calibrate_topic(panel.gateway, 
+                                                                                                          panel.topic, 
+                                                                                                          panel.identification)], 
                                                                     None,
                                                                     None,
                                                                     lambda a,b : wait_flag.set())
@@ -143,6 +151,7 @@ class ConfigHandler(ServiceInterface):
                         result = self._config_storage.remove_panel(panel_id)
 
                         if (result):   
+                            self.remove_panel_subscription(panels[idx])
                             del panels[idx]
                             return True, "Painél Removido"
         except Exception as e:
@@ -150,6 +159,12 @@ class ConfigHandler(ServiceInterface):
         
         return False, "Remove panel error: Panel not found"
     
+    def remove_panel_subscription(self, panel):
+        topic = ClientMiddleware.get_calibrate_topic(panel.gateway, panel.status_name, panel.indicator)
+        if(topic in self._status_subscribers):
+            self._middleware.remove_subscribe_from_status(self._status_subscribers[topic], topic)
+            del self._status_subscribers[topic]
+
     def remove_panel_command(self, command):
         data = command["data"]
 

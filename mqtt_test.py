@@ -7,48 +7,52 @@ import paho.mqtt.client as mqtt
 # Define the broker and port
 BROKER = "mqtt.eclipseprojects.io"
 PORT = 1883
-
 MESSAGES_TO_SEND = 20
 
 # Callback for successful connection
 def on_connect(client, userdata, flags, rc):
     if rc == 0:
         print("Connected successfully")
+        # Subscribe to the command topic
+        client.subscribe("iocloudcommand/#")
     else:
         print(f"Connection failed with code {rc}")
+
+# Callback for receiving messages
+def on_message(client, userdata, msg):
+    print(f"Received command on topic: {msg.topic}")
+    response_topic = msg.topic.replace("iocloudcommand/", "iocloud/", 1)
+    response_topic = response_topic.replace("request/", "response/", 1)
+    
+    client.publish(response_topic, msg.payload)
+    print(f"Responded to topic: {response_topic}")
 
 # Create an MQTT client instance
 client = mqtt.Client()
 
-# Assign callback for connection
+# Assign callbacks
 client.on_connect = on_connect
+client.on_message = on_message
 
-# Connect to the MQTT broker
+# Connect and start the loop
 client.connect(BROKER, PORT)
-
-# Start the network loop in a separate thread
 client.loop_start()
 
 try:
     while True:
-        # Get the current timestamp
-        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S") # ISO 8601 UTC format
-        print("sending mqtt messages")
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        print("Sending MQTT messages")
         for i in range(MESSAGES_TO_SEND):
-            # print(f"Sending message /titanium/1C692031BE{(i + 4):02}/temperature/response")
-            # Generate a random temperature value
-            temperature = round(random.uniform(20.0, 30.0), 2)  # Random float between 20.0 and 30.0
             topic = f"iocloud/1C692031BE04/status/temperature/{i}"
-            # Create a JSON payload
             payload = {
-                "value":   round(random.uniform(22.0, 22.5), 2),
+                "value": round(random.uniform(22.0, 22.5), 2),
                 "timestamp": timestamp
             }
             payload_json = json.dumps(payload)
             client.publish(topic, payload_json)
-        print("sent mqtt messages")
-        time.sleep(30)  # Wait for 5 seconds before sending the next message
+        print("Sent MQTT messages")
+        time.sleep(30)
 except KeyboardInterrupt:
     print("Stopping the client.")
-    client.loop_stop()  # Stop the loop
-    client.disconnect()  # Disconnect from the broker
+    client.loop_stop()
+    client.disconnect()

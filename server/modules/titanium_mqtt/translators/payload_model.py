@@ -4,7 +4,7 @@ from typing import Any
 
 class MqttActions(Enum):
     READ = "read"
-    CALIBRATE = "calibrate"
+    CALIBRATE = "calibrateresponse"
     STATUS = "status"
 
 class MqttPayloadModel:

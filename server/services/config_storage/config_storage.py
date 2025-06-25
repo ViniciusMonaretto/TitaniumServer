@@ -175,6 +175,7 @@ class ConfigStorage(ServiceInterface):
         return result
     
     def get_panels(self) -> list[object]:
+        panels: list[Panel] = []
         try:
             conn = sqlite3.connect(DB_NAME)
             conn.row_factory = sqlite3.Row  # So we can access columns by name
@@ -201,6 +202,8 @@ class ConfigStorage(ServiceInterface):
                         p.panelGroup,
                         p.indicator,
                         p.sensorType,
+                        p.gain,
+                        p.offset,
                         
                         a.alarmId,
                         a.alarmName,
@@ -217,7 +220,6 @@ class ConfigStorage(ServiceInterface):
             cursor.execute(query)
             rows = cursor.fetchall()
 
-            panels: list[Panel] =[]
             last_panel_id = -1
             for row in rows:
                 info = dict(row)
@@ -231,7 +233,9 @@ class ConfigStorage(ServiceInterface):
                         'color': row['color'],
                         'panelGroup': row['panelGroup'],
                         'indicator': row['indicator'],
-                        'sensorType': row['sensorType']
+                        'sensorType': row['sensorType'],
+                        'gain': row['gain'],
+                        'offset': row['offset']
                     }
                     panels.append(panel)
                     last_panel_id = info['panelId']
@@ -249,15 +253,12 @@ class ConfigStorage(ServiceInterface):
                     elif info['alarmType'] == AlarmType.Lower:
                         panels[-1]['minAlarm'] = alarm
 
-            panels = [dict(row) for row in rows]  # Convert each row to a dict
-            return panels
-
         except sqlite3.Error as e:
             self._logger.error(f"Status_saver::get_panels: SQLite error: {e}" )
             return []
         finally:
             conn.close()
-            return []
+        return panels
     
     def add_alarm(self, alarm: Alarm):
         new_id = -1
