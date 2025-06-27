@@ -107,7 +107,7 @@ class AlarmManager(ServiceInterface):
                                                   command["requestId"])
 
     def add_alarm_command(self, command):
-        result = self.add_alarm(command)
+        result = self.add_alarm(command['data'])
         
         if result.id != '':
             self._middleware.send_command_answear( True, result.to_json(), command["requestId"])
@@ -118,7 +118,7 @@ class AlarmManager(ServiceInterface):
 
     def add_alarm(self, alarm_info):
         try:
-            alarm = Alarm(alarm_info['data'])
+            alarm = Alarm(alarm_info)
             alarm_id = self._config_storage.add_alarm(alarm)
             if alarm_id != -1:
                 alarm.id = alarm_id
@@ -129,7 +129,7 @@ class AlarmManager(ServiceInterface):
         return alarm
 
     def setup_alarm(self, alarm: Alarm):
-        topic = alarm.topic.replace("-","/")
+        topic = alarm.topic
         if topic not in self._status_subscribers:
             self._status_subscribers[topic] = StatuSubscribers(self.add_check_status, topic)
             self._middleware.add_subscribe_to_status(self._status_subscribers[topic], topic)
@@ -161,6 +161,15 @@ class AlarmManager(ServiceInterface):
             self._logger.error(f"AlarmManager::add_alarm error: {e}")
         
         return True
+    
+    def change_alarm_threshold(self, alarm_id, new_threshold, topic):
+        for item in self._alarms_info[topic]:
+            if item.id == alarm_id:
+                item.threshold = new_threshold
+                self._config_storage.update_alarm(item)
+                return item
+        
+        return None
 
     def remove_alarm_internal_info(self, topic_in: str, alarm_id):
         topic = topic_in.replace("-","/")

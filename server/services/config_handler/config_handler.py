@@ -167,7 +167,7 @@ class ConfigHandler(ServiceInterface):
 
         if panel:
             panel.max_alarm = self.handle_change_panel_alarm(panel, panel.max_alarm, max_alarm, True)
-            panel.min_alarm = self.handle_change_panel_alarm(panel, panel.min_alarm, min_alarm, True)
+            panel.min_alarm = self.handle_change_panel_alarm(panel, panel.min_alarm, min_alarm, False)
             if gain != panel.gain or offset != panel.offset:
                 self._middleware.send_command(MqttCommands.CALIBRATION, update_panel_info)
             else:
@@ -176,8 +176,8 @@ class ConfigHandler(ServiceInterface):
     def handle_change_panel_alarm(self, panel: Panel, alarm: Alarm, new_alarm_value: float, is_max_alarm: bool):
         if alarm == None and new_alarm_value != None:
             alarm_info = {
-                "name": panel.id + "max" if is_max_alarm else "min",
-                "topic": panel.topic,
+                "name": str(panel.id) + "max" if is_max_alarm else "min",
+                "topic": ClientMiddleware.get_status_topic(panel.gateway, panel.topic, panel.indicator),
                 "threshold": new_alarm_value,
                 "type": AlarmType.Higher if is_max_alarm else AlarmType.Lower,
                 "panelId": panel.id
@@ -187,7 +187,7 @@ class ConfigHandler(ServiceInterface):
             self._alarm_manager.remove_alarm(alarm.id)
             return None
         elif alarm != None and alarm.threshold != new_alarm_value:
-            return self._alarm_manager.change_alarm(alarm.id)
+            return self._alarm_manager.change_alarm_threshold(alarm.id, new_alarm_value, panel.topic)
         
         return alarm
 

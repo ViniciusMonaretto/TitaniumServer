@@ -127,6 +127,44 @@ class ConfigStorage(ServiceInterface):
             conn.close()
         return result
     
+    def update_alarm(self, alarm: Alarm):
+        result = None
+        try:
+            conn = sqlite3.connect(DB_NAME)
+            cursor = conn.cursor()
+
+            cursor.execute("PRAGMA foreign_keys = ON;")
+
+            update_query = """
+                UPDATE Alarms
+                SET
+                    name = ?,
+                    topic = ?,
+                    threshold = ?,
+                    type = ?,
+                    panelId = ?,
+                WHERE id = ?;
+                """
+            
+            new_values = (
+                alarm.name,
+                alarm.topic,
+                alarm.threshold,
+                alarm.type,
+                alarm.panel_id
+            )
+            
+            cursor.execute(update_query, new_values)
+            conn.commit()
+
+            result = alarm
+
+        except sqlite3.Error as e:
+            self._logger.error(f"update_panel error: {e}")
+        finally:
+            conn.close()
+        return result
+    
     def update_panel(self, panel: Panel):
         result = False
         try:
