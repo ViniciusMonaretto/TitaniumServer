@@ -6,6 +6,9 @@ from middleware.client_middleware import ClientMiddleware
 
 from dataModules.panel import Panel
 from middleware.status_subscriber import StatuSubscribers
+from dataModules.alarm import Alarm, AlarmType
+from modules.titanium_mqtt.mqtt_commands import MqttCommands
+from services.alarm_manager.alarm_manager import AlarmManager
 from services.sensor_data_storage.sensor_data_storage import SensorDataStorage
 from support.logger import Logger
 
@@ -22,11 +25,16 @@ class ConfigHandler(ServiceInterface):
     _panels_info: dict[str: list[Panel]] = {}
     _status_subscribers = {}
 
-    def __init__(self, middleware: ClientMiddleware, config_storage: ConfigStorage, sensor_data_storage: SensorDataStorage):
+    def __init__(self, 
+                 middleware: ClientMiddleware, 
+                 config_storage: ConfigStorage, 
+                 sensor_data_storage: SensorDataStorage,
+                 alarm_manager: AlarmManager):
         self._logger = Logger()
         self._middleware = middleware
         self._config_storage = config_storage
         self._sensor_data_storage = sensor_data_storage
+        self._alarm_manager = alarm_manager
 
         self.initialize_commands()
         self.initialize_system()
@@ -37,7 +45,8 @@ class ConfigHandler(ServiceInterface):
         commands = {
             ConfigHandlerCommands.ADD_PANEL: self.add_panel_command,
             ConfigHandlerCommands.REMOVE_PANEL: self.remove_panel_command,
-            ConfigHandlerCommands.GET_PANEL_LIST: self.get_panels_list_command
+            ConfigHandlerCommands.GET_PANEL_LIST: self.get_panels_list_command,
+            ConfigHandlerCommands.UPDATE_PANEL_FUNCTIONALITIES: self.update_panel_functions_command
             }
         self._middleware.add_commands(commands)
     
@@ -80,6 +89,14 @@ class ConfigHandler(ServiceInterface):
             self._status_subscribers[topic] = StatuSubscribers(lambda status_info : self.calibration_update_received(status_info, group, index), topic)
             self._middleware.add_subscribe_to_status(self._status_subscribers[topic], topic)
 
+    def _find_panel_from_id(self, panel_id):
+        for group_name in self._panels_info:
+            panel: Panel = next((item for item in self._panels_info[group_name] if item.id == panel_id), None)
+            if panel != None:
+                return panel
+        
+        return None
+    
 
     def add_group(self, group_name) -> Union[bool, str]:
         if group_name in self._panels_info:
@@ -132,7 +149,48 @@ class ConfigHandler(ServiceInterface):
             self._middleware.send_command_answear( result, self._panels_info[data["group"]][-1], command["requestId"])
         else:
             self._middleware.send_command_answear( result, message, command["requestId"])
+
+    def update_panel_functions_command(self, command):
+        try:
+            self.update_panel_functions(command["data"])
+            self._middleware.send_command_answear( True, {}, command["requestId"])
+        except Exception as e:
+            self._middleware.send_command_answear( False, f"{e}", command["requestId"])  
+    
+    def update_panel_functions(self, update_panel_info):
+        gain = update_panel_info["gain"]
+        offset = update_panel_info["offset"]
+        max_alarm = update_panel_info["maxAlarm"]
+        min_alarm = update_panel_info["minAlarm"]
+        panel_id = update_panel_info["panelId"]
+        panel = self._find_panel_from_id(panel_id)
+
+        if panel:
+            panel.max_alarm = self.handle_change_panel_alarm(panel, panel.max_alarm, max_alarm, True)
+            panel.min_alarm = self.handle_change_panel_alarm(panel, panel.min_alarm, min_alarm, True)
+            if gain != panel.gain or offset != panel.offset:
+                self._middleware.send_command(MqttCommands.CALIBRATION, update_panel_info)
+            else:
+                self.send_ui_update_action()
+                
+    def handle_change_panel_alarm(self, panel: Panel, alarm: Alarm, new_alarm_value: float, is_max_alarm: bool):
+        if alarm == None and new_alarm_value != None:
+            alarm_info = {
+                "name": panel.id + "max" if is_max_alarm else "min",
+                "topic": panel.topic,
+                "threshold": new_alarm_value,
+                "type": AlarmType.Higher if is_max_alarm else AlarmType.Lower,
+                "panelId": panel.id
+            }
+            return self._alarm_manager.add_alarm(alarm_info)
+        elif alarm != None and new_alarm_value == None:
+            self._alarm_manager.remove_alarm(alarm.id)
+            return None
+        elif alarm != None and alarm.threshold != new_alarm_value:
+            return self._alarm_manager.change_alarm(alarm.id)
         
+        return alarm
+
     
     def remove_panel(self, panel_id) -> Union[bool, str]:
         try: 

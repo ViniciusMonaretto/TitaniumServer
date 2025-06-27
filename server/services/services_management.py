@@ -19,8 +19,8 @@ class ServiceManager:
 
         self._config_storage = ConfigStorage(self._middleware)
         self._sensor_data_storage = SensorDataStorage(self._middleware)
-        self._config_handler = ConfigHandler(self._middleware, self._config_storage, self._sensor_data_storage)
         self._alarm_manager = AlarmManager(self._middleware, self._config_storage)
+        self._config_handler = ConfigHandler(self._middleware, self._config_storage, self._sensor_data_storage, self._alarm_manager)
         
         self._status_saver_thread = Thread(target = self.threaded_function, args = (10, ))
     

@@ -27,9 +27,10 @@ export class SensorInfoDialogComponent {
   public gain: number = 0
   public offset: number = 0
   public enableAlarms: boolean = false
-  public maxAlarm: number = 0
-  public minAlarm: number = 0
+  public maxAlarm: number | null = null
+  public minAlarm: number | null = null
 
+  private panelId = -1
   private gateway = ""
   private topic = ""
   private indicator = 0
@@ -44,8 +45,9 @@ export class SensorInfoDialogComponent {
     this.sensorName = data.sensorInfo.name
     this.gain = data.sensorInfo.gain ?? 0
     this.offset = data.sensorInfo.offset ?? 0
-    this.maxAlarm = 0
-    this.minAlarm = 0
+    this.panelId =  data.sensorInfo.id
+    this.maxAlarm = null
+    this.minAlarm = null
 
     this.gateway = data.sensorInfo.gateway
     this.topic = data.sensorInfo.topic
@@ -67,7 +69,8 @@ export class SensorInfoDialogComponent {
       "minAlarm": this.minAlarm,
       "gateway": this.gateway,
       "topic": this.topic,
-      "indicator": this.indicator
+      "indicator": this.indicator,
+      "panelId": this.panelId
     }
   }
 

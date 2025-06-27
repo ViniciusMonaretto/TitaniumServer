@@ -157,7 +157,7 @@ class VisualizationWebSocketHandler(tornado.websocket.WebSocketHandler):
         self.send_panel_info()
 
     def calibrate_sensor(self, callibrate_command):
-        self._middleware.send_command(MqttCommands.CALIBRATION, callibrate_command)
+        self._middleware.send_command(ConfigHandlerCommands.UPDATE_PANEL_FUNCTIONALITIES, callibrate_command)
     
     def send_panel_info(self):
         self._middleware.send_command(ConfigHandlerCommands.GET_PANEL_LIST, {}, 
