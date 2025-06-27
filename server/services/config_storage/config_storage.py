@@ -284,7 +284,8 @@ class ConfigStorage(ServiceInterface):
                         'name': info['alarmName'],
                         'topic': info['alarmTopic'],
                         'threshold': info['alarmThreshold'],
-                        'type': info['alarmType']
+                        'type': info['alarmType'],
+                        'panelId': info['panelId']
                     }
                     if info['alarmType'] == AlarmType.Higher:
                         panels[-1]['maxAlarm'] = alarm

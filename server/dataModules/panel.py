@@ -49,10 +49,10 @@ class Panel:
         if "gain" in obj:
             self.gain = obj["gain"]
 
-        if "minAlarm" in obj and "alarmId" in obj:
+        if "minAlarm" in obj and "id" in obj["minAlarm"]:
             self.min_alarm = Alarm(obj["minAlarm"])
         
-        if "maxAlarm" in obj and "alarmId" in obj:
+        if "maxAlarm" in obj and "id" in obj["maxAlarm"]:
             self.max_alarm = Alarm(obj["maxAlarm"])
         self.sensor_type = SensorTypes.GetType(obj["sensorType"])
     

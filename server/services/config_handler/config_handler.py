@@ -176,7 +176,7 @@ class ConfigHandler(ServiceInterface):
     def handle_change_panel_alarm(self, panel: Panel, alarm: Alarm, new_alarm_value: float, is_max_alarm: bool):
         if alarm == None and new_alarm_value != None:
             alarm_info = {
-                "name": str(panel.id) + "max" if is_max_alarm else "min",
+                "name": str(panel.id) + ("max" if is_max_alarm else "min"),
                 "topic": ClientMiddleware.get_status_topic(panel.gateway, panel.topic, panel.indicator),
                 "threshold": new_alarm_value,
                 "type": AlarmType.Higher if is_max_alarm else AlarmType.Lower,

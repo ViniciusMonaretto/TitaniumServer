@@ -1,4 +1,5 @@
 import {SensorTypesEnum} from "../enum/sensor-type"
+import { AlarmModule } from "./alarm-module";
 
 export class SensorModule{
     public id: number = 0
@@ -11,6 +12,8 @@ export class SensorModule{
     public value: Number|null = null
     public gain: number = 0
     public offset: number = 0
+    public maxAlarm: AlarmModule | null = null
+    public minAlarm: AlarmModule | null = null
 
     constructor(){
         
