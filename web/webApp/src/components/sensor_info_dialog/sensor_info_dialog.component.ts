@@ -7,7 +7,6 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatInputModule } from '@angular/material/input';
 import { FormsModule } from '@angular/forms';
 import { SensorModule } from '../../models/sensor-module';
-import { Action } from 'rxjs/internal/scheduler/Action';
 
 @Component({
   selector: 'sensor-info-dialog',

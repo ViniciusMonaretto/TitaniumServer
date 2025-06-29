@@ -20,8 +20,6 @@ from services.service_interface import ServiceInterface
 from support.logger import Logger
 
 
-
-
 MONGO_DB_URI = "mongodb://root:example@localhost:27017/"
 MONGO_DB_NAME = "IoCloud"
 MONGO_DB_COLLECTION = "SensorData"

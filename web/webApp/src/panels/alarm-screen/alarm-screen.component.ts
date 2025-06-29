@@ -5,7 +5,6 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatCardModule } from '@angular/material/card';
 import { IoCloudTableComponent } from '../../components/io-cloud-table/io-cloud-table.component';
 import { MatDialog } from '@angular/material/dialog';
-import { AlarmAddWindowComponent } from '../../components/alarm-add-window/alarm-add-window.component';
 import { UiPanelService } from '../../services/ui-panels.service';
 import { EventAlarmManagerService } from '../../services/event-alarm-manager.service';
 
@@ -20,10 +19,9 @@ import { EventAlarmManagerService } from '../../services/event-alarm-manager.ser
     standalone: true
 })
 export class AlarmViewComponent implements OnInit {
-  headerInfo: string[][] = [["name", "Nome"], ["topic", "Medição"], ["type", "Trigger"], ["threshold", "Valor"]]
+  headerInfo: string[][] = [["panelName", "Sensor"], ["panelType", "Tipo"], ["value", "Valor"], ["timestamp", "Data"]]
 
   constructor(public dialog: MatDialog, 
-    private uiPanelService: UiPanelService, 
     private eventsService: EventAlarmManagerService)
   {
 

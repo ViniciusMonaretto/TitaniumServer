@@ -42,11 +42,35 @@ export class UiPanelService {
       }
     }
 
+    GetPanelById(panelId: number)
+    {
+      for(var groupPanelsName in this.panels)
+      {
+        var group = this.panels[groupPanelsName]
+        var panel = group.temperature.find(x=>x.id == panelId)
+        if (panel)
+        {
+          return panel
+        }
+        var panel = group.pressure.find(x=>x.id == panelId)
+        if (panel)
+        {
+          return panel
+        }
+        var panel = group.power.find(x=>x.id == panelId)
+        if (panel)
+        {
+          return panel
+        }
+      }
+      return null
+    }
+
     GetUiConfig()
     {
       return this.panels
     }
-
+    
     AddSensorToPanel(sensor: SensorModule, groupName: string)
     {
       switch(sensor.sensorType)

@@ -62,16 +62,17 @@ class AlarmManager(ServiceInterface):
             while not self._check_queue.empty():
                 try:
                     sensor_info: SensorInfo = self._check_queue.get(timeout=1)
-                    sensor_info.timestamp = datetime.fromisoformat(sensor_info.timestamp)
+                    data = sensor_info.value
+                    data["timestamp"] = datetime.fromisoformat(data["timestamp"])
 
-                    topic = sensor_info.sensor_full_topic.replace('-', '/')
+                    topic = sensor_info.sensor_full_topic
 
                     for alarm in self._alarms_info[topic]:
-                        if self.check_if_alarm_should_trigger(alarm, sensor_info.value):
+                        if self.check_if_alarm_should_trigger(alarm, data["value"]):
                             evt = EventModel(alarm.id, 
                                              alarm.panel_id, 
-                                             sensor_info.timestamp,
-                                             sensor_info.value)
+                                             data["timestamp"],
+                                             data["value"])
                             evt.name = alarm.name
                             events_to_add.append(evt)
                 except KeyboardInterrupt:
@@ -91,9 +92,9 @@ class AlarmManager(ServiceInterface):
 
     def add_check_status(self, status_info):
         try:
-            self._check_queue.put(SensorInfo(status_info["subStatusName"].replace('/', '-'),
+            self._check_queue.put(SensorInfo(status_info["subStatusName"],
                                              datetime.fromisoformat(status_info["data"]["timestamp"]),
-                                             status_info["data"]["data"]))
+                                             status_info["data"]))
         except Exception as e:
             self._logger.error(f"AlarmManager::add_check_status: Error adding data to queue {e}")
 
@@ -151,7 +152,7 @@ class AlarmManager(ServiceInterface):
         try:
             alarm_info, result = self._config_storage.get_alarm_info(alarm_id)
             if len(alarm_info) > 0:
-                topic = alarm_info[0]["topic"].replace("-","/")
+                topic = alarm_info[0]["topic"]
                 if topic in self._alarms_info:
 
                     result = self._config_storage.remove_alarm(alarm_id)
@@ -171,8 +172,7 @@ class AlarmManager(ServiceInterface):
         
         return None
 
-    def remove_alarm_internal_info(self, topic_in: str, alarm_id):
-        topic = topic_in.replace("-","/")
+    def remove_alarm_internal_info(self, topic: str, alarm_id):
         if( topic in self._alarms_info ):
             alarm = next((obj for obj in self._alarms_info[topic] if obj.id == alarm_id), None)
             if alarm:

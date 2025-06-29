@@ -4,6 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { ErrorDialogComponent } from '../components/error-dialog/error-dialog.component';
 import { SpinnerComponent } from '../components/spinner/spinner.component';
+import { EventAlarmModule } from '../models/event-alarm-module';
 
 @Injectable({
   providedIn: 'root'
@@ -12,13 +13,16 @@ export class ServerConectorService {
   private socket: WebSocket | null;
   private wsUrl = 'ws://localhost:8888/websocket'
 
+  private isConnecting: boolean = false
+
   //private reconnectAttempts: number = 0;
   private reconnectDelay: number = 2000;
   private dialogRef: MatDialogRef<SpinnerComponent> | null = null;
   private alarmRequest: ((alarms: any) => void) | null = null;
   private addAlarmRequest: ((alarms: any) => void) | null = null;
   private removeAlarmRequest: ((alarms: any) => void) | null = null;
-  private receivedEventsCallback: ((events: { panelId: number, events: any[] }, replaceValue: boolean) => void) | null = null;
+  private receivedEventsCallback: ((events: EventAlarmModule[], replaceValue: boolean) => void) | null = null;
+  private afterConnectRequests: Function[] = []
 
   constructor(private uiPanelService: UiPanelService, private dialog: MatDialog) {
     this.socket = null
@@ -27,6 +31,17 @@ export class ServerConectorService {
     }, 100)
 
   }
+
+  addOnConnectCallback(callback: Function) {
+    this.afterConnectRequests.push(callback)
+  }
+
+  private runOpenCommands() {
+    for (var callback of this.afterConnectRequests) {
+      callback();
+    }
+  }
+
 
   public setAlarmInfoCallback(callback: (alarms: any) => void): void {
     this.alarmRequest = callback;
@@ -47,6 +62,7 @@ export class ServerConectorService {
   private connectToServer(): void {
     this.showSpinnerDialog();
     this.socket = new WebSocket(this.wsUrl);
+    this.isConnecting = true
 
     this.socket.onmessage = (message) => { this.onMessage(message) }
 
@@ -56,7 +72,6 @@ export class ServerConectorService {
 
     this.socket.onopen = () => {
       console.log('WebSocket connected successfully!');
-      //this.reconnectAttempts = 0;  // Reset reconnect attempts on successful connection
     };
   }
 
@@ -145,12 +160,38 @@ export class ServerConectorService {
     }
   }
 
+  private createEventModel(eventInfo: any) {
+    var evt = new EventAlarmModule()
+    var panel = this.uiPanelService.GetPanelById(eventInfo["panelId"])
+
+    evt.id = eventInfo["id"]
+    evt.name = eventInfo["name"]
+    evt.alarmId = eventInfo["alarmId"]
+    evt.panelId = eventInfo["panelId"]
+    evt.value = eventInfo["value"]
+    evt.timestamp = eventInfo["timestamp"]
+
+    if (panel) {
+      evt.panelType = panel.sensorType
+      evt.panelName = panel.name
+    }
+
+    return evt;
+  }
+
   private onMessage(message: any): void {
     console.log('Received message:', message);
     let data = JSON.parse(message["data"])
     if (data["status"] == "uiConfig") {
       this.uiPanelService.SetNewUiConfig(data["message"])
-      this.hideSpinnerDialog();
+
+      if (this.isConnecting)
+      {
+        this.isConnecting = false
+        this.hideSpinnerDialog();
+         this.runOpenCommands();
+      }
+      
     }
     else if (data["status"] == "sensorUpdate") {
       let message = data["message"]
@@ -175,19 +216,24 @@ export class ServerConectorService {
     else if (data["status"] == "alarmRemoved") {
       let message = data["message"]
       if (this.removeAlarmRequest) {
-        this.removeAlarmRequest(message['data'])
+        this.removeAlarmRequest(message)
       }
     }
     else if (data["status"] == "eventListResponse") {
       let message = data["message"]
       if (this.receivedEventsCallback) {
-        this.receivedEventsCallback(message['data'], true)
+        var events: Array<EventAlarmModule> = []
+
+        message['data']["events"].forEach((x: any) => {
+          events.push(this.createEventModel(x));
+        })
+        this.receivedEventsCallback(events, true)
       }
     }
     else if (data["status"] == "eventInfoUpdate") {
       let message = data["message"]
       if (this.receivedEventsCallback) {
-        this.receivedEventsCallback({ panelId: message['data']["panelId"], events: [message['data']] }, false)
+        this.receivedEventsCallback([this.createEventModel(message)], false)
       }
     }
     else if (data["status"] == "error") {

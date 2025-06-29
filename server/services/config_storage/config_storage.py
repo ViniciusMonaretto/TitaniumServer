@@ -321,7 +321,7 @@ class ConfigStorage(ServiceInterface):
             new_id = cursor.lastrowid
 
         except Exception as e:
-            self._logger.error(f"Panel Add error: {e}" )
+            self._logger.error(f"Alarm Add error: {e}" )
         finally:
             conn.close()
         return new_id
@@ -399,7 +399,8 @@ class ConfigStorage(ServiceInterface):
         data = command["data"]
         events, result = self.get_events_info()
         if(result):
-            self._middleware.send_command_answear( result, {'events':events, 'panelId': data["panelId"]}, command["requestId"])
+            panel_id = data["panelId"] if "panelId" in data else None
+            self._middleware.send_command_answear( result, {'events':events, 'panelId': panel_id}, command["requestId"])
         else:
             self._middleware.send_command_answear( result, "Error Getting Events", command["requestId"])
 
@@ -455,6 +456,7 @@ class ConfigStorage(ServiceInterface):
     
     def add_event_array(self, events: list[EventModel]):
         result = False
+        conn: sqlite3.Connection = None
         try:
             event_data = [
             (e.alarm_id, e.panel_id, e.value, e.timestamp.timestamp()) 
@@ -477,8 +479,9 @@ class ConfigStorage(ServiceInterface):
             conn.commit()
             result = True
         except Exception as e:
-            self._logger.error(f"Panel Add error: {e}" )
+            self._logger.error(f"Event Add error: {e}" )
         finally:
-            conn.close()
+            if conn != None:
+                conn.close()
             
         return result

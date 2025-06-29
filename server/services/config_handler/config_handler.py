@@ -160,8 +160,8 @@ class ConfigHandler(ServiceInterface):
     def update_panel_functions(self, update_panel_info):
         gain = update_panel_info["gain"]
         offset = update_panel_info["offset"]
-        max_alarm = update_panel_info["maxAlarm"]
-        min_alarm = update_panel_info["minAlarm"]
+        max_alarm = update_panel_info["maxAlarm"] if "maxAlarm" in update_panel_info else None
+        min_alarm = update_panel_info["minAlarm"] if "minAlarm" in update_panel_info else None
         panel_id = update_panel_info["panelId"]
         panel = self._find_panel_from_id(panel_id)
 
