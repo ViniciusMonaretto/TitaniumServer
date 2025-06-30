@@ -15,6 +15,11 @@ export class EventAlarmManagerService {
         
     }
 
+    public removeAllEvents()
+    {
+        this.connectorService.sendCommand("removeAllEvents", {})
+    }
+
     public getEvents()
     {
         return this.events

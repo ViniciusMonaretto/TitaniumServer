@@ -43,7 +43,8 @@ class AlarmManager(ServiceInterface):
         commands = {
             AlarmManagerCommands.REMOVE_ALARM: self.remove_alarm_command,
             AlarmManagerCommands.ADD_ALARM: self.add_alarm_command,
-            AlarmManagerCommands.GET_ALARMS: self.get_alarm_command
+            AlarmManagerCommands.GET_ALARMS: self.get_alarm_command,
+            AlarmManagerCommands.REMOVE_ALL_EVENTS: self.remove_all_events_command
             }
         self._middleware.add_commands(commands)
 
@@ -128,6 +129,15 @@ class AlarmManager(ServiceInterface):
             self._logger.error(f"AlarmManager::add_alarm error: {e}")
         
         return alarm
+    
+    def remove_all_events_command(self, command):
+        result = self._config_storage.remove_events(command)
+        if result:
+            self._middleware.send_command_answear( result, {"events": []}, command["requestId"])
+        else:
+            self._middleware.send_command_answear( result, 
+                                                  "Erro ao remover os eventos", 
+                                                  command["requestId"])
 
     def setup_alarm(self, alarm: Alarm):
         topic = alarm.topic

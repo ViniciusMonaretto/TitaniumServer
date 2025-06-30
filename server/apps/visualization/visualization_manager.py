@@ -82,6 +82,8 @@ class VisualizationWebSocketHandler(tornado.websocket.WebSocketHandler):
                 self.add_alarm(payload)
             elif "removeAlarm" in message_obj["commandName"]:
                 self.remove_alarm(payload)
+            elif "removeAllEvents" in message_obj["commandName"]:
+                self.remove_all_events()
             elif "calibrate" in message_obj["commandName"]:
                 self.calibrate_sensor(payload)
             else:
@@ -91,6 +93,10 @@ class VisualizationWebSocketHandler(tornado.websocket.WebSocketHandler):
     
     def on_close(self):
         self._logger.debug("WebSocket closed")
+        self._middleware.remove_subscribe_from_status(self._event_subscriber, self._event_subscriber.get_topic())
+        self._middleware.remove_subscribe_from_status(self._calibrate_subscriber, self._calibrate_subscriber.get_topic())
+        self._calibrate_subscriber = None
+        self._event_subscriber = None
         for subscriber_topic in self._status_subscribers:
             self._middleware.remove_subscribe_from_status(self._status_subscribers[subscriber_topic], subscriber_topic)
 
@@ -207,6 +213,11 @@ class VisualizationWebSocketHandler(tornado.websocket.WebSocketHandler):
     
     def send_event(self, event_data):
         self.send_message_to_ui("eventInfoUpdate", event_data["data"])
+
+    def remove_all_events(self):
+         self._middleware.send_command(AlarmManagerCommands.REMOVE_ALL_EVENTS, {}, 
+                                      lambda data: self.send_events(data),
+                                      self.send_error_message)
 
 ################# Subscriber Functions #############################
     def add_subscribers(self, panels_info: dict[str: list[any]]):

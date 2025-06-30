@@ -23,3 +23,6 @@ class StatuSubscribers(SubscriberInterface):
 
     def remove_count(self):
         self._count-=1
+
+    def get_topic(self):
+        return self._status

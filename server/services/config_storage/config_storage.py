@@ -485,3 +485,26 @@ class ConfigStorage(ServiceInterface):
                 conn.close()
             
         return result
+    
+    def remove_events(self, event_info):
+        conn = None
+        result = False
+        try:
+            # Connect to the database
+            conn = sqlite3.connect(DB_NAME)
+            cursor = conn.cursor()
+
+            # Delete all rows from the Events table
+            cursor.execute("DELETE FROM Events")
+
+            # Commit changes and close connection
+            conn.commit()
+            result = True
+        except Exception as e:
+            self._logger.error(f"Event Add error: {e}" )
+        finally:
+            if conn:
+                conn.close()
+        
+        return result
+        

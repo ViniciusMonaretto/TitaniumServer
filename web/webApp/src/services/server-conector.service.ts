@@ -2,9 +2,9 @@ import { Injectable } from '@angular/core';
 import { UiPanelService } from './ui-panels.service'
 import { v4 as uuidv4 } from 'uuid';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
-import { ErrorDialogComponent } from '../components/error-dialog/error-dialog.component';
 import { SpinnerComponent } from '../components/spinner/spinner.component';
 import { EventAlarmModule } from '../models/event-alarm-module';
+import { DialogHelper } from './dialog-helper.service';
 
 @Injectable({
   providedIn: 'root'
@@ -17,14 +17,13 @@ export class ServerConectorService {
 
   //private reconnectAttempts: number = 0;
   private reconnectDelay: number = 2000;
-  private dialogRef: MatDialogRef<SpinnerComponent> | null = null;
   private alarmRequest: ((alarms: any) => void) | null = null;
   private addAlarmRequest: ((alarms: any) => void) | null = null;
   private removeAlarmRequest: ((alarms: any) => void) | null = null;
   private receivedEventsCallback: ((events: EventAlarmModule[], replaceValue: boolean) => void) | null = null;
   private afterConnectRequests: Function[] = []
 
-  constructor(private uiPanelService: UiPanelService, private dialog: MatDialog) {
+  constructor(private uiPanelService: UiPanelService, private dialogHelper: DialogHelper) {
     this.socket = null
     setTimeout(() => {
       this.connectToServer();
@@ -60,7 +59,7 @@ export class ServerConectorService {
   }
 
   private connectToServer(): void {
-    this.showSpinnerDialog();
+    this.dialogHelper.showSpinnerDialog();
     this.socket = new WebSocket(this.wsUrl);
     this.isConnecting = true
 
@@ -73,22 +72,6 @@ export class ServerConectorService {
     this.socket.onopen = () => {
       console.log('WebSocket connected successfully!');
     };
-  }
-
-  private showSpinnerDialog(): void {
-    if (!this.dialogRef) {
-      this.dialogRef = this.dialog.open(SpinnerComponent, {
-        disableClose: true,
-        panelClass: 'transparent-dialog',
-        backdropClass: 'dimmed-backdrop',
-      });
-    }
-
-  }
-
-  private hideSpinnerDialog(): void {
-    this.dialogRef?.close();
-    this.dialogRef = null;
   }
 
   private onDisconnection() {
@@ -104,13 +87,6 @@ export class ServerConectorService {
       //this.reconnectAttempts++;
       this.connectToServer();
     }, this.reconnectDelay);
-  }
-
-  private openErrorDialog(message: string): void {
-    this.dialog.open(ErrorDialogComponent, {
-      width: '400px',
-      data: { message },
-    });
   }
 
   public formatLocalDateToCustomString(date: Date) {
@@ -185,13 +161,12 @@ export class ServerConectorService {
     if (data["status"] == "uiConfig") {
       this.uiPanelService.SetNewUiConfig(data["message"])
 
-      if (this.isConnecting)
-      {
+      if (this.isConnecting) {
         this.isConnecting = false
-        this.hideSpinnerDialog();
-         this.runOpenCommands();
+        this.dialogHelper.hideSpinnerDialog();
+        this.runOpenCommands();
       }
-      
+
     }
     else if (data["status"] == "sensorUpdate") {
       let message = data["message"]
@@ -237,7 +212,7 @@ export class ServerConectorService {
       }
     }
     else if (data["status"] == "error") {
-      this.openErrorDialog(data["message"])
+      this.dialogHelper.openErrorDialog(data["message"]["data"])
     }
     else {
       console.log("Status " + data["status"] + " not found")

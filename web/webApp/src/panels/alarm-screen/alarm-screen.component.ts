@@ -7,6 +7,7 @@ import { IoCloudTableComponent } from '../../components/io-cloud-table/io-cloud-
 import { MatDialog } from '@angular/material/dialog';
 import { UiPanelService } from '../../services/ui-panels.service';
 import { EventAlarmManagerService } from '../../services/event-alarm-manager.service';
+import { DialogHelper } from '../../services/dialog-helper.service';
 
 @Component({
     selector: 'event-screen',
@@ -21,10 +22,20 @@ import { EventAlarmManagerService } from '../../services/event-alarm-manager.ser
 export class AlarmViewComponent implements OnInit {
   headerInfo: string[][] = [["panelName", "Sensor"], ["panelType", "Tipo"], ["value", "Valor"], ["timestamp", "Data"]]
 
-  constructor(public dialog: MatDialog, 
+  constructor(private dialogHelper: DialogHelper, 
     private eventsService: EventAlarmManagerService)
   {
 
+  }
+
+  eraseAllEvents()
+  {
+    this.dialogHelper.openQuestionDialog("Apagar eventos", 
+      "Deseja limpar todos os eventos?",
+      () =>
+      {
+        this.eventsService.removeAllEvents()
+      })
   }
 
   ngOnInit(): void {
