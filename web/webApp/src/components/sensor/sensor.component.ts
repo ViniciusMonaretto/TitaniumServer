@@ -44,6 +44,30 @@ export class SensorComponent implements OnInit {
     this.sensorInfo.name
   }
 
+  getColorOfSensor()
+  {
+    var value = this.sensorInfo?.value
+    var maxValue = this.sensorInfo?.maxAlarm?.threshold
+    var minValue = this.sensorInfo?.minAlarm?.threshold
+
+    if (!value)
+    {
+      return 'none';
+    }
+
+    if (maxValue && value > maxValue)
+    {
+      return 'red'
+    }
+
+    if (minValue && value < minValue)
+    {
+      return 'red'
+    }
+
+    return 'none';
+  }
+
   deletePanel()
   {
     this.deleteCallback.emit(this.sensorInfo.id)

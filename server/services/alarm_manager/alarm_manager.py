@@ -14,7 +14,7 @@ from ..service_interface import ServiceInterface
 
 class AlarmManager(ServiceInterface):
     _alarms_info: dict[str, list[Alarm]] = {}
-    _status_subscribers: dict[str: StatuSubscribers] = {}
+    _status_subscribers: dict[str, StatuSubscribers] = {}
 
     def __init__(self, middleware: ClientMiddleware, config_storage: ConfigStorage):
         self._logger = Logger()
@@ -63,7 +63,10 @@ class AlarmManager(ServiceInterface):
             while not self._check_queue.empty():
                 try:
                     sensor_info: SensorInfo = self._check_queue.get(timeout=1)
-                    data = sensor_info.value
+                    data = {
+                        "timestamp": sensor_info.timestamp,
+                        "value": sensor_info.value
+                    }
                     data["timestamp"] = datetime.fromisoformat(data["timestamp"])
 
                     topic = sensor_info.sensor_full_topic
@@ -95,7 +98,7 @@ class AlarmManager(ServiceInterface):
         try:
             self._check_queue.put(SensorInfo(status_info["subStatusName"],
                                              datetime.fromisoformat(status_info["data"]["timestamp"]),
-                                             status_info["data"]))
+                                             status_info["data"]["value"]))
         except Exception as e:
             self._logger.error(f"AlarmManager::add_check_status: Error adding data to queue {e}")
 

@@ -1,7 +1,7 @@
 <div class="sensor">
   <div class="measure-display" (click)="infoCLick()">
     <div class="border-measure"></div>
-    <div class="middle-measure">
+    <div class="middle-measure" [style.color]="getColorOfSensor()">
       {{ getCurrentReading() }}
     </div>
     <div

@@ -4,12 +4,12 @@ class AlarmType:
     Equal = 2
 
 class Alarm:
-    id = "" 
+    id = 0
     topic = ""
     name = ""
     threshold = 0
     type = AlarmType.Higher
-    panel_id = 0,
+    panel_id = 0
 
     def __init__(self, obj):
         if "id" in obj:

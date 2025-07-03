@@ -26,8 +26,8 @@ export class SensorInfoDialogComponent {
   public gain: number = 0
   public offset: number = 0
   public enableAlarms: boolean = false
-  public maxAlarm: number | null | undefined = null
-  public minAlarm: number | null | undefined = null
+  public maxAlarm: Number | null | undefined = null
+  public minAlarm: Number | null | undefined = null
 
   private panelId = -1
   private gateway = ""

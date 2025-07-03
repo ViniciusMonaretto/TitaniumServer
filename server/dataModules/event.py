@@ -1,12 +1,12 @@
 from datetime import datetime
 
 class EventModel:
-    event_id = "" 
+    event_id = 0 
     alarm_id = -1
     value = 0
     panel_id = -1
     name = ""
-    timestamp: datetime = 0
+    timestamp: datetime = datetime.now()
 
     def __init__(self, alarm_id: int, panel_id: int, timestamp: datetime, value: int,  event_id = -1):
         self.event_id = event_id

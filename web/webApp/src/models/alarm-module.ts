@@ -5,7 +5,7 @@ export class AlarmModule{
     public name: string = "";
     public sensor: string = "";
     public alarmType: AlarmTypes = AlarmTypes.EQUAL
-    public threshold: number|null = null
+    public threshold: Number|null = null
 
     constructor(){
         
