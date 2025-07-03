@@ -2,7 +2,7 @@
 import threading
 import queue
 import uuid
-from datetime import datetime
+from datetime import datetime, timedelta
 
 # Third-party imports
 import pytz
@@ -39,6 +39,10 @@ class SensorDataStorage(ServiceInterface):
 
         self._info_wrything_thread = threading.Thread(target=self.write_sensor_data_loop, daemon=True)
         self._info_wrything_thread.start()
+
+        # Start the cleanup thread for old data
+        self._cleanup_thread = threading.Thread(target=self.cleanup_old_data_loop, daemon=True)
+        self._cleanup_thread.start()
 
         self._status_subscribers = {}
 
@@ -89,7 +93,12 @@ class SensorDataStorage(ServiceInterface):
             while not self._write_queue.empty():
                 try:
                     sensor_info: SensorInfo = self._write_queue.get(timeout=1)
-                    sensor_info.timestamp = datetime.fromisoformat(sensor_info.timestamp)
+                    # Convert timestamp to string if it's not already a string
+                    if isinstance(sensor_info.timestamp, str):
+                        sensor_info.timestamp = datetime.fromisoformat(sensor_info.timestamp)
+                    else:
+                        # If it's already a datetime object, use it directly
+                        sensor_info.timestamp = sensor_info.timestamp
                     
                     sensor_infos.append(sensor_info.to_json())
                 except KeyboardInterrupt:
@@ -103,7 +112,7 @@ class SensorDataStorage(ServiceInterface):
             threading.Event().wait(1)
 
 
-    def add_new_subscription(self, topic: str, gateway: str, indicator: str) ->  Union[bool, str]:
+    def add_new_subscription(self, topic: str, gateway: str, indicator: str) -> tuple[bool, str]:
         try:
             self.subscribe_to_status(gateway, topic, indicator)
             return True, ""
@@ -273,3 +282,40 @@ class SensorDataStorage(ServiceInterface):
             result = False
 
         finish_callback(result, message)
+
+    def cleanup_old_data_loop(self):
+        """Background thread that runs every 24 hours to clean up data older than 60 days"""
+        while True:
+            try:
+                self._logger.info("SensorDataStorage: Starting cleanup of old data (older than 60 days)")
+                self.run_mongo_commands_async_background(self._cleanup_old_data())
+                
+                # Wait for 24 hours before next cleanup
+                threading.Event().wait(24 * 60 * 60)  # 24 hours in seconds
+                
+            except Exception as e:
+                self._logger.error(f"SensorDataStorage::cleanup_old_data_loop: Error in cleanup loop {e}")
+                # Wait 1 hour before retrying if there's an error
+                threading.Event().wait(60 * 60)  # 1 hour in seconds
+
+    async def _cleanup_old_data(self):
+        """Async method to clean up sensor data older than 60 days"""
+        try:
+            # Calculate the cutoff date (60 days ago)
+            cutoff_date = datetime.now() - timedelta(days=60)
+            cutoff_timestamp = cutoff_date.timestamp()
+            
+            # Create query to find documents older than 60 days
+            query = {"Timestamp": {"$lt": cutoff_timestamp}}
+            
+            # Delete old documents
+            result = await self._collection.delete_many(query)
+            
+            deleted_count = result.deleted_count
+            self._logger.info(f"SensorDataStorage: Cleaned up {deleted_count} documents older than 60 days")
+            
+            return deleted_count
+            
+        except Exception as e:
+            self._logger.error(f"SensorDataStorage::_cleanup_old_data: Error cleaning up old data {e}")
+            return 0
