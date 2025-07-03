@@ -13,5 +13,21 @@ services:
     volumes:
       - mongo_data:/data/db
 
+  mosquitto:
+    image: eclipse-mosquitto:2.0
+    container_name: my-mosquitto
+    restart: always
+    ports:
+      - "1883:1883"  # MQTT default port
+      - "9001:9001"  # WebSocket port for MQTT over WebSocket
+    volumes:
+      - mosquitto_data:/mosquitto/data
+      - mosquitto_logs:/mosquitto/log
+      - ./config/mosquitto/config:/mosquitto/config
+    environment:
+      - MOSQUITTO_CONFIG_FILE=/mosquitto/config/mosquitto.conf
+
 volumes:
   mongo_data:
+  mosquitto_data:
+  mosquitto_logs:
