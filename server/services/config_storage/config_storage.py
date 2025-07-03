@@ -212,8 +212,8 @@ class ConfigStorage(ServiceInterface):
             conn.close()
         return result
     
-    def get_panels(self) -> list[object]:
-        panels: list[Panel] = []
+    def get_panels(self) -> list[dict]:
+        panels: list[dict] = []
         try:
             conn = sqlite3.connect(DB_NAME)
             conn.row_factory = sqlite3.Row  # So we can access columns by name
@@ -456,7 +456,7 @@ class ConfigStorage(ServiceInterface):
     
     def add_event_array(self, events: list[EventModel]):
         result = False
-        conn: sqlite3.Connection = None
+        conn: sqlite3.Connection | None = None
         try:
             event_data = [
             (e.alarm_id, e.panel_id, e.value, e.timestamp.timestamp()) 
@@ -487,7 +487,7 @@ class ConfigStorage(ServiceInterface):
         return result
     
     def remove_events(self, event_info):
-        conn = None
+        conn: sqlite3.Connection | None = None
         result = False
         try:
             # Connect to the database

@@ -22,7 +22,7 @@ DB_CONFIG = "db_status_saves.json"
 DB_NAME = "titanium_server_db.db"
 
 class ConfigHandler(ServiceInterface):
-    _panels_info: dict[str: list[Panel]] = {}
+    _panels_info: dict[str, list[Panel]] = {}
     _status_subscribers = {}
 
     def __init__(self, 
@@ -91,14 +91,14 @@ class ConfigHandler(ServiceInterface):
 
     def _find_panel_from_id(self, panel_id):
         for group_name in self._panels_info:
-            panel: Panel = next((item for item in self._panels_info[group_name] if item.id == panel_id), None)
+            panel: Panel | None = next((item for item in self._panels_info[group_name] if item.id == panel_id), None)
             if panel != None:
                 return panel
         
         return None
     
 
-    def add_group(self, group_name) -> Union[bool, str]:
+    def add_group(self, group_name) -> tuple[bool, str]:
         if group_name in self._panels_info:
             return (False, "Group name already added")
         self._panels_info[group_name] = []
@@ -111,7 +111,7 @@ class ConfigHandler(ServiceInterface):
             for panel_info in panels_info[group_name]:
                 self.add_panel(panel_info)
 
-    def add_panel(self, panel_info) -> Union[bool, str]:
+    def add_panel(self, panel_info) -> tuple[bool, str]:
         result = False
         message = ""
         panel = Panel(panel_info)
@@ -128,7 +128,12 @@ class ConfigHandler(ServiceInterface):
             index = panel.id
         if( index != -1):
             panel.id = index
-            result, message = self._sensor_data_storage.add_new_subscription(panel.topic, panel.gateway, panel.indicator)
+            subscription_result = self._sensor_data_storage.add_new_subscription(panel.topic, panel.gateway, panel.indicator)
+            if isinstance(subscription_result, tuple):
+                result, message = subscription_result
+            else:
+                result = subscription_result
+                message = "Subscription result"
         
             if result:
                 self._panels_info[group_name].append(panel)
@@ -192,7 +197,7 @@ class ConfigHandler(ServiceInterface):
         return alarm
 
     
-    def remove_panel(self, panel_id) -> Union[bool, str]:
+    def remove_panel(self, panel_id) -> tuple[bool, str]:
         try: 
             for panels in self._panels_info.values():
                 for idx, panel in enumerate(panels):
@@ -200,7 +205,7 @@ class ConfigHandler(ServiceInterface):
                         wait_flag = threading.Event()
                         self._sensor_data_storage.erase_sensor_info([ClientMiddleware.get_calibrate_topic(panel.gateway, 
                                                                                                           panel.topic, 
-                                                                                                          panel.identification)], 
+                                                                                                          panel.indicator)], 
                                                                     None,
                                                                     None,
                                                                     lambda a,b : wait_flag.set())
@@ -218,7 +223,7 @@ class ConfigHandler(ServiceInterface):
         return False, "Remove panel error: Panel not found"
     
     def remove_panel_subscription(self, panel):
-        topic = ClientMiddleware.get_calibrate_topic(panel.gateway, panel.status_name, panel.indicator)
+        topic = ClientMiddleware.get_calibrate_topic(panel.gateway, panel.topic, panel.indicator)
         if(topic in self._status_subscribers):
             self._middleware.remove_subscribe_from_status(self._status_subscribers[topic], topic)
             del self._status_subscribers[topic]

@@ -220,7 +220,7 @@ class VisualizationWebSocketHandler(tornado.websocket.WebSocketHandler):
                                       self.send_error_message)
 
 ################# Subscriber Functions #############################
-    def add_subscribers(self, panels_info: dict[str: list[any]]):
+    def add_subscribers(self, panels_info: dict[str, list[any]]):
         for panels in panels_info.values():
             for panel in panels:
                 self.add_panel_subscriber(Panel(panel))
