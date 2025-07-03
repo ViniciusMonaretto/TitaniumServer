@@ -156,14 +156,14 @@ class SensorDataStorage(ServiceInterface):
     def read_sensor_info_command(self, command):
         self.read_sensor_info(command, lambda result, data_out: self._middleware.send_command_answear( result, data_out, command["requestId"]))
     
-    def read_sensor_info(self, command: object, finish_callback):
+    def read_sensor_info(self, command: dict, finish_callback):
         self.run_mongo_commands_async_background(self._read_sensor_info(command, finish_callback))
 
-    async def _read_sensor_info(self, command: object, finish_callback):
+    async def _read_sensor_info(self, command: dict, finish_callback):
         data = command["data"]
         sensor_infos = data["sensorInfos"]
 
-        query = {
+        query: dict = {
                 "SensorFullTopic": {"$in": []}
             }
 
@@ -235,8 +235,8 @@ class SensorDataStorage(ServiceInterface):
     
     def erase_sensor_info(self, 
                           sensors_ids: list[str], 
-                          begin_date: datetime, 
-                          end_date: datetime, 
+                          begin_date: datetime|None, 
+                          end_date: datetime|None, 
                           finish_callback):
         self.run_mongo_commands_async_background(self._erase_sensor_info(sensors_ids, 
                                                                          begin_date, 
@@ -245,26 +245,28 @@ class SensorDataStorage(ServiceInterface):
     
     async def _erase_sensor_info(self, 
                           sensors_ids: list[str], 
-                          begin_date: datetime, 
-                          end_date: datetime, 
+                          begin_date: datetime|None, 
+                          end_date: datetime|None, 
                           finish_callback):
 
         result = False
         message = "Successo"
 
-        query = {
+        query: dict = {
                 "SensorFullTopic": {"$in": sensors_ids}
             }
         
         if begin_date:
+            query["Timestamp"] = {}
             query["Timestamp"]["$gt"] = begin_date.timestamp()
 
-            if end_date:
-                query["Timestamp"]["$lt"] = end_date.timestamp()
+        if end_date:
+            if "Timestamp" not in query:
+                query["Timestamp"] = {}
+            query["Timestamp"]["$lt"] = end_date.timestamp()
         
         try:
             result = await self._collection.delete_many(query)
-            
         except Exception as e:
             self._logger.error(f"SensorDataStorage::erase_sensor_info: Error trying to fetch info from table {e}")
             message = "Erro removendo ids do banco"
