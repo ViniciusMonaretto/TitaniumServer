@@ -65,6 +65,7 @@ export class GroupOfSensorsComponent implements OnInit {
       width: '450px',
       data: {sensorInfo: sensorInfo,
       sensorType: this.type,
+      canEdit: this.canEdit,
       callback: (calibrateInfo: any) => {
         this.calibrateSensor(calibrateInfo)
       }

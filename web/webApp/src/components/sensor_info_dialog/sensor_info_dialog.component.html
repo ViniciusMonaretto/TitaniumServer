@@ -4,31 +4,31 @@
     <div>
         <div>Ganho</div>
         <mat-form-field style="width: 100%;" appearance="fill">
-            <input matInput type="number" step="0.01" [(ngModel)]="gain">
+            <input matInput type="number" [disabled]="!canEdit" step="0.01" [(ngModel)]="gain">
         </mat-form-field>
     </div>
     <div>
         <div>Offset:</div>
         <mat-form-field style="width: 100%;" appearance="fill">
-            <input matInput type="number" step="0.01" [(ngModel)]="offset">
+            <input matInput type="number" [disabled]="!canEdit" step="0.01" [(ngModel)]="offset">
         </mat-form-field>
     </div>
     <div class="border-t pt-4">
         <label class="inline-flex items-center mb-2">
-            <input type="checkbox" id="alarmEnabled" [(ngModel)]="enableAlarms" class="form-checkbox h-5 w-5 text-blue-600">
+            <input type="checkbox" id="alarmEnabled" [disabled]="!canEdit" [(ngModel)]="enableAlarms" class="form-checkbox h-5 w-5 text-blue-600">
             <span class="ml-2 text-sm text-gray-700">Habilitar Alarmes</span>
         </label>
         <div class="alarm-div">
             <div style="width: calc(50% - 5px);">
                 <div>Máximo</div>
                 <mat-form-field style="width: 100%;" appearance="fill">
-                    <input [disabled]="!enableAlarms" matInput type="number" [(ngModel)]="maxAlarm">
+                    <input [disabled]="!enableAlarms || !canEdit" matInput type="number" [(ngModel)]="maxAlarm">
                 </mat-form-field>
             </div>
             <div style="width: calc(50% - 5px);">
                 <div>Mínimo</div>
                 <mat-form-field style="width: 100%;" appearance="fill">
-                    <input [disabled]="!enableAlarms" matInput type="number" [(ngModel)]="minAlarm">
+                    <input [disabled]="!enableAlarms || !canEdit" matInput type="number" [(ngModel)]="minAlarm">
                 </mat-form-field>
             </div> 
         </div>   

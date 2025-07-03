@@ -28,6 +28,7 @@ export class SensorInfoDialogComponent {
   public enableAlarms: boolean = false
   public maxAlarm: Number | null | undefined = null
   public minAlarm: Number | null | undefined = null
+  public canEdit: boolean = false
 
   private panelId = -1
   private gateway = ""
@@ -39,7 +40,7 @@ export class SensorInfoDialogComponent {
   uiConfig: { [id: string]: any } = {}
 
   constructor(public dialogRef: MatDialogRef<SensorInfoDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: {sensorInfo: SensorModule, callback: ((obj: any) => void)}
+    @Inject(MAT_DIALOG_DATA) public data: {sensorInfo: SensorModule, callback: ((obj: any) => void), canEdit: boolean}
   ) {
     this.sensorName = data.sensorInfo.name
     this.gain = data.sensorInfo.gain ?? 0
@@ -54,6 +55,7 @@ export class SensorInfoDialogComponent {
     this.topic = data.sensorInfo.topic
     this.indicator = data.sensorInfo.indicator
     this.onApplyAction = data.callback;
+    this.canEdit = data.canEdit
   }
 
   validForm() {
