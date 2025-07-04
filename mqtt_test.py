@@ -5,11 +5,13 @@ from datetime import datetime
 import paho.mqtt.client as mqtt
 
 # Define the broker and port
-BROKER = "mqtt.eclipseprojects.io"
+BROKER = "localhost"  # "mqtt.eclipseprojects.io"
 PORT = 1883
 MESSAGES_TO_SEND = 20
 
 # Callback for successful connection
+
+
 def on_connect(client, userdata, flags, rc):
     if rc == 0:
         print("Connected successfully")
@@ -19,13 +21,16 @@ def on_connect(client, userdata, flags, rc):
         print(f"Connection failed with code {rc}")
 
 # Callback for receiving messages
+
+
 def on_message(client, userdata, msg):
     print(f"Received command on topic: {msg.topic}")
     response_topic = msg.topic.replace("iocloudcommand/", "iocloud/", 1)
     response_topic = response_topic.replace("request/", "response/", 1)
-    
+
     client.publish(response_topic, msg.payload)
     print(f"Responded to topic: {response_topic}")
+
 
 # Create an MQTT client instance
 client = mqtt.Client()

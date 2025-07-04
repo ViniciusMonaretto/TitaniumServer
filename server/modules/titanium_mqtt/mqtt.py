@@ -10,20 +10,22 @@ from modules.titanium_mqtt.mqtt_commands import MqttCommands
 from support.logger import Logger
 
 from .translators.translator_model import PayloadTranslator
- 
+
 
 SUBSCRIBE_TOPIC_LIST = [("iocloud/#", 0)]
 
-PUBLISH_TOPIC_LIST =   ["GetLevel", "titanium/level"]
+PUBLISH_TOPIC_LIST = ["GetLevel", "titanium/level"]
 
 GATEWAY_CONFIG_DIR = "titaniumGatewaysConfigs"
 
-MQTT_SERVER = "mqtt.eclipseprojects.io"
+MQTT_SERVER = "localhost"
 
 MQTT_PORT = 1883
 
+
 class TitaniumMqtt:
     _client: mqtt.Client
+
     def __init__(self, middleware: ClientMiddleware):
         self._logger = Logger()
         self._subscribe_topic_list = SUBSCRIBE_TOPIC_LIST
@@ -39,19 +41,21 @@ class TitaniumMqtt:
 
         self._read_queue = queue.Queue()
 
-        self._command_handler = threading.Thread(target=self.handle_incoming_messages, daemon=True)
-        self._messages_handler = threading.Thread(target=self.handle_incoming_messages, daemon=True)
+        self._command_handler = threading.Thread(
+            target=self.handle_incoming_messages, daemon=True)
+        self._messages_handler = threading.Thread(
+            target=self.handle_incoming_messages, daemon=True)
 
     def initialize_commands(self):
         commands = {
             MqttCommands.CALIBRATION: self.calibrate_command
-            }
+        }
         self._middleware.add_commands(commands)
 
     def calibrate_command(self, command):
         command_data = command["data"]
-        if(not self._client or not self._client.is_connected()):
-           self._middleware.send_command_answear( False, "calibrate_command: Mqtt not connected", 
+        if (not self._client or not self._client.is_connected()):
+            self._middleware.send_command_answear(False, "calibrate_command: Mqtt not connected",
                                                   command_data["requestId"])
         topic = f"iocloudcommand/{command_data['gateway']}/calibraterequest/{command_data['topic']}/{command_data['indicator']}"
         payload = {
@@ -60,12 +64,13 @@ class TitaniumMqtt:
             "gain": command_data["gain"]
         }
         self._client.publish(topic, json.dumps(payload))
-        self._middleware.send_command_answear( True, "sucess", command["requestId"])
+        self._middleware.send_command_answear(
+            True, "sucess", command["requestId"])
 
     def on_connect(self, client, userdata, _flags, rc):
         self._logger.info(f"MqqtServer: Connected with result code {rc}")
         client.subscribe(userdata['subscribe_topics'])
-            
+
     def on_message(self, _c, _u, msg):
         self._logger.debug(f"Received message: {msg.topic} {msg.payload}")
         self._read_queue.put(msg)
@@ -74,7 +79,7 @@ class TitaniumMqtt:
         self._client = mqtt.Client()
 
         user_data = {}
-        user_data['subscribe_topics'] = self._subscribe_topic_list 
+        user_data['subscribe_topics'] = self._subscribe_topic_list
         user_data['publish_topics'] = self._publish_topics_list
         self._client.user_data_set(user_data)
 
@@ -87,25 +92,30 @@ class TitaniumMqtt:
             self._client.loop_start()
         except Exception as e:
             self._logger.error(f"Error Connecting to Mqtt: {e}")
-    
+
     def execute(self, command):
         topic = self.get_topic_from_command(command.name)
         self._client.publish(topic, command.message)
 
     def handle_incoming_messages(self):
-        while(not self._end_thread):
+        while (not self._end_thread):
             try:
                 msg = self._read_queue.get_nowait()
-                mqtt_message = self._translator.translate_incoming_message(msg.topic, msg.payload)
+                mqtt_message = self._translator.translate_incoming_message(
+                    msg.topic, msg.payload)
 
                 if (mqtt_message):
-                    topic_name = TitaniumMqtt.get_topic_from_mosquitto_obj(mqtt_message)
-                    self._middleware.send_status(topic_name, mqtt_message.payload)
+                    topic_name = TitaniumMqtt.get_topic_from_mosquitto_obj(
+                        mqtt_message)
+                    if (topic_name):
+                        self._middleware.send_status(
+                            topic_name, mqtt_message.payload)
             except queue.Empty:
                 pass
             except Exception as e:
-                self._logger.error(f"Mqtt.handle_incoming_messages: Error Parsing messages {e}")
-    
+                self._logger.error(
+                    f"Mqtt.handle_incoming_messages: Error Parsing messages {e}")
+
     def stop(self):
         self._end_thread = True
         self._client.loop_stop()
@@ -113,15 +123,16 @@ class TitaniumMqtt:
         self._messages_handler.join()
 
     def get_topic_from_command(self, command):
-        if command in  self._publish_topics_list:
+        if command in self._publish_topics_list:
             return self._publish_topics_list[command]
         return command
 
     @staticmethod
     def get_topic_from_mosquitto_obj(mqtt_message: MqttPayloadModel):
         if mqtt_message.action == "calibrateresponse":
-            return ClientMiddleware.get_calibrate_topic( mqtt_message.gateway, mqtt_message.subtopic, mqtt_message.indicator)
+            return ClientMiddleware.get_calibrate_topic(mqtt_message.gateway, mqtt_message.subtopic, mqtt_message.indicator)
         elif mqtt_message.action == "status":
-            return ClientMiddleware.get_status_topic( mqtt_message.gateway, mqtt_message.subtopic, mqtt_message.indicator)
+            return ClientMiddleware.get_status_topic(mqtt_message.gateway, mqtt_message.subtopic, mqtt_message.indicator)
         else:
-            Logger().warning(f"TitaniumMqtt::get_topic_from_mosquitto_obj: Mqtt message action not supported: {mqtt_message.action}")
+            Logger().warning(
+                f"TitaniumMqtt::get_topic_from_mosquitto_obj: Mqtt message action not supported: {mqtt_message.action}")
