@@ -2,13 +2,13 @@
 import threading
 import queue
 import uuid
-from datetime import datetime, timedelta
+from datetime import datetime
+from typing import Any, Callable, Dict, List, Optional
 
 # Third-party imports
 import pytz
 from motor.motor_asyncio import AsyncIOMotorClient
 from pymongo import ASCENDING
-from typing import Union
 
 # Local application imports
 from middleware.client_middleware import ClientMiddleware
@@ -26,30 +26,27 @@ MONGO_DB_COLLECTION = "SensorData"
 
 
 class SensorDataStorage(ServiceInterface):
-    _indexes_created = False
+    """Service for storing and managing sensor data in MongoDB."""
 
     def __init__(self, middleware: ClientMiddleware):
         self._logger = Logger()
         self._middleware = middleware
-
         self._async_loop = AsyncioLoopThread()
-
         self._indexes_created = False
+        self._status_subscribers: Dict[str, StatuSubscribers] = {}
+
         self.initialize_commands()
         self.initialize_system()
         self.id = str(uuid.uuid4())
 
-        self._info_wrything_thread = threading.Thread(
+        self._info_writing_thread = threading.Thread(
             target=self.write_sensor_data_loop, daemon=True)
-        self._info_wrything_thread.start()
-
-        # Start the cleanup thread for old data
-
-        self._status_subscribers = {}
+        self._info_writing_thread.start()
 
         self._logger.info("SensorDataStorage initialized")
 
-    def initialize_commands(self):
+    def initialize_commands(self) -> None:
+        """Initialize command handlers."""
         commands = {
             SensorDataStorageCommands.ADD_SENSOR_INFO: self.add_sensor_info_command,
             SensorDataStorageCommands.READ_SENSOR_INFO: self.read_sensor_info_command,
@@ -57,33 +54,36 @@ class SensorDataStorage(ServiceInterface):
         }
         self._middleware.add_commands(commands)
 
-    async def create_indexes_of_db(self):
+    async def create_indexes_of_db(self) -> None:
+        """Create database indexes for efficient queries and TTL."""
         if not self._indexes_created:
+            # Create compound index for efficient queries
             await self._collection.create_index(
                 [("SensorFullTopic", ASCENDING), ("Timestamp", ASCENDING)],
                 background=True
             )
 
+            # Create TTL index to expire documents after 60 days
             await self._collection.create_index(
                 "Timestamp",
                 expireAfterSeconds=60 * 24 * 60 * 60,  # 60 days in seconds
                 background=True
             )
+
             self._indexes_created = True
 
-    def initialize_system(self):
+    def initialize_system(self) -> None:
+        """Initialize MongoDB connection and create indexes."""
         try:
             self._client = AsyncIOMotorClient(MONGO_DB_URI)
-
             self._write_queue = queue.Queue()
-
             self._db = self._client[MONGO_DB_NAME]
             self._collection = self._db[MONGO_DB_COLLECTION]
 
             self.run_mongo_commands_async_background(
                 self.create_indexes_of_db())
 
-            while (self._indexes_created is False):
+            while not self._indexes_created:
                 pass
 
             self._logger.debug(
@@ -92,12 +92,13 @@ class SensorDataStorage(ServiceInterface):
             self._logger.error(
                 f"SensorDataStorage.initialize_system: MongoDB connection error {e}")
 
-    def run_mongo_commands_async_background(self, coro):
+    def run_mongo_commands_async_background(self, coro) -> Any:
+        """Run MongoDB commands asynchronously in background."""
         future = self._async_loop.run_coro(coro)
-
         return future
 
-    def write_sensor_data_loop(self):
+    def write_sensor_data_loop(self) -> None:
+        """Main loop for writing sensor data to database."""
         while True:
             sensor_infos = []
             while not self._write_queue.empty():
@@ -107,9 +108,8 @@ class SensorDataStorage(ServiceInterface):
                     if isinstance(sensor_info.timestamp, str):
                         sensor_info.timestamp = datetime.fromisoformat(
                             sensor_info.timestamp)
-                    else:
-                        # If it's already a datetime object, use it directly
-                        sensor_info.timestamp = sensor_info.timestamp
+                    # If it's already a datetime object, use it directly
+                    # (no need to reassign)
 
                     sensor_infos.append(sensor_info.to_json())
                 except KeyboardInterrupt:
@@ -119,21 +119,23 @@ class SensorDataStorage(ServiceInterface):
                         f"SensorDataStorage::write_sensor_data_loop: Error getting data from write queue {e}")
                     break
 
-            if len(sensor_infos) > 0:
+            if sensor_infos:
                 self.add_info(sensor_infos)
             threading.Event().wait(1)
 
     def add_new_subscription(self, topic: str, gateway: str, indicator: str) -> tuple[bool, str]:
+        """Add a new subscription for sensor data."""
         try:
             self.subscribe_to_status(gateway, topic, indicator)
             return True, ""
 
         except Exception as e:
-            message = f"SensorDataStorage::add_new_subscription: Exceptio creating new table {e}"
+            message = f"SensorDataStorage::add_new_subscription: Exception creating new table {e}"
             self._logger.error(message)
             return False, message
 
-    def add_sensor_data_to_queue(self, status_info):
+    def add_sensor_data_to_queue(self, status_info: Dict[str, Any]) -> None:
+        """Add sensor data to the write queue."""
         try:
             self._write_queue.put(SensorInfo(status_info["subStatusName"],
                                              datetime.fromisoformat(
@@ -143,33 +145,39 @@ class SensorDataStorage(ServiceInterface):
             self._logger.error(
                 f"SensorDataStorage::add_sensor_data_to_queue: Error adding data to queue {e}")
 
-    def subscribe_to_status(self, gateway, status_name, indicator):
+    def subscribe_to_status(self, gateway: str, status_name: str, indicator: str) -> None:
+        """Subscribe to status updates for a specific sensor."""
         topic = ClientMiddleware.get_status_topic(
             gateway, status_name, indicator)
-        if (not topic in self._status_subscribers):
+        if topic not in self._status_subscribers:
             self._status_subscribers[topic] = StatuSubscribers(
                 self.add_sensor_data_to_queue, topic)
             self._middleware.add_subscribe_to_status(
                 self._status_subscribers[topic], topic)
 
-    def remove_subscription_from_status(self, gateway, status_name, indicator):
+    def remove_subscription_from_status(self, gateway: str, status_name: str, indicator: str) -> None:
+        """Remove subscription from status updates."""
         topic = ClientMiddleware.get_status_topic(
             gateway, status_name, indicator)
-        if (topic in self._status_subscribers):
+        if topic in self._status_subscribers:
             self._middleware.remove_subscribe_from_status(
                 self._status_subscribers[topic], topic)
             del self._status_subscribers[topic]
 
-    def add_sensor_info_command(self, command):
+    def add_sensor_info_command(self, command: Dict[str, Any]) -> None:
+        """Handle add sensor info command."""
         data_info = command["data"]
         self.add_info(data_info, lambda result: self._middleware.send_command_answear(
             result, "", command["requestId"]))
 
-    def add_info(self, data: object, finish_callback=None):
+    def add_info(self, data: Any, finish_callback: Optional[Callable] = None) -> None:
+        """Add sensor info to database."""
         self.run_mongo_commands_async_background(
             self._add_info(data, finish_callback))
 
-    async def _add_info(self, data, finish_callback=None):
+    async def _add_info(self, data: Any, finish_callback: Optional[Callable] = None) -> None:
+        """Add sensor info to database asynchronously."""
+        result = None
         try:
             if isinstance(data, list):
                 result = await self._collection.insert_many(data)
@@ -177,7 +185,7 @@ class SensorDataStorage(ServiceInterface):
                     f"SensorDataStorage:add_info: Inserted documents count: {len(result.inserted_ids)}")
             else:
                 result = await self._collection.insert_one(data)
-                print(
+                self._logger.debug(
                     f"SensorDataStorage:add_info: Inserted documents ID: {result.inserted_id}")
         except Exception as e:
             self._logger.error(
@@ -185,44 +193,46 @@ class SensorDataStorage(ServiceInterface):
         if finish_callback:
             finish_callback(result)
 
-    def read_sensor_info_command(self, command):
+    def read_sensor_info_command(self, command: Dict[str, Any]) -> None:
+        """Handle read sensor info command."""
         self.read_sensor_info(command, lambda result, data_out: self._middleware.send_command_answear(
             result, data_out, command["requestId"]))
 
-    def read_sensor_info(self, command: dict, finish_callback):
+    def read_sensor_info(self, command: Dict[str, Any], finish_callback: Callable) -> None:
+        """Read sensor info from database."""
         self.run_mongo_commands_async_background(
             self._read_sensor_info(command, finish_callback))
 
-    async def _read_sensor_info(self, command: dict, finish_callback):
+    async def _read_sensor_info(self, command: Dict[str, Any], finish_callback: Callable) -> None:
+        """Read sensor info from database asynchronously."""
         data = command["data"]
         sensor_infos = data["sensorInfos"]
 
-        query: dict = {
+        query: Dict[str, Any] = {
             "SensorFullTopic": {"$in": []}
         }
 
-        for index, info in enumerate(sensor_infos):
+        for info in sensor_infos:
             table_name = info["topic"]
             gateway = info["gateway"]
             indicator = info["indicator"]
             table_name = ClientMiddleware.get_status_topic(
                 gateway, table_name, indicator)
 
-            query["SensorFullTopic"]["$in"] = query["SensorFullTopic"]["$in"] + [table_name]
+            query["SensorFullTopic"]["$in"].append(table_name)
 
-        if ("beginDate" in data):
+        if "beginDate" in data:
             dt = datetime.strptime(
                 data["beginDate"][:26], '%Y-%m-%dT%H:%M:%S.%f')
             query["Timestamp"] = {}
             query["Timestamp"]["$gt"] = dt.timestamp()
 
-            if ("endDate" in data):
+            if "endDate" in data:
                 dt_end = datetime.strptime(
                     data["endDate"][:26], '%Y-%m-%dT%H:%M:%S.%f')
                 query["Timestamp"]["$lt"] = dt_end.timestamp()
 
         data_out = {'info': {}}
-
         result = True
 
         try:
@@ -244,28 +254,29 @@ class SensorDataStorage(ServiceInterface):
 
         finish_callback(result, data_out)
 
-    def erase_sensor_info_command(self, command):
+    def erase_sensor_info_command(self, command: Dict[str, Any]) -> None:
+        """Handle erase sensor info command."""
         data = command["data"]
         sensor_infos = data["sensorInfos"]
 
         sensors_ids = []
-        for index, info in enumerate(sensor_infos):
+        for info in sensor_infos:
             table_name = info["topic"]
             gateway = info["gateway"]
             indicator = info["indicator"]
             table_name = ClientMiddleware.get_status_topic(
                 gateway, table_name, indicator)
 
-            sensors_ids = sensors_ids + [table_name]
+            sensors_ids.append(table_name)
 
         dt_begin = None
         dt_end = None
 
-        if ("beginDate" in data):
+        if "beginDate" in data:
             dt_begin = datetime.strptime(
                 data["beginDate"][:26], '%Y-%m-%dT%H:%M:%S.%f')
 
-            if ("endDate" in data):
+            if "endDate" in data:
                 dt_end = datetime.strptime(
                     data["endDate"][:26], '%Y-%m-%dT%H:%M:%S.%f')
 
@@ -275,25 +286,27 @@ class SensorDataStorage(ServiceInterface):
                                lambda result, data_out: self._middleware.send_command_answear(result, data_out, command["requestId"]))
 
     def erase_sensor_info(self,
-                          sensors_ids: list[str],
-                          begin_date: datetime | None,
-                          end_date: datetime | None,
-                          finish_callback):
+                          sensors_ids: List[str],
+                          begin_date: Optional[datetime],
+                          end_date: Optional[datetime],
+                          finish_callback: Callable) -> None:
+        """Erase sensor info from database."""
         self.run_mongo_commands_async_background(self._erase_sensor_info(sensors_ids,
                                                                          begin_date,
                                                                          end_date,
                                                                          finish_callback))
 
     async def _erase_sensor_info(self,
-                                 sensors_ids: list[str],
-                                 begin_date: datetime | None,
-                                 end_date: datetime | None,
-                                 finish_callback):
+                                 sensors_ids: List[str],
+                                 begin_date: Optional[datetime],
+                                 end_date: Optional[datetime],
+                                 finish_callback: Callable) -> None:
+        """Erase sensor info from database asynchronously."""
 
         result = False
         message = "Successo"
 
-        query: dict = {
+        query: Dict[str, Any] = {
             "SensorFullTopic": {"$in": sensors_ids}
         }
 
