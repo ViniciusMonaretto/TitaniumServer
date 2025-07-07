@@ -1,9 +1,18 @@
-# Standard library imports
-import threading
 import queue
 import uuid
+import threading
 from datetime import datetime
 from typing import Any, Callable, Dict, List, Optional
+import sys
+import os
+from support.logger import Logger
+from services.service_interface import ServiceInterface
+from services.sensor_data_storage.sensor_data_storage_commands import SensorDataStorageCommands
+from services.sensor_data_storage.async_loop_thread import AsyncioLoopThread
+from middleware.status_subscriber import StatuSubscribers
+from dataModules.sensor_info import SensorInfo
+from middleware.client_middleware import ClientMiddleware
+
 
 # Third-party imports
 import pytz
@@ -11,13 +20,7 @@ from motor.motor_asyncio import AsyncIOMotorClient
 from pymongo import ASCENDING
 
 # Local application imports
-from middleware.client_middleware import ClientMiddleware
-from dataModules.sensor_info import SensorInfo
-from middleware.status_subscriber import StatuSubscribers
-from services.sensor_data_storage.async_loop_thread import AsyncioLoopThread
-from services.sensor_data_storage.sensor_data_storage_commands import SensorDataStorageCommands
-from services.service_interface import ServiceInterface
-from support.logger import Logger
+sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 
 
 MONGO_DB_URI = "mongodb://root:example@localhost:27017/"
