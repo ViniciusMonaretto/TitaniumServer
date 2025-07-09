@@ -4,6 +4,7 @@ import tornado.websocket
 
 from dataModules.alarm import Alarm
 from modules.titanium_mqtt.mqtt_commands import MqttCommands
+from services.report_generator.report_generator_commands import ReportGeneratorCommands
 from services.config_storage.config_storage_commands import ConfigStorageCommand
 from services.alarm_manager.alarm_manager_commands import AlarmManagerCommands
 from support.logger import Logger 
@@ -86,10 +87,12 @@ class VisualizationWebSocketHandler(tornado.websocket.WebSocketHandler):
                 self.remove_all_events()
             elif "calibrate" in message_obj["commandName"]:
                 self.calibrate_sensor(payload)
+            elif "generaterReport" in message_obj["commandName"]:
+                self.generate_report(payload)
             else:
                 self._logger.error("VisualizationWebSocketHandler:: unknown command: " + message_obj["commandName"])
         except Exception as e:
-            self._logger.error(f"Exception occured on panel message: {e}")
+            self._logger.error(f"Exception occured on websocket message: {e}")
     
     def on_close(self):
         self._logger.debug("WebSocket closed")
@@ -131,7 +134,7 @@ class VisualizationWebSocketHandler(tornado.websocket.WebSocketHandler):
             data['endDate'] = request["endDate"]
     
         self._middleware.send_command(SensorDataStorageCommands.READ_SENSOR_INFO, data, self.send_status_history)                                    
-
+    
     def send_status_history(self, data):
         self._logger.info("Visualization.send_status_history: graph send")
         self.send_message_to_ui("statusInfo", data)  
@@ -151,6 +154,9 @@ class VisualizationWebSocketHandler(tornado.websocket.WebSocketHandler):
         panel_topic = self._id_to_topic_map[panel_id]
 
         status_subscriber = self._status_subscribers[panel_topic]
+
+        if status_subscriber == None:
+            return
 
         status_subscriber.remove_count()
 
@@ -218,6 +224,23 @@ class VisualizationWebSocketHandler(tornado.websocket.WebSocketHandler):
          self._middleware.send_command(AlarmManagerCommands.REMOVE_ALL_EVENTS, {}, 
                                       lambda data: self.send_events(data),
                                       self.send_error_message)
+
+################# Report commands #############################	
+    def generate_report(self, request):
+        data = {
+                'sensorInfos': request['sensorInfos'], 
+                'websocketId': request['requestId']
+            }
+        if("beginDate" in request):
+            data['beginDate'] = request["beginDate"]
+        if("endDate" in request):
+            data['endDate'] = request["endDate"]
+        self._middleware.send_command(ReportGeneratorCommands.GENERATE_REPORT, data, 
+                                      self.send_report,
+                                      self.send_error_message)
+
+    def send_report(self, data):
+        self.send_message_to_ui("report", data)
 
 ################# Subscriber Functions #############################
     def add_subscribers(self, panels_info: dict[str, list[any]]):

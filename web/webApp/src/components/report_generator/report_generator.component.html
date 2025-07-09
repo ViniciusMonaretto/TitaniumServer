@@ -1,0 +1,55 @@
+<h2 mat-dialog-title>Gerar Relatório</h2>
+<mat-dialog-content>
+    <mat-form-field style="width: 100%;" appearance="fill">
+        <mat-label>Selecionar Grupo</mat-label>
+        <mat-select [(ngModel)]="selectedGroup">
+            <mat-option *ngFor="let group of getGroups()" [value]="group">{{group}}</mat-option>
+        </mat-select>
+    </mat-form-field>
+    <mat-form-field style="width: 100%;" appearance="fill" *ngIf="selectedGroup!=''">
+        <mat-label>Selecionar Tipo</mat-label>
+        <mat-select [(ngModel)]="option">
+            <mat-option [value]="'temperature'">Temperature</mat-option>
+            <mat-option [value]="'pressure'">Pressão</mat-option>
+            <mat-option [value]="'power'">Potência</mat-option>
+        </mat-select>
+    </mat-form-field>
+    <mat-form-field style="width: 100%;" appearance="fill" *ngIf="selectedGroup!='' && getAvailableSensors().length != 0">
+        <mat-label>Selecionar Sensores</mat-label>
+        <mat-select [(ngModel)]="selectedSensors" multiple>
+            <mat-option *ngFor="let panel of getAvailableSensors()" [value]="panel">{{panel.name}}</mat-option>
+        </mat-select>
+    </mat-form-field>
+    <div class="date-container">
+        <div class="date-picker-class">
+            <mat-form-field appearance="outline">
+                <mat-label>Data de Início</mat-label>
+                <input matInput [matDatepicker]="pickerStart" [(ngModel)]="startDate">
+                <mat-datepicker-toggle matSuffix [for]="pickerStart"></mat-datepicker-toggle>
+                <mat-datepicker #pickerStart></mat-datepicker>
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+                <mat-label></mat-label>
+                <input matInput type="time" (change)="setTime($event, startDate)">
+            </mat-form-field>
+        </div>
+        
+        <div class="date-picker-class">
+            <mat-form-field appearance="outline">
+                <mat-label>Data de Fim</mat-label>
+                <input matInput [matDatepicker]="pickerEnd" [(ngModel)]="endDate">
+                <mat-datepicker-toggle matSuffix [for]="pickerEnd"></mat-datepicker-toggle>
+                <mat-datepicker #pickerEnd></mat-datepicker>
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+                <mat-label></mat-label>
+                <input matInput type="time" (change)="setTime($event, endDate)">
+            </mat-form-field>
+        </div>
+        
+    </div>
+</mat-dialog-content>
+<mat-dialog-actions>
+    <button mat-button (click)="onCancel()">Cancelar</button>
+    <button mat-button [disabled]="!validForm()" (click)="onApply()" cdkFocusInitial>Aplicar</button>
+</mat-dialog-actions>

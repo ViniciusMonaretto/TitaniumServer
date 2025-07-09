@@ -124,6 +124,22 @@ export class ServerConectorService {
     this.sendCommand("getStatusHistory", obj)
   }
 
+  public sendRequestForReportInfo(sensorInfos: Array<any>,
+    group: string,
+    beginDate?: Date | null,
+    endDate?: Date | null) {
+    const requestId = uuidv4();
+    let obj: any = { "sensorInfos": sensorInfos, "requestId": requestId }
+    if (beginDate) {
+      obj["beginDate"] = this.formatLocalDateToCustomString(beginDate)
+      if (endDate) {
+        obj["endDate"] = this.formatLocalDateToCustomString(endDate)
+      }
+    }
+
+    this.sendCommand("generaterReport", obj)
+  }
+
   public sendCommand(commandName: string, payload: any) {
     if (this.socket?.readyState === WebSocket.OPEN) {
       let obj = {

@@ -1,31 +1,20 @@
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogModule } from '@angular/material/dialog';
+
 import { CommonModule } from '@angular/common';
-import { SensorAddWindowComponent } from '../sensor-add-window/sensor-add-window.component';
-import { DateAdapter, MAT_DATE_FORMATS, MAT_DATE_LOCALE, MatNativeDateModule, NativeDateAdapter } from '@angular/material/core';
-import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { MatInputModule } from '@angular/material/input';
 import { FormsModule } from '@angular/forms';
 import { SensorModule } from '../../models/sensor-module';
-
-export const MY_DATE_FORMATS = {
-  parse: {
-    dateInput: 'l, LLL d, yyyy',
-  },
-  display: {
-    dateInput: 'dd/MM/yyyy',  
-    monthYearLabel: 'MMM yyyy',
-    dateA11yLabel: 'LL',
-    monthYearA11yLabel: 'MMMM yyyy',
-  }
-};
+import { MatNativeDateModule, DateAdapter, NativeDateAdapter, MAT_DATE_LOCALE, MAT_DATE_FORMATS } from '@angular/material/core';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MY_DATE_FORMATS } from '../graph-request-window/graph-request-window.component';
 
 @Component({
-  selector: 'app-graph-request',
-  templateUrl: './graph-request-window.component.html',
-  styleUrls: ['./graph-request-window.component.scss'],
+  selector: 'sensor-info-dialog',
+  templateUrl: './report_generator.component.html',
+  styleUrls: ['./report_generator.component.scss'],
   imports: [
     CommonModule,
     MatDialogModule,
@@ -43,8 +32,7 @@ export const MY_DATE_FORMATS = {
   ],
   standalone: true
 })
-export class GraphRequestWindowComponent implements OnInit {
-
+export class ReportGeneratorComponent {
   uiConfig: { [id: string]: any } = {}
 
   selectedSensors: Array<SensorModule> = []
@@ -55,13 +43,10 @@ export class GraphRequestWindowComponent implements OnInit {
 
   option: string = ""
 
-  constructor(public dialogRef: MatDialogRef<SensorAddWindowComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: any
+  constructor(public dialogRef: MatDialogRef<ReportGeneratorComponent>,
+    @Inject(MAT_DIALOG_DATA) public data: {uiConfig: { [id: string]: any }, callback: ((obj: any) => void), canEdit: boolean}
   ) {
     this.uiConfig = data.uiConfig
-  }
-
-  ngOnInit(): void {
   }
 
   getGroups(): string[] {
@@ -91,17 +76,14 @@ export class GraphRequestWindowComponent implements OnInit {
   }
 
   validForm() {
-    return this.selectedGroup != "" && this.option != "" &&
-      ((this.startDate == null && this.endDate == null) ||
-        (this.startDate != null && this.endDate == null) ||
-        (this.startDate != null && this.endDate != null && this.startDate?.getTime() < this.endDate.getTime()))
+    return this.selectedSensors.length > 0 && this.startDate && this.endDate;
   }
 
-  onNoClick(): void {
+  onCancel(): void {
     this.dialogRef.close();
   }
 
-  onAddCLick() {
+  onApply(): void {
     let selectedPanels = []
     if (this.selectedSensors.length == 0) {
       this.selectedSensors = this.getAvailableSensors()

@@ -4,6 +4,7 @@ import asyncio
 
 from services.alarm_manager.alarm_manager import AlarmManager
 from services.sensor_data_storage.sensor_data_storage import SensorDataStorage
+from services.report_generator.report_generator import ReportGenerator
 
 from .config_handler.config_handler import ConfigHandler
 from support.logger import Logger
@@ -21,7 +22,8 @@ class ServiceManager:
         self._sensor_data_storage = SensorDataStorage(self._middleware)
         self._alarm_manager = AlarmManager(self._middleware, self._config_storage)
         self._config_handler = ConfigHandler(self._middleware, self._config_storage, self._sensor_data_storage, self._alarm_manager)
-        
+        self._report_generator = ReportGenerator(self._middleware, self._sensor_data_storage)
+
         self._status_saver_thread = Thread(target = self.threaded_function, args = (10, ))
     
     def run(self):
