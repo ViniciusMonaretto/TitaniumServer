@@ -10,6 +10,8 @@ import { SensorModule } from '../../models/sensor-module';
 import { MatNativeDateModule, DateAdapter, NativeDateAdapter, MAT_DATE_LOCALE, MAT_DATE_FORMATS } from '@angular/material/core';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MY_DATE_FORMATS } from '../graph-request-window/graph-request-window.component';
+import { SensorTreeComponent } from '../sensor-tree/sensor-tree.component';
+import { MatRadioModule } from '@angular/material/radio';
 
 @Component({
   selector: 'sensor-info-dialog',
@@ -23,7 +25,9 @@ import { MY_DATE_FORMATS } from '../graph-request-window/graph-request-window.co
     MatInputModule,
     FormsModule,
     MatNativeDateModule,
-    MatDatepickerModule
+    MatDatepickerModule,
+    SensorTreeComponent,
+    MatRadioModule
   ],
   providers: [
     { provide: DateAdapter, useClass: NativeDateAdapter },
@@ -35,7 +39,7 @@ import { MY_DATE_FORMATS } from '../graph-request-window/graph-request-window.co
 export class ReportGeneratorComponent {
   uiConfig: { [id: string]: any } = {}
 
-  selectedSensors: Array<SensorModule> = []
+  selectedSensors: { [id: string]: SensorModule } = {}
   selectedGroup: string = ""
 
   startDate: Date | null = null
@@ -43,10 +47,37 @@ export class ReportGeneratorComponent {
 
   option: string = ""
 
+  timeRangeChoice: string = 'lastHour';
+
   constructor(public dialogRef: MatDialogRef<ReportGeneratorComponent>,
     @Inject(MAT_DIALOG_DATA) public data: {uiConfig: { [id: string]: any }, callback: ((obj: any) => void), canEdit: boolean}
   ) {
     this.uiConfig = data.uiConfig
+  }
+
+  ngOnInit(): void {
+    this.setTimeRange(this.timeRangeChoice);
+  }
+
+  setTimeRange(choice: string) {
+    const now = new Date();
+    if (choice === 'lastHour') {
+      this.endDate = new Date(now);
+      this.startDate = new Date(now.getTime() - 60 * 60 * 1000);
+    } else if (choice === 'lastDay') {
+      this.endDate = new Date(now);
+      this.startDate = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+    } else if (choice === 'lastWeek') {
+      this.endDate = new Date(now);
+      this.startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+    }
+  }
+
+  // Watch for changes to timeRangeChoice
+  ngOnChanges(): void {
+    if (this.timeRangeChoice !== 'custom') {
+      this.setTimeRange(this.timeRangeChoice);
+    }
   }
 
   getGroups(): string[] {
@@ -60,23 +91,9 @@ export class ReportGeneratorComponent {
     }
   }
 
-  getAvailableSensors()
-  {
-    switch(this.option)
-    {
-      case "temperature":
-        return this.uiConfig[this.selectedGroup].temperature
-      case "pressure":
-        return this.uiConfig[this.selectedGroup].pressure
-      case "power":
-        return this.uiConfig[this.selectedGroup].power
-      default:
-        return []
-    }
-  }
 
   validForm() {
-    return this.selectedSensors.length > 0 && this.startDate && this.endDate;
+    return Object.keys(this.selectedSensors).length > 0 && this.startDate && this.endDate;
   }
 
   onCancel(): void {
@@ -85,15 +102,12 @@ export class ReportGeneratorComponent {
 
   onApply(): void {
     let selectedPanels = []
-    if (this.selectedSensors.length == 0) {
-      this.selectedSensors = this.getAvailableSensors()
-    }
 
-    for (let panel of this.selectedSensors) {
+    for (let sensor of Object.values(this.selectedSensors)) {
       selectedPanels.push({
-        "gateway": panel.gateway,
-        "topic": panel.topic,
-        "indicator": panel.indicator
+        "gateway": sensor.gateway,
+        "topic": sensor.topic,
+        "indicator": sensor.indicator
       })
     }
 

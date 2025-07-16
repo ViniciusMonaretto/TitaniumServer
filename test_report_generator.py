@@ -61,7 +61,7 @@ def test_excel_report_creation():
 
         # Check if file was created
         if os.path.exists(excel_file_path):
-            print(f"✅ Excel report created successfully: {excel_file_path}")
+            print(f"    Excel report created successfully: {excel_file_path}")
             print(f"   File size: {os.path.getsize(excel_file_path)} bytes")
 
             # Clean up the test file

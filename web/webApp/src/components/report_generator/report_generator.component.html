@@ -1,26 +1,21 @@
 <h2 mat-dialog-title>Gerar Relatório</h2>
 <mat-dialog-content>
-    <mat-form-field style="width: 100%;" appearance="fill">
-        <mat-label>Selecionar Grupo</mat-label>
-        <mat-select [(ngModel)]="selectedGroup">
-            <mat-option *ngFor="let group of getGroups()" [value]="group">{{group}}</mat-option>
-        </mat-select>
-    </mat-form-field>
-    <mat-form-field style="width: 100%;" appearance="fill" *ngIf="selectedGroup!=''">
-        <mat-label>Selecionar Tipo</mat-label>
-        <mat-select [(ngModel)]="option">
-            <mat-option [value]="'temperature'">Temperature</mat-option>
-            <mat-option [value]="'pressure'">Pressão</mat-option>
-            <mat-option [value]="'power'">Potência</mat-option>
-        </mat-select>
-    </mat-form-field>
-    <mat-form-field style="width: 100%;" appearance="fill" *ngIf="selectedGroup!='' && getAvailableSensors().length != 0">
+    <div style="width: 100%;" appearance="fill">
         <mat-label>Selecionar Sensores</mat-label>
-        <mat-select [(ngModel)]="selectedSensors" multiple>
-            <mat-option *ngFor="let panel of getAvailableSensors()" [value]="panel">{{panel.name}}</mat-option>
-        </mat-select>
-    </mat-form-field>
-    <div class="date-container">
+        <sensor-tree [panelsInfo]="uiConfig" [selectedSensors]="selectedSensors"></sensor-tree>
+    </div>
+    <div class="time-choice-div">
+        <div>
+            <mat-label>Selecionar Intervalo de Tempo</mat-label>
+        </div>
+      <mat-radio-group style="display: flex; flex-direction: row; gap: 10px;" [(ngModel)]="timeRangeChoice" (change)="setTimeRange(timeRangeChoice)">
+        <mat-radio-button value="lastHour">Última hora</mat-radio-button>
+        <mat-radio-button value="lastDay">Último dia</mat-radio-button>
+        <mat-radio-button value="lastWeek">Última semana</mat-radio-button>
+        <mat-radio-button value="custom">Personalizado</mat-radio-button>
+      </mat-radio-group>
+    </div>
+    <div class="date-container" *ngIf="timeRangeChoice === 'custom'">
         <div class="date-picker-class">
             <mat-form-field appearance="outline">
                 <mat-label>Data de Início</mat-label>

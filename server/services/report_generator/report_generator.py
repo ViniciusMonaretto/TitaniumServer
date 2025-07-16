@@ -98,14 +98,14 @@ class ReportGenerator(ServiceInterface):
                     True,
                     {"status": "success", "file_path": excel_file_path,
                         "report": data_out['info']},
-                    data_out.get('requestId', '')
+                    data_out["commandId"]
                 )
             except Exception as e:
                 self._logger.error(f"Failed to create Excel report: {e}")
                 self._middleware.send_command_answear(
                     False,
                     {"status": "error", "message": f"Failed to create Excel report: {e}"},
-                    data_out.get('requestId', '')
+                   data_out["commandId"]
                 )
         else:
             self._logger.error("Failed to generate report - no data received")
@@ -113,7 +113,7 @@ class ReportGenerator(ServiceInterface):
                 False,
                 {"status": "error",
                     "message": "Failed to generate report - no data received"},
-                data_out.get('requestId', '')
+                data_out["commandId"]
             )
 
     def _create_excel_report(self, sensor_data: Dict[str, Any]) -> str:

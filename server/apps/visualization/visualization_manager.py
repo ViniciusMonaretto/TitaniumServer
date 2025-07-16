@@ -17,6 +17,10 @@ from services.sensor_data_storage.sensor_data_storage_commands import SensorData
 
 from services.config_handler.config_handler_command import ConfigHandlerCommands
 
+import os
+import base64
+import mimetypes
+
 class Visualization(tornado.web.RequestHandler):
     def get(self):
         self.render("../../webApp/browser/index.html")
@@ -240,7 +244,25 @@ class VisualizationWebSocketHandler(tornado.websocket.WebSocketHandler):
                                       self.send_error_message)
 
     def send_report(self, data):
-        self.send_message_to_ui("report", data)
+        file_path = data["data"]["file_path"]
+        if not os.path.isfile(file_path):
+            self.send_error_message(f"File not found: {file_path}")
+            return
+
+        with open(file_path, "rb") as f:
+            file_bytes = f.read()
+            encoded = base64.b64encode(file_bytes).decode("utf-8")
+            filename = os.path.basename(file_path)
+            mime_type, _ = mimetypes.guess_type(file_path)
+            if not mime_type:
+                mime_type = "application/octet-stream"
+
+            message = {
+                "filename": filename,
+                "filedata": encoded,
+                "mimetype": mime_type
+            }
+            self.send_message_to_ui("report", message)
 
 ################# Subscriber Functions #############################
     def add_subscribers(self, panels_info: dict[str, list[any]]):

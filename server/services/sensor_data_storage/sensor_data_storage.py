@@ -254,7 +254,7 @@ class SensorDataStorage(ServiceInterface):
             self._logger.error(
                 f"SensorDataStorage::read_sensor_info: Error trying to fetch info from table {e}")
             result = False
-
+        data_out["commandId"] = command["requestId"]
         finish_callback(result, data_out)
 
     def erase_sensor_info_command(self, command: Dict[str, Any]) -> None:

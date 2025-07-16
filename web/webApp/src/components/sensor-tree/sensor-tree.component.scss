@@ -1,0 +1,36 @@
+.main-div{
+  max-height: 350px;
+  overflow-x: auto; 
+  margin-bottom: 10px;
+}
+
+.tree-container{
+    padding: 5px;
+    border-radius: 5px;
+    min-height: 300px;
+    background-color: #e1e1e1;
+    margin-bottom: 5px;
+}
+
+.tree-node-div{
+    background-color: #e1e1e1;
+}
+
+.tree-container .mat-tree-node,
+.tree-container .mat-nested-tree-node {
+  padding-left: calc(var(--node-level) * 30px);
+}
+
+.selected-icon {
+  color: #1976d2;
+  background-color: #e3f2fd;
+  border-radius: 50%;
+  transform: scale(1.2);
+  transition: color 0.2s, background 0.2s, transform 0.2s;
+}
+
+.mat-icon:hover, .expanded-icon:hover {
+  cursor: pointer;
+  background-color: #e3f2fd;
+  border-radius: 50%;
+}

@@ -227,6 +227,15 @@ export class ServerConectorService {
         this.receivedEventsCallback([this.createEventModel(message)], false)
       }
     }
+    else if (data["status"] == "report") {
+      let message = data["message"];
+      const link = document.createElement('a');
+      link.href = `data:${message.mimetype};base64,${message.filedata}`;
+      link.download = message.filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
     else if (data["status"] == "error") {
       this.dialogHelper.openErrorDialog(data["message"]["data"])
     }
