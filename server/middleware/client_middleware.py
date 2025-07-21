@@ -1,6 +1,7 @@
 from collections.abc import Callable
 import multiprocessing
 import threading
+from typing import Any
 from middleware.middleware import Middleware
 from middleware.data_converter.data_converter import DataConverter
 from middleware.subscriber_interface import SubscriberInterface
@@ -71,6 +72,9 @@ class ClientMiddleware:
     
     def send_status(self, topic: str, new_status):
         self._global_middleware.send_status(topic, new_status)
+    
+    def send_status_array(self, status_list: list[Any]):
+        self._global_middleware.send_status_array(status_list)
 
 ############################################################################################################
 ################################# Middleware Update System #################################################

@@ -97,8 +97,8 @@ class AlarmManager(ServiceInterface):
     def add_check_status(self, status_info):
         try:
             self._check_queue.put(SensorInfo(status_info["subStatusName"],
-                                             datetime.fromisoformat(status_info["data"]["timestamp"]),
-                                             status_info["data"]["value"]))
+                                             status_info["data"].timestamp,
+                                             status_info["data"].value))
         except Exception as e:
             self._logger.error(f"AlarmManager::add_check_status: Error adding data to queue {e}")
 

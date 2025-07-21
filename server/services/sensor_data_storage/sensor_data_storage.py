@@ -141,9 +141,8 @@ class SensorDataStorage(ServiceInterface):
         """Add sensor data to the write queue."""
         try:
             self._write_queue.put(SensorInfo(status_info["subStatusName"],
-                                             datetime.fromisoformat(
-                                                 status_info["data"]["timestamp"]),
-                                             status_info["data"]["value"]))
+                                             status_info["data"].timestamp,
+                                             status_info["data"].value))
         except Exception as e:
             self._logger.error(
                 f"SensorDataStorage::add_sensor_data_to_queue: Error adding data to queue {e}")

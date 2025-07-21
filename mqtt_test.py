@@ -3,11 +3,12 @@ import random
 import json
 from datetime import datetime
 import paho.mqtt.client as mqtt
+import copy
 
 # Define the broker and port
 BROKER = "localhost"  # "mqtt.eclipseprojects.io"
 PORT = 1883
-MESSAGES_TO_SEND = 20
+MESSAGES_TO_SEND = 1
 
 # Callback for successful connection
 
@@ -44,18 +45,48 @@ client.connect(BROKER, PORT)
 client.loop_start()
 
 try:
+    # Base sensor values
+    base_sensors = [
+        {"value": -41.5, "active": True, "unit": "°C"},
+        {"value": -29.08, "active": True, "unit": "°C"},
+        {"value": -18.41, "active": True, "unit": "°C"},
+        {"value": -10.97, "active": True, "unit": "°C"},
+        {"value": -0.67, "active": True, "unit": "°C"},
+        {"value": 7.33, "active": True, "unit": "°C"},
+        {"value": 20.88, "active": True, "unit": "°C"},
+        {"value": 25.1, "active": True, "unit": "°C"},
+        {"value": 28.18, "active": True, "unit": "°C"},
+        {"value": 39.2, "active": True, "unit": "°C"},
+        {"value": 48.3, "active": True, "unit": "°C"},
+        {"value": 62.77, "active": True, "unit": "°C"},
+        {"value": 68.89, "active": True, "unit": "°C"},
+        {"value": 80.62, "active": True, "unit": "°C"},
+        {"value": 92.21, "active": True, "unit": "°C"},
+        {"value": 98.12, "active": True, "unit": "°C"},
+        {"value": 111.21, "active": True, "unit": "°C"},
+        {"value": 124.4, "active": True, "unit": "°C"},
+        {"value": 132.87, "active": True, "unit": "°C"},
+        {"value": 140.7, "active": True, "unit": "°C"},
+        {"value": 20, "active": False, "unit": "kPa"},
+        {"value": 20, "active": False, "unit": "kPa"}
+    ]
     while True:
-        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        print("Sending MQTT messages")
-        for i in range(MESSAGES_TO_SEND):
-            topic = f"iocloud/1C692031BE04/status/temperature/{i}"
-            payload = {
-                "value": round(random.uniform(22.0, 22.5), 2),
-                "timestamp": timestamp
-            }
-            payload_json = json.dumps(payload)
-            client.publish(topic, payload_json)
-        print("Sent MQTT messages")
+        sensors = []
+        for sensor in base_sensors:
+            if sensor["unit"] == "°C":
+                varied_value = round(sensor["value"] + random.uniform(-5, 5), 2)
+                sensors.append({**sensor, "value": varied_value})
+            else:
+                sensors.append(sensor.copy())
+        payload = {
+            "timestamp": "2025-07-20T22:21:24",
+            "sensors": sensors
+        }
+        topic = "iocloud/response/1C692031BE04/sensor/report"
+        payload_json = json.dumps(payload)
+        print(f"Sending MQTT message to {topic}")
+        client.publish(topic, payload_json)
+        print("Sent MQTT message")
         time.sleep(30)
 except KeyboardInterrupt:
     print("Stopping the client.")

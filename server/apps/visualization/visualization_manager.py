@@ -184,7 +184,10 @@ class VisualizationWebSocketHandler(tornado.websocket.WebSocketHandler):
         self.send_message_to_ui("uiConfig", panels)
     
     def send_status(self, status_data):
-        self.send_message_to_ui("sensorUpdate", status_data)
+        self.send_message_to_ui("sensorUpdate", {
+            "subStatusName": status_data["subStatusName"],
+            "data": status_data["data"].to_dict()
+        })
     
 ################# Alarms commands #############################
     def add_alarm(self, alarm_info):
