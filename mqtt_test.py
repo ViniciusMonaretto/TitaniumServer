@@ -79,7 +79,7 @@ try:
             else:
                 sensors.append(sensor.copy())
         payload = {
-            "timestamp": "2025-07-20T22:21:24",
+            "timestamp": datetime.now().isoformat(timespec='seconds'),
             "sensors": sensors
         }
         topic = "iocloud/response/1C692031BE04/sensor/report"
