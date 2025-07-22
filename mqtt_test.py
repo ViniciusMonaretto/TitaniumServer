@@ -21,6 +21,7 @@ def on_connect(client, userdata, flags, rc):
     else:
         print(f"Connection failed with code {rc}")
 
+
 # Callback for receiving messages
 
 
@@ -43,6 +44,8 @@ client.on_message = on_message
 # Connect and start the loop
 client.connect(BROKER, PORT)
 client.loop_start()
+
+client.subscribe("iocloud/request/#")
 
 try:
     # Base sensor values
@@ -68,7 +71,7 @@ try:
         {"value": 132.87, "active": True, "unit": "°C"},
         {"value": 140.7, "active": True, "unit": "°C"},
         {"value": 20, "active": False, "unit": "kPa"},
-        {"value": 20, "active": False, "unit": "kPa"}
+        {"value": 20, "active": False, "unit": "kPa"},
     ]
     while True:
         sensors = []
@@ -79,8 +82,8 @@ try:
             else:
                 sensors.append(sensor.copy())
         payload = {
-            "timestamp": datetime.now().isoformat(timespec='seconds'),
-            "sensors": sensors
+            "timestamp": datetime.now().isoformat(timespec="seconds"),
+            "sensors": sensors,
         }
         topic = "iocloud/response/1C692031BE04/sensor/report"
         payload_json = json.dumps(payload)

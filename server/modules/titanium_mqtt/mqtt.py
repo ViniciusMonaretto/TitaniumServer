@@ -9,7 +9,7 @@ from modules.titanium_mqtt.translators.payload_model import MqttPayloadModel
 from middleware.client_middleware import ClientMiddleware
 from modules.titanium_mqtt.mqtt_commands import MqttCommands
 from support.logger import Logger
-from .mqtt_helper import MqttHelper 
+from .mqtt_helper import MqttHelper
 
 from .translators.translator_model import PayloadTranslator
 
@@ -44,34 +44,40 @@ class TitaniumMqtt:
         self._read_queue = queue.Queue()
 
         self._command_handler = threading.Thread(
-            target=self.handle_incoming_messages, daemon=True)
+            target=self.handle_incoming_messages, daemon=True
+        )
         self._messages_handler = threading.Thread(
-            target=self.handle_incoming_messages, daemon=True)
+            target=self.handle_incoming_messages, daemon=True
+        )
 
     def initialize_commands(self):
-        commands = {
-            MqttCommands.CALIBRATION: self.calibrate_command
-        }
+        commands = {MqttCommands.CALIBRATION: self.calibrate_command}
         self._middleware.add_commands(commands)
 
     def calibrate_command(self, command):
         command_data = command["data"]
-        if (not self._client or not self._client.is_connected()):
-            self._middleware.send_command_answear(False, "calibrate_command: Mqtt not connected",
-                                                  command_data["requestId"])
-        topic = f"iocloudcommand/{command_data['gateway']}/calibraterequest/{command_data['topic']}/{command_data['indicator']}"
+        if not self._client or not self._client.is_connected():
+            self._middleware.send_command_answear(
+                False,
+                "calibrate_command: Mqtt not connected",
+                command_data["requestId"],
+            )
+        topic = f"iocloud/request/{command_data['gateway']}/command"
         payload = {
-            "action": "start",
-            "offset": command_data["offset"],
-            "gain": command_data["gain"]
+            "command": 1,
+            "params": {
+                "sensor_id": command_data["indicator"],
+                "offset": command_data["offset"],
+                "gain": command_data["gain"],
+                "type": command_data["topic"],
+            },
         }
         self._client.publish(topic, json.dumps(payload))
-        self._middleware.send_command_answear(
-            True, "sucess", command["requestId"])
+        self._middleware.send_command_answear(True, "sucess", command["requestId"])
 
     def on_connect(self, client, userdata, _flags, rc):
         self._logger.info(f"MqqtServer: Connected with result code {rc}")
-        client.subscribe(userdata['subscribe_topics'])
+        client.subscribe(userdata["subscribe_topics"])
 
     def on_message(self, _c, _u, msg):
         self._logger.debug(f"Received message: {msg.topic} {msg.payload}")
@@ -81,14 +87,13 @@ class TitaniumMqtt:
         self._client = mqtt.Client()
 
         user_data = {}
-        user_data['subscribe_topics'] = self._subscribe_topic_list
-        user_data['publish_topics'] = self._publish_topics_list
+        user_data["subscribe_topics"] = self._subscribe_topic_list
+        user_data["publish_topics"] = self._publish_topics_list
         self._client.user_data_set(user_data)
 
         self._client.on_connect = self.on_connect
         self._client.on_message = self.on_message
         try:
-
             self._client.connect(MQTT_SERVER, MQTT_PORT, 60)
             self._messages_handler.start()
             self._client.loop_start()
@@ -100,20 +105,25 @@ class TitaniumMqtt:
         self._client.publish(topic, command.message)
 
     def handle_incoming_messages(self):
-        while (not self._end_thread):
+        while not self._end_thread:
             try:
                 msg = self._read_queue.get_nowait()
                 mqtt_message = self._translator.translate_incoming_message(
-                    msg.topic, msg.payload)
+                    msg.topic, msg.payload
+                )
 
-                if (mqtt_message):
-                    status_list = [{"statusName": status.full_topic, "data": status} for status in mqtt_message.data]
+                if mqtt_message:
+                    status_list = [
+                        {"statusName": status.full_topic, "data": status}
+                        for status in mqtt_message.data
+                    ]
                     self._middleware.send_status_array(status_list)
             except queue.Empty:
                 pass
             except Exception as e:
                 self._logger.error(
-                    f"Mqtt.handle_incoming_messages: Error Parsing messages {e}")
+                    f"Mqtt.handle_incoming_messages: Error Parsing messages {e}"
+                )
 
     def stop(self):
         self._end_thread = True

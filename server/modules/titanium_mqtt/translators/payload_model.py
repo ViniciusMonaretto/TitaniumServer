@@ -1,16 +1,36 @@
+from abc import ABC, abstractmethod
 import datetime
 from enum import Enum
-import json
 from typing import Any
 
 
 class MqttActions(Enum):
     REPORT = "report"
-    CALIBRATE = "calibrateresponse"
+    COMMAND = "command"
     STATUS = "status"
 
-class MqttReadingModel:
-    full_topic: str = "" 
+
+class MqttDataModel(ABC):
+    @abstractmethod
+    def to_dict(self) -> dict[str:Any]:
+        pass
+
+
+class MqttCallibrationModel(MqttDataModel):
+    full_topic: str = ""
+    gain: float
+    offset: float
+
+    def to_dict(self):
+        return {
+            "gain": self.gain,
+            "offset": self.offset,
+            "subStatusName": self.full_topic,
+        }
+
+
+class MqttReadingModel(MqttDataModel):
+    full_topic: str = ""
     value: Any
     timestamp: datetime.date
 
@@ -18,10 +38,11 @@ class MqttReadingModel:
         return {
             "value": self.value,
             "timestamp": self.timestamp.isoformat(),
-            "subStatusName": self.full_topic
+            "subStatusName": self.full_topic,
         }
+
 
 class MqttPayloadModel:
     gateway: str = ""
-    data: list[MqttReadingModel] = []
+    data: list[MqttDataModel] = []
     action: MqttActions = MqttActions.REPORT
