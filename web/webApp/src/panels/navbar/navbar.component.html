@@ -1,18 +1,29 @@
 <div style="height: 100%;">
-    <side-nav-option *ngFor="let group of getGroupSensorUi()"
-                    [icon]="'timelapse'" 
-                    [componentText]="'Status Sensores'">
-                    <side-nav-option *ngFor="let group of getGroupSensorUi()"
-                        [isSuboption]="true"
-                        [icon]="'timelapse'" 
-                        [componentText]="group" 
-                        (buttonCallback)="setSensor(group)">
-                    </side-nav-option>
+    <div style="display: flex; gap:5px; padding: 24px;">
+        <img src="assets/icon/ioCloudLogo.svg" alt="ioCloud Logo" style="height: 32px;" />
+        <div style="display: flex ;
+                    height: 32px;
+                    align-items: center;
+                    font-size: 24px;
+                    color: #3E5CAF;">IoCloud</div>
+    </div>
+    <side-nav-option *ngFor="let group of getGroupSensorUi()" [icon]="'assets/icon/homeIcon.svg'"
+        [iconSelected]="'assets/icon/homeSelectedIcon.svg'" [componentText]="'Status Sensores'"
+        [isSelected]="isPanelSelected(panelOptions.SENSORS)">
+        <side-nav-option *ngFor="let group of getGroupSensorUi()" [isSuboption]="true"
+            [icon]="'assets/icon/homeIcon.svg'" [iconSelected]="'assets/icon/homeSelectedIcon.svg'"
+            [componentText]="group" (buttonCallback)="setSensor(group)"
+            [isSelected]="isPanelSelected(panelOptions.SENSORS)">
+        </side-nav-option>
     </side-nav-option>
-    <side-nav-option [icon]="'storage'" [componentText]="'Gráficos'" (buttonCallback)="setStatusLog()"></side-nav-option>
-    <side-nav-option [icon]="'warning'" [componentText]="'Alarmes'" (buttonCallback)="setAlertScreen()"></side-nav-option>
-    <side-nav-option [icon]="'insert_drive_file'" [componentText]="'Relatórios'" (buttonCallback)="openReportGenerator()"></side-nav-option>
-    <side-nav-option [icon]="CanEdit()?'editOff':'modeEdit'" 
-                     [componentText]="CanEdit()?'Habilitar Edição':'Desabilitar Edição'" 
-                     (buttonCallback)="toogleEdit()"></side-nav-option>
+    <side-nav-option [icon]="'assets/icon/graphIcon.svg'" [iconSelected]="'assets/icon/graphSelectedIcon.svg'"
+        [componentText]="'Gráficos'" (buttonCallback)="setStatusLog()"
+        [isSelected]="isPanelSelected(panelOptions.STATUS_LOG)"></side-nav-option>
+    <side-nav-option [icon]="'assets/icon/eventsIcon.svg'" [iconSelected]="'assets/icon/eventsSelectedIcon.svg'"
+        [componentText]="'Alarmes'" (buttonCallback)="setAlertScreen()"
+        [isSelected]="isPanelSelected(panelOptions.ALERT_VIEW)"></side-nav-option>
+    <side-nav-option [icon]="'assets/icon/downloadIcon.svg'" [iconSelected]="'assets/icon/downloadSelectedIcon.svg'"
+        [componentText]="'Relatórios'" (buttonCallback)="openReportGenerator()"></side-nav-option>
+    <side-nav-option [icon]="'assets/icon/homeIcon.svg'" [iconSelected]="'assets/icon/homeSelectedIcon.svg'"
+        [componentText]="CanEdit()?'Desabilitar':'Editar'" (buttonCallback)="toogleEdit()"></side-nav-option>
 </div>

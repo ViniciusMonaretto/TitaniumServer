@@ -4,7 +4,7 @@
                         'side-nav-inner-class-sub': isSuboption,
                         'transparent-button': true}"
             aria-label="Example icon-button with heart icon">
-        <mat-icon [ngClass]="{'reduced-icon': isSuboption}">{{icon}}</mat-icon>
+        <img [src]="getIcon()" [style]="isSuboption?'height: 20px;padding: 25px;':'height: 28px;'"/>
         <div>
             {{componentText}}
         </div>

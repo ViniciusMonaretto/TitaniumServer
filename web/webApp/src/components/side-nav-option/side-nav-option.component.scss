@@ -1,7 +1,8 @@
 .side-nav-inner-class {
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-start;
     align-items: center;
+    gap: 10px;
     width: 100%;
     height: 50px;
 }

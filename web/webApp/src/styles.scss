@@ -4,7 +4,7 @@ html {
   color-scheme: light dark;
   @include mat.theme((
     color: mat.$violet-palette,
-    typography: Roboto,
+    typography: 'Segoe UI',
     density: 0
   ));
 }
@@ -16,6 +16,17 @@ html {
   font-style: normal;
 }
 
-html, body { height: 100%; }
-body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; } 
+@font-face {
+  font-family: 'Segoe UI';
+  src: url('assets/fonts/segoe-ui-regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+
+html, body { 
+  height: 100%;
+ }
+body { margin: 0; font-family: 'Segoe UI', sans-serif; } 
 

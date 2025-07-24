@@ -13,16 +13,23 @@ import { MatIconModule } from '@angular/material/icon';
 export class SideNavOptionComponent implements OnInit {
 
   @Input() icon: string = "";
+  @Input() iconSelected: string = "";
   @Input() componentText: string = "";
   @Input() isSuboption: boolean = false;
+  @Input() isSelected: boolean = false;
   @Output() buttonCallback: EventEmitter<any> = new EventEmitter();
 
   unfoldOptions: boolean = false
-  
 
   constructor() { }
 
   ngOnInit(): void {
+  }
+
+  getIcon()
+  {
+    return this.isSelected? this.iconSelected: this.icon;
+
   }
 
   buttonCLick() : void {

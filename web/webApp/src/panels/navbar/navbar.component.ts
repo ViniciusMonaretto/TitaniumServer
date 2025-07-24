@@ -19,10 +19,14 @@ import { ServerConectorService } from '../../services/server-conector.service';
 })
 export class NavbarComponent implements OnInit {
 
+  public panelOptions = MainScreenOptions
+
   constructor(public dialog: MatDialog,
     private mainScreenService: MainScreenSelector,
     private UiPanelsService: UiPanelService,
     private serverConnector: ServerConectorService) { }
+
+ 
 
   ngOnInit(): void {
   }
@@ -30,6 +34,11 @@ export class NavbarComponent implements OnInit {
   addNewSensorCallback(sensorData: any): void {
     console.log('Sensor added:', sensorData);
     // Handle the sensor data (e.g., save it to the server)
+  }
+
+  isPanelSelected(panel: number)
+  {
+    return this.mainScreenService.GetScreen() == panel
   }
 
   addSensor(): void {
