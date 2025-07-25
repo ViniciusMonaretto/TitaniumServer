@@ -1,6 +1,7 @@
 import json
 import threading
 import queue
+import os
 from typing import Any
 import paho.mqtt.client as mqtt
 
@@ -20,9 +21,9 @@ PUBLISH_TOPIC_LIST = ["GetLevel", "titanium/level"]
 
 GATEWAY_CONFIG_DIR = "titaniumGatewaysConfigs"
 
-MQTT_SERVER = "localhost"
-
-MQTT_PORT = 1883
+# Get MQTT connection details from environment variables
+MQTT_SERVER = os.getenv('MQTT_HOST', 'localhost')
+MQTT_PORT = int(os.getenv('MQTT_PORT', '1883'))
 
 
 class TitaniumMqtt:

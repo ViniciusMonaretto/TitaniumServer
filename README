@@ -10,7 +10,7 @@ Steps to use the Titanium Server system:
 3. Activate virtual envirorment and install all required dependencies:
     - run: pip install -r requirements.txt for that
 
-4. on the folder web/webApp run node install:
+4. (optional for web Dev)on the folder web/webApp run node install:
     - npm install
 
 5. Run the server using the file server/main.py
