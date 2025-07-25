@@ -1,33 +1,14 @@
 <div class="sensor">
+  <div class="header-sensor">
+    {{ sensorInfo.name }}
+    <img src="assets/icon/wifiIcon.svg" alt="">
+  </div>
   <div class="measure-display" (click)="infoCLick()">
-    <div class="middle-measure" [style.color]="getColorOfSensor()">
-      {{ getCurrentReading() }}
-    </div>
-    <div
-      class="border-measure"
-      style="
-        display: flex;
-        height: 100%;
-        flex-direction: column;
-        justify-content: space-around;
-      "
-    >
-      <div>
-        {{ getMeasureIcon() }}
-      </div>
-      <div>
-        <button
-          *ngIf="canEdit"
-          mat-icon-button
-          class="delete-icon"
-          (click)="deletePanel()"
-        >
-          <mat-icon>delete</mat-icon>
-        </button>
-      </div>
+    <div class="middle-measure" >
+      {{ getCurrentReading() + " " + getMeasureIcon() }}
     </div>
   </div>
-</div>
-<div class="header-sensor">
-  {{ sensorInfo.name }}
+  <div class="footer-display" [style.color]="getColorOfSensor()">
+      {{getStatusMessageOfSensor()}}
+  </div>
 </div>

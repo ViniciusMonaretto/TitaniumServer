@@ -26,10 +26,25 @@ export class GroupOfSensorsComponent implements OnInit {
   @Input() group: string = "";
   @Input() type: string = "";
   @Input() sensorArray: Array<SensorModule> = [];
+  @Input() width: string | undefined
 
   constructor(public dialog: MatDialog, private serverConnector: ServerConectorService) { }
 
   ngOnInit(): void {
+  }
+
+  getStyleOfCell() {
+    return this.width ? { width: this.width } : {};
+  }
+
+  getGridStyle() {
+    const width = this.width || '380px';
+    return {
+      display: 'grid',
+      gridTemplateColumns: `repeat(auto-fill, minmax(${width}, 1fr))`,
+      gap: '10px',
+      paddingBottom: '10px'
+    };
   }
 
   addSensor(groupName: string): void {

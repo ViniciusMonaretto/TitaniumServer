@@ -81,6 +81,9 @@ export class UiPanelService {
         case SensorTypesEnum.PREASSURE:
           this.panels[groupName]["pressure"].push(sensor)
           break
+        case SensorTypesEnum.TENSION:
+        case SensorTypesEnum.CURRENT:
+        case SensorTypesEnum.POWER_FACTOR:
         case SensorTypesEnum.POWER:
           this.panels[groupName]["power"].push(sensor)
           break

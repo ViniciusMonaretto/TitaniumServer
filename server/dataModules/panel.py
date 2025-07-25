@@ -5,6 +5,9 @@ class SensorTypes:
     Pressure = "Pressure"
     Temperature = "Temperature"
     Power = "Power"
+    Current = "Current"
+    Tension = "Tension"
+    PowerFactor = "PowerFactor"
     Unknow = "Unknow"
 
     @classmethod
@@ -15,6 +18,12 @@ class SensorTypes:
             return cls.Temperature
         elif panelName == cls.Power:
             return cls.Power
+        elif panelName == cls.Current:
+            return cls.Current
+        elif panelName == cls.Tension:
+            return cls.Tension
+        elif panelName == cls.PowerFactor:
+            return cls.PowerFactor
         
         return cls.Unknow
 

@@ -1,41 +1,49 @@
 .sensor{
-    max-width: 300px;
+    max-width: 380px;
+    max-height: 120px;
     height: 100px;
     border: solid;
     border-width: thin;
-    border-color: black;
-    border-radius: 5px;
-    background-color: black;
-    color: white;
-    font-family: 'LCD', sans-serif;
+    border-color: #E5E7EB;
+    border-radius: 8px;
+    color: #6B7280;
+    box-shadow: 0px 1px 2px 0px #0000000D;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
 }
 
 .header-sensor
 {
-    height: 15%;
+    height: 30px;
     display: flex;
     align-items: center;
-    padding-left: 10px;
+    justify-content: space-between;
     font-size: 15px;
-    padding-top: 10px;
 }
 
 .measure-display
 {
-    font-family: 'Digital Numbers', sans-serif;
     display: flex;
-    height: 100%;
     align-items: center;
     justify-content: space-around;
+    color: #1D4ED8;
+    height: calc(100% - 45px);
+}
+
+.footer-display
+{
+    height: 30px;
 }
 
 .middle-measure
 {
-    width: 80%;
+    width: 100%;
     display: flex;
     align-items: center;
     justify-content: space-around;
-    font-size: 50px;
+    font-size: 36px;
 }
 
 .border-measure

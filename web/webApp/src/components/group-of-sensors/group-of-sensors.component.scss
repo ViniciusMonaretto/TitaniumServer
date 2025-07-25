@@ -1,23 +1,17 @@
 .main-group-div {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px; 
-  justify-content: flex-start; 
+  // Only keep non-layout styles here if needed
 }
 
 .flex-item {
-  width: 260px;
-  //flex: 1 1 200px; 
-  max-width: 300px;
   box-sizing: border-box;
   text-align: center;
 }
 
 .group-header{
   width: 100%;
-  font-size: x-large;
+  color:#262626;
+  font-size: 20px;
   padding-bottom: 20px;
-  font-weight: bold;
 }
 
 .add-button{

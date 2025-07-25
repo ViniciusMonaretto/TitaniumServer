@@ -181,7 +181,34 @@
             "group": "camera 1"
         },
         {
-            "name": "123",
+            "name": "Tensão",
+            "gateway": "123",
+            "topic": "123",
+            "color": "#000000",
+            "sensorType": "Tension",
+            "indicator": "0",
+            "group": "camera 1"
+        },
+        {
+            "name": "Corrente",
+            "gateway": "123",
+            "topic": "123",
+            "color": "#000000",
+            "sensorType": "Current",
+            "indicator": "0",
+            "group": "camera 1"
+        },
+        {
+            "name": "Fator de Potencia",
+            "gateway": "123",
+            "topic": "123",
+            "color": "#000000",
+            "sensorType": "PowerFactor",
+            "indicator": "0",
+            "group": "camera 1"
+        },
+        {
+            "name": "Potencia",
             "gateway": "123",
             "topic": "123",
             "color": "#000000",
@@ -190,7 +217,16 @@
             "group": "camera 1"
         },
         {
-            "name": "1233",
+            "name": "P1",
+            "gateway": "123",
+            "topic": "123",
+            "color": "#000000",
+            "sensorType": "Pressure",
+            "indicator": "0",
+            "group": "camera 1"
+        },
+        {
+            "name": "P2",
             "gateway": "123",
             "topic": "123",
             "color": "#000000",

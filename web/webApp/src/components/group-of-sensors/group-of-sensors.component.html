@@ -1,8 +1,9 @@
 <div style="    height: 100%;">
   <div class="group-header">{{name}}</div>
   <div style="height: calc(100% - 56px); overflow-y: auto;">
-    <div class="main-group-div">
+    <div class="main-group-div" [ngStyle]="getGridStyle()">
       <sensor class="flex-item"
+              [style]="getStyleOfCell()"
              *ngFor="let sensor of sensorArray" 
               [sensorInfo]="sensor" 
               [canEdit]="canEdit"

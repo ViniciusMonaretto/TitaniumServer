@@ -10,9 +10,13 @@
     width: 100%;
     font-size: xx-large;
     padding-bottom: 20px;
-    font-weight: bold;
+    color: #262626;
 }
 
 .info-bellow-display{
     width: 50%;
+}
+
+.main-screen-style {
+    height: calc(100% - 40px);
 }

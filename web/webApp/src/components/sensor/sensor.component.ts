@@ -36,12 +36,48 @@ export class SensorComponent implements OnInit {
     {
         return "Kw"
     }
+    if(this.sensorInfo.sensorType == SensorTypesEnum.CURRENT)
+    {
+        return "A"
+    }
+    if(this.sensorInfo.sensorType == SensorTypesEnum.TENSION)
+    {
+        return "V"
+    }
+    if(this.sensorInfo.sensorType == SensorTypesEnum.POWER_FACTOR)
+    {
+        return "%"
+    }
 
     return ""
   }
 
   ngOnInit(): void {
     this.sensorInfo.name
+  }
+
+  getStatusMessageOfSensor()
+  {
+    var value = this.sensorInfo?.value
+    var maxValue = this.sensorInfo?.maxAlarm?.threshold
+    var minValue = this.sensorInfo?.minAlarm?.threshold
+
+    if (!value)
+    {
+      return 'OK';
+    }
+
+    if (maxValue && value > maxValue)
+    {
+      return 'Valor Muito Alto'
+    }
+
+    if (minValue && value < minValue)
+    {
+      return 'Valor Muito Baixo'
+    }
+
+    return 'none';
   }
 
   getColorOfSensor()
@@ -52,17 +88,17 @@ export class SensorComponent implements OnInit {
 
     if (!value)
     {
-      return 'none';
+      return '#22C55E';
     }
 
     if (maxValue && value > maxValue)
     {
-      return 'red'
+      return '#FA3838'
     }
 
     if (minValue && value < minValue)
     {
-      return 'red'
+      return 'rgb(31 31 141)'
     }
 
     return 'none';

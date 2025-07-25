@@ -1,35 +1,26 @@
 <div class="group-div-display">
     <div style="height: 100%;">
         <div class="group-header">{{getGroupSelected()}}</div>
-        <mat-card style="height: calc(100% - 40px);">
-            <mat-card-content style="height: 100%;">
-                <div style="height: 100%;
+        <div class="main-screen-style">
+            <div style="height: 100%;
                                 display: flex;
                                 flex-direction: column;
                                 justify-content: space-between;">
-                    <div style="height: 75%;">
-                        <group-of-sensors [name]="'Temperatura'" 
-                                          [canEdit]="CanEdit()"
-                                          [group]="getGroupSelected()" 
-                                          [type]="getSensorType().TEMPERATURE"
-                                          [sensorArray]="getInfoOfGroup().temperature"></group-of-sensors>
-                    </div>
-                    <div style="display: flex; height: 23%;">
-                        <group-of-sensors class="info-bellow-display" 
-                                          [group]="getGroupSelected()" 
-                                          [canEdit]="CanEdit()"
-                                          [name]="'Potência'" 
-                                          [sensorArray]="getInfoOfGroup().power"
-                                          [type]="getSensorType().POWER"></group-of-sensors>
-                        <group-of-sensors class="info-bellow-display" 
-                                          [group]="getGroupSelected()" 
-                                          [canEdit]="CanEdit()"
-                                          [name]="'Pressão'" 
-                                          [sensorArray]="getInfoOfGroup().pressure"
-                                          [type]="getSensorType().PREASSURE"></group-of-sensors>
-                    </div>
+                <div style="height: 75%;">
+                    <group-of-sensors [name]="'Temperatura'" [canEdit]="CanEdit()" [group]="getGroupSelected()"
+                        [type]="getSensorType().TEMPERATURE"
+                        [sensorArray]="getInfoOfGroup().temperature"></group-of-sensors>
                 </div>
-            </mat-card-content>
-        </mat-card>
+                <div style="display: flex; height: 23%;     gap: 10px;">
+                    <group-of-sensors class="info-bellow-display" [group]="getGroupSelected()" [canEdit]="CanEdit()"
+                    [width]="'180px'"
+                        [name]="'Potência'" [sensorArray]="getInfoOfGroup().power"
+                        [type]="getSensorType().POWER"></group-of-sensors>
+                    <group-of-sensors class="info-bellow-display" [group]="getGroupSelected()" [canEdit]="CanEdit()"
+                        [name]="'Pressão'" [sensorArray]="getInfoOfGroup().pressure"
+                        [type]="getSensorType().PREASSURE"></group-of-sensors>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
