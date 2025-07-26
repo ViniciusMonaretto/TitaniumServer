@@ -54,6 +54,15 @@ class IoCloudApiTranslator(PayloadTranslator):
             type_of_sensor = "temperature"
         elif reading_json["unit"] == "kPa":
             type_of_sensor = "pressure"
+        elif reading_json["unit"] == "V":
+            type_of_sensor = "tension"
+        elif reading_json["unit"] == "A":
+            type_of_sensor = "current"
+        elif reading_json["unit"] == "kW":
+            type_of_sensor = "power"
+        elif reading_json["unit"] == "%":
+            type_of_sensor = "powerFactor"
+            reading_json["value"] = reading_json["value"]*100
         else:
             self.logger.error(
                 f"IoCloudApiTranslator::_create_reading: mqtt unit not recognized {reading_json['unit']}"
@@ -66,17 +75,31 @@ class IoCloudApiTranslator(PayloadTranslator):
 
         reading.value = reading_json["value"]
         reading.timestamp = timestamp
-
+        reading.is_active = reading_json["active"]
         return reading
 
     def _read_sensor_report_message(self, gateway: str, message_json: Any):
         timestamp = datetime.fromisoformat(message_json["timestamp"])
         data = []
         index_obj = {}
+
+        current_reading = None
+        tension_reading = None
         for raw_reading in message_json["sensors"]:
-            reading = self._create_reading(gateway, timestamp, raw_reading, index_obj)
+            reading = self._create_reading(
+                gateway, timestamp, raw_reading, index_obj)
             if reading:
+                if "current" in reading.full_topic:
+                    current_reading = reading.value
+                elif "tension" in reading.full_topic:
+                    tension_reading = reading.value
                 data.append(reading)
+
+        if current_reading and tension_reading:
+            power = current_reading * tension_reading/1000
+            power_reading = self._create_reading(
+                gateway, timestamp, {"value": f"{power:.2f}", "unit": "kW", "active": True}, index_obj)
+            data.append(power_reading)
 
         return data
 

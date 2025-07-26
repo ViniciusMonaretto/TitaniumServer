@@ -6,7 +6,7 @@ import paho.mqtt.client as mqtt
 import copy
 
 # Define the broker and port
-BROKER = "localhost"  # "mqtt.eclipseprojects.io"
+BROKER = "broker.hivemq.com"  # "mqtt.eclipseprojects.io"
 PORT = 1883
 MESSAGES_TO_SEND = 1
 
@@ -72,12 +72,15 @@ try:
         {"value": 140.7, "active": True, "unit": "°C"},
         {"value": 20, "active": False, "unit": "kPa"},
         {"value": 20, "active": False, "unit": "kPa"},
+        {"value": 220, "active": False, "unit": "V"},
+        {"value": 2, "active": False, "unit": "A"},
     ]
     while True:
         sensors = []
         for sensor in base_sensors:
             if sensor["unit"] == "°C":
-                varied_value = round(sensor["value"] + random.uniform(-5, 5), 2)
+                varied_value = round(
+                    sensor["value"] + random.uniform(-5, 5), 2)
                 sensors.append({**sensor, "value": varied_value})
             else:
                 sensors.append(sensor.copy())

@@ -1,26 +1,14 @@
-import importlib.util
+import importlib
 import os
 
 current_folder = os.path.dirname(os.path.abspath(__file__))
 
-def convert_tag(data):
-    mp = {1073539744: "João Silva"}
-
-    if data in mp:
-        return mp[data]
-    else:
-        return data
-
 class DataConverter:
-
-    def convert_data(self, status_name, object):
-        """try:
-            cls = getattr( status_name)
-            if isinstance(cls, type):
-                instance = globals()[status_name]()
-                return instance.convert(object)
-        except:
-            pass"""
-        if status_name == 'tag_uuid':
-            return convert_tag(object)
-        return object
+    def convert_data(self, status_name, obj):
+        try:
+            module = importlib.import_module(f".{status_name}", package="middleware.data_converter")
+            cls = getattr(module, status_name.capitalize())
+            instance = cls()
+            return instance.convert_in_new_status(obj)
+        except Exception as e:
+            return None

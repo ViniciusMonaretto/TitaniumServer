@@ -1,5 +1,5 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
-import { MatCardModule } from '@angular/material/card'; 
+import { MatCardModule } from '@angular/material/card';
 import { CommonModule } from '@angular/common';
 
 import { SensorModule } from '../../models/sensor-module';
@@ -12,19 +12,19 @@ import { IoCloudTableComponent } from '../io-cloud-table/io-cloud-table.componen
 import { MatIconModule } from '@angular/material/icon';
 
 @Component({
-    selector: 'sensor-info',
-    templateUrl: './sensor-info.component.html',
-    styleUrls: ['./sensor-info.component.scss'],
-    imports: [MatCardModule, 
-              CommonModule, 
-              GraphComponent,
-              MatFormFieldModule,
-              MatSelectModule,
-              MatInputModule,
-              IoCloudTableComponent,
-              FormsModule,
-              MatIconModule ], // Add MatCardModule to imports
-    standalone: true
+  selector: 'sensor-info',
+  templateUrl: './sensor-info.component.html',
+  styleUrls: ['./sensor-info.component.scss'],
+  imports: [MatCardModule,
+    CommonModule,
+    GraphComponent,
+    MatFormFieldModule,
+    MatSelectModule,
+    MatInputModule,
+    IoCloudTableComponent,
+    FormsModule,
+    MatIconModule], // Add MatCardModule to imports
+  standalone: true
 })
 export class SensorInfoComponent implements OnInit {
 
@@ -54,17 +54,14 @@ export class SensorInfoComponent implements OnInit {
     this.getStatusHistory()
   }
 
-  return()
-  {
+  return() {
     this.onExit.emit()
   }
 
-  setLineData(dataArr: any)
-  {
-    if(dataArr.length == 0)
-    {
+  setLineData(dataArr: any) {
+    if (dataArr.length == 0) {
       this.lineChartData = null
-      return;  
+      return;
     }
     this.lineChartData = []
     this.lineChartData.push({
@@ -76,7 +73,7 @@ export class SensorInfoComponent implements OnInit {
       fill: false,
       data: []
     });
-    
+
     let newSeries: { x: number, y: number }[] = [];
 
     for (let info of dataArr) {
@@ -93,15 +90,13 @@ export class SensorInfoComponent implements OnInit {
     this.lineChartData[0].data = newSeries;
   }
 
-  getCurrentValue()
-  {
-    return this.currentReading && this.currentReading != "" ? this.currentReading:"???" 
+  getCurrentValue() {
+    return this.currentReading && this.currentReading != "" ? this.currentReading : "???"
   }
 
-  getStatusHistory()
-  {
-    let gtw = this.sensorInfo?.gateway=="*"?"":this.sensorInfo?.gateway 
-    this.onLoad.emit({"gateway": gtw, "table": this.sensorInfo?.topic, "indicator": this.sensorInfo?.indicator})
+  getStatusHistory() {
+    let gtw = this.sensorInfo?.gateway == "*" ? "" : this.sensorInfo?.gateway
+    this.onLoad.emit({ "gateway": gtw, "table": this.sensorInfo?.topic, "indicator": this.sensorInfo?.indicator })
   }
 
 }

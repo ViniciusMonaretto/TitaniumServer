@@ -33,12 +33,14 @@ class MqttReadingModel(MqttDataModel):
     full_topic: str = ""
     value: Any
     timestamp: datetime.date
+    is_active: bool
 
     def to_dict(self):
         return {
             "value": self.value,
             "timestamp": self.timestamp.isoformat(),
             "subStatusName": self.full_topic,
+            "isActive": self.is_active,
         }
 
 

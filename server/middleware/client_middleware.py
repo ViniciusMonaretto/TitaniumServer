@@ -104,7 +104,11 @@ class ClientMiddleware:
         status_name = new_status["name"]
         data = new_status["data"]
 
-        data_converted = self._data_converter.convert_data(status_name.split('-')[1], data)
+        generated_status: list[dict[str, Any]] = self._data_converter.convert_data(status_name.split('-')[1], data)
         for subscriber_status_name, subscriber in self._subscribers.items():
             if self._check_if_subscribed(subscriber_status_name, status_name):
-                subscriber.send_status(status_name, data_converted)
+                subscriber.send_status(status_name, data)
+            if generated_status:
+                for status_gen in generated_status:
+                    if self._check_if_subscribed(subscriber_status_name, status_gen["name"]):
+                        subscriber.send_status(status_gen["name"], status_gen["value"])

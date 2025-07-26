@@ -6,47 +6,40 @@ import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 
 @Component({
-    selector: 'sensor',
-    templateUrl: './sensor.component.html',
-    styleUrls: ['./sensor.component.scss'],
-    imports: [CommonModule, MatIconModule],
-    standalone: true
+  selector: 'sensor',
+  templateUrl: './sensor.component.html',
+  styleUrls: ['./sensor.component.scss'],
+  imports: [CommonModule, MatIconModule],
+  standalone: true
 })
 export class SensorComponent implements OnInit {
   @Input() canEdit: boolean = false
   @Input() sensorInfo: SensorModule = new SensorModule()
   @Output() clickCallback: EventEmitter<any> = new EventEmitter();
   @Output() deleteCallback: EventEmitter<any> = new EventEmitter();
-  
+
   public sensorTypes = Object.values(SensorTypesEnum);
-  
+
   constructor() { }
 
-  getMeasureIcon(): String
-  {
-    if(this.sensorInfo.sensorType == SensorTypesEnum.PREASSURE)
-    {
+  getMeasureIcon(): String {
+    if (this.sensorInfo.sensorType == SensorTypesEnum.PREASSURE) {
       return "Pa"
     }
-    if(this.sensorInfo.sensorType == SensorTypesEnum.TEMPERATURE)
-    {
-        return "ºC"
+    if (this.sensorInfo.sensorType == SensorTypesEnum.TEMPERATURE) {
+      return "ºC"
     }
-    if(this.sensorInfo.sensorType == SensorTypesEnum.POWER)
-    {
-        return "Kw"
+    if (this.sensorInfo.sensorType == SensorTypesEnum.POWER) {
+      return "Kw"
     }
-    if(this.sensorInfo.sensorType == SensorTypesEnum.CURRENT)
-    {
-        return "A"
+    if (this.sensorInfo.sensorType == SensorTypesEnum.CURRENT) {
+      return "A"
     }
-    if(this.sensorInfo.sensorType == SensorTypesEnum.TENSION)
-    {
-        return "V"
+    if (this.sensorInfo.sensorType == SensorTypesEnum.TENSION) {
+      return "V"
     }
-    if(this.sensorInfo.sensorType == SensorTypesEnum.POWER_FACTOR)
-    {
-        return "%"
+    if (this.sensorInfo.sensorType == SensorTypesEnum.POWER_FACTOR) {
+      return "%"
     }
 
     return ""
@@ -56,67 +49,60 @@ export class SensorComponent implements OnInit {
     this.sensorInfo.name
   }
 
-  getStatusMessageOfSensor()
-  {
+  getStatusMessageOfSensor() {
     var value = this.sensorInfo?.value
     var maxValue = this.sensorInfo?.maxAlarm?.threshold
     var minValue = this.sensorInfo?.minAlarm?.threshold
 
-    if (!value)
-    {
-      return 'OK';
+    if (!this.sensorInfo.isActive) {
+      return 'Desativado';
     }
 
-    if (maxValue && value > maxValue)
-    {
+    if (!value && value !== 0) {
+      return 'sem leitura';
+    }
+
+    if (maxValue && value > maxValue) {
       return 'Valor Muito Alto'
     }
 
-    if (minValue && value < minValue)
-    {
+    if (minValue && value < minValue) {
       return 'Valor Muito Baixo'
     }
 
-    return 'none';
+    return 'OK';
   }
 
-  getColorOfSensor()
-  {
+  getColorOfSensor() {
     var value = this.sensorInfo?.value
     var maxValue = this.sensorInfo?.maxAlarm?.threshold
     var minValue = this.sensorInfo?.minAlarm?.threshold
 
-    if (!value)
-    {
-      return '#22C55E';
+    if (!this.sensorInfo.isActive || (!value && value !== 0)) {
+      return 'none';
     }
 
-    if (maxValue && value > maxValue)
-    {
+    if (maxValue && value > maxValue) {
       return '#FA3838'
     }
 
-    if (minValue && value < minValue)
-    {
+    if (minValue && value < minValue) {
       return 'rgb(31 31 141)'
     }
 
-    return 'none';
+    return '#22C55E';
   }
 
-  deletePanel()
-  {
+  deletePanel() {
     this.deleteCallback.emit(this.sensorInfo.id)
   }
 
-  infoCLick()
-  {
+  infoCLick() {
     this.clickCallback.emit(this.sensorInfo)
   }
 
-  getCurrentReading()
-  {
-    return this.sensorInfo?.value ? this.sensorInfo?.value : "--"
+  getCurrentReading() {
+    return this.sensorInfo?.isActive ? this.sensorInfo?.value : "--"
   }
 
 }

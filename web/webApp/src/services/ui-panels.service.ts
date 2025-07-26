@@ -211,6 +211,7 @@ export class UiPanelService {
           if("topic" in callbackObj )
           {
             callbackObj.value = status_update.value
+            callbackObj.isActive = status_update.isActive
             if(tableFullName in this.sensorCachedCurrentInfo)
             {
               this.sensorCachedCurrentInfo[tableFullName].push({
