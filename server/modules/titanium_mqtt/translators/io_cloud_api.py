@@ -27,7 +27,16 @@ class IoCloudApiTranslator(PayloadTranslator):
     def _create_calibration_update(self, gateway, calibration_json):
         calibration_update: MqttCallibrationModel = MqttCallibrationModel()
 
-        type_of_sensor = calibration_json["type"]
+        if calibration_json["command_status"] != 0:
+            self.logger.error(
+                f"IoCloudApiTranslator::_create_calibration_update: Calibration for sensor {calibration_json['sensor_id']} failed"
+            )
+            return None
+
+        type_of_sensor = self._get_type_of_sensor(calibration_json)
+        if not type_of_sensor:
+            return None
+
         index = calibration_json["sensor_id"]
         calibration_update.full_topic = (
             MqttHelper.get_topic_from_mosquitto_obj_calibration(
@@ -40,16 +49,7 @@ class IoCloudApiTranslator(PayloadTranslator):
 
         return calibration_update
 
-    def _create_reading(self, gateway, timestamp, reading_json, index_obj):
-        reading: MqttReadingModel = MqttReadingModel()
-        type_of_sensor = ""
-
-        if reading_json["unit"] not in index_obj:
-            index_obj[reading_json["unit"]] = 0
-
-        index = index_obj[reading_json["unit"]]
-        index_obj[reading_json["unit"]] += 1
-
+    def _get_type_of_sensor(self, reading_json):
         if reading_json["unit"] == "°C":
             type_of_sensor = "temperature"
         elif reading_json["unit"] == "kPa":
@@ -67,6 +67,21 @@ class IoCloudApiTranslator(PayloadTranslator):
             self.logger.error(
                 f"IoCloudApiTranslator::_create_reading: mqtt unit not recognized {reading_json['unit']}"
             )
+            return None
+        return type_of_sensor
+
+    def _create_reading(self, gateway, timestamp, reading_json, index_obj):
+        reading: MqttReadingModel = MqttReadingModel()
+        type_of_sensor = ""
+
+        if reading_json["unit"] not in index_obj:
+            index_obj[reading_json["unit"]] = 0
+
+        index = index_obj[reading_json["unit"]]
+        index_obj[reading_json["unit"]] += 1
+
+        type_of_sensor = self._get_type_of_sensor(reading_json)
+        if (type_of_sensor == None):
             return None
 
         reading.full_topic = MqttHelper.get_topic_from_mosquitto_obj_report(
@@ -137,9 +152,9 @@ class IoCloudApiTranslator(PayloadTranslator):
                     f"IoCloudApiTranslator::translate_payload: mqtt topic {topic} not valid"
                 )
 
-            if message_json["command"] == 1:
+            if message_json["command_index"] == 1:
                 out_payload.data = self._read_calibration_update_message(
-                    msg_split[2], message_json["params"]
+                    msg_split[2], message_json
                 )
 
         return out_payload

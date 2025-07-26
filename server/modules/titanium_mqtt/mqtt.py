@@ -15,7 +15,7 @@ from .mqtt_helper import MqttHelper
 from .translators.translator_model import PayloadTranslator
 
 
-SUBSCRIBE_TOPIC_LIST = [("iocloud/#", 0)]
+SUBSCRIBE_TOPIC_LIST = [("iocloud/response/#", 0)]
 
 PUBLISH_TOPIC_LIST = ["GetLevel", "titanium/level"]
 
@@ -67,10 +67,9 @@ class TitaniumMqtt:
         payload = {
             "command": 1,
             "params": {
-                "sensor_id": command_data["indicator"],
+                "sensor_id": int(command_data["indicator"]),
                 "offset": command_data["offset"],
-                "gain": command_data["gain"],
-                "type": command_data["topic"],
+                "gain": command_data["gain"]
             },
         }
         self._client.publish(topic, json.dumps(payload))
