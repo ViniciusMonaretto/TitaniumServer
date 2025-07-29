@@ -6,7 +6,7 @@ import paho.mqtt.client as mqtt
 import copy
 
 # Define the broker and port
-BROKER = "broker.hivemq.com"  # "mqtt.eclipseprojects.io"
+BROKER = 'broker.hivemq.com'  # "mqtt.eclipseprojects.io"
 PORT = 1883
 MESSAGES_TO_SEND = 1
 
@@ -70,10 +70,11 @@ try:
         {"value": 124.4, "active": True, "unit": "°C"},
         {"value": 132.87, "active": True, "unit": "°C"},
         {"value": 140.7, "active": True, "unit": "°C"},
-        {"value": 20, "active": False, "unit": "kPa"},
-        {"value": 20, "active": False, "unit": "kPa"},
-        {"value": 220, "active": False, "unit": "V"},
-        {"value": 2, "active": False, "unit": "A"},
+        {"value": 20, "active": True, "unit": "kPa"},
+        {"value": 20, "active": True, "unit": "kPa"},
+        {"value": 220, "active": True, "unit": "V"},
+        {"value": 2, "active": True, "unit": "A"},
+        {"value": 96, "active": True, "unit": "%"}
     ]
     while True:
         sensors = []
@@ -88,7 +89,7 @@ try:
             "timestamp": datetime.now().isoformat(timespec="seconds"),
             "sensors": sensors,
         }
-        topic = "iocloud/response/1C692031BE04/sensor/report"
+        topic = "iocloud/response/1C69209DFC08/sensor/report"
         payload_json = json.dumps(payload)
         print(f"Sending MQTT message to {topic}")
         client.publish(topic, payload_json)

@@ -74,11 +74,8 @@ class IoCloudApiTranslator(PayloadTranslator):
         reading: MqttReadingModel = MqttReadingModel()
         type_of_sensor = ""
 
-        if reading_json["unit"] not in index_obj:
-            index_obj[reading_json["unit"]] = 0
-
-        index = index_obj[reading_json["unit"]]
-        index_obj[reading_json["unit"]] += 1
+        index = index_obj["current_index"]
+        index_obj["current_index"] += 1
 
         type_of_sensor = self._get_type_of_sensor(reading_json)
         if (type_of_sensor == None):
@@ -96,7 +93,7 @@ class IoCloudApiTranslator(PayloadTranslator):
     def _read_sensor_report_message(self, gateway: str, message_json: Any):
         timestamp = datetime.fromisoformat(message_json["timestamp"])
         data = []
-        index_obj = {}
+        index_obj = {"current_index": 0}
 
         current_reading = None
         tension_reading = None
