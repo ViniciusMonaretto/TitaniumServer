@@ -10,7 +10,7 @@
     </div>
 
     <div class="rowTable">
-        <div class="headerCell" *ngFor="let header of headerInfo"> {{header[1]}}</div>
+        <div class="headerCell bodyCell" *ngFor="let header of headerInfo"> {{header[1]}}</div>
         <div *ngIf="editCallback.observers.length > 0 || deleteCallback.observers.length > 0" class="headerCell"></div>
     </div>
     <div class="rowsContainer">
@@ -28,5 +28,4 @@
             </div>
         </div>
     </div>
-
 </div>

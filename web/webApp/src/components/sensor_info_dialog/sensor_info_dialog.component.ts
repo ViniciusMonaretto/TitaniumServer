@@ -35,17 +35,18 @@ export class SensorInfoDialogComponent {
   private topic = ""
   private indicator = 0
 
-  private onApplyAction: ((obj: any) => void)|null = null
+  private onApplyAction: ((obj: any) => void) | null = null
 
   uiConfig: { [id: string]: any } = {}
+  calibrate: boolean = false
 
   constructor(public dialogRef: MatDialogRef<SensorInfoDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: {sensorInfo: SensorModule, callback: ((obj: any) => void), canEdit: boolean}
+    @Inject(MAT_DIALOG_DATA) public data: { sensorInfo: SensorModule, callback: ((obj: any) => void), canEdit: boolean }
   ) {
     this.sensorName = data.sensorInfo.name
-    this.gain = data.sensorInfo.gain ?? 0
-    this.offset = data.sensorInfo.offset ?? 0
-    this.panelId =  data.sensorInfo.id
+    this.gain = data.sensorInfo.gain ?? null
+    this.offset = data.sensorInfo.offset ?? null
+    this.panelId = data.sensorInfo.id
     this.maxAlarm = data.sensorInfo.maxAlarm?.threshold
     this.minAlarm = data.sensorInfo.minAlarm?.threshold
 
@@ -59,12 +60,14 @@ export class SensorInfoDialogComponent {
   }
 
   validForm() {
-    return this.gain != 0 && this.offset != 0 && 
-           (!this.enableAlarms || (this.maxAlarm != 0 && this.minAlarm != 0))
+    var validAlarm = !this.enableAlarms || (this.maxAlarm != null && this.minAlarm != null)
+    var validCalibration = !this.calibrate ||   
+                           (this.gain && this.gain !== null && this.offset && this.offset !== null)
+    console.log(validCalibration)
+    return this.canEdit && (this.calibrate || this.enableAlarms) && (validAlarm && validCalibration)
   }
 
-  getChangeInfoPanel()
-  {
+  getChangeInfoPanel() {
     return {
       "gain": this.gain,
       "offset": this.offset,
@@ -82,8 +85,7 @@ export class SensorInfoDialogComponent {
   }
 
   onApply(): void {
-    if (this.onApplyAction)
-    {
+    if (this.onApplyAction) {
       this.onApplyAction(this.getChangeInfoPanel())
     }
     this.dialogRef.close();

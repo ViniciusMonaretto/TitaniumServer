@@ -1,16 +1,20 @@
 <h2 mat-dialog-title>{{sensorName}}</h2>
 <mat-dialog-content>
     <h3>Calibração</h3>
+    <label class="inline-flex items-center mb-2">
+        <input type="checkbox" id="alarmEnabled" [disabled]="!canEdit" [(ngModel)]="calibrate" class="form-checkbox h-5 w-5 text-blue-600">
+        <span class="ml-2 text-sm text-gray-700">Calibrar</span>
+    </label>
     <div>
         <div>Ganho</div>
         <mat-form-field style="width: 100%;" appearance="fill">
-            <input matInput type="number" [disabled]="!canEdit" step="0.01" [(ngModel)]="gain">
+            <input matInput type="number" [disabled]="!calibrate" step="0.01" [(ngModel)]="gain">
         </mat-form-field>
     </div>
     <div>
         <div>Offset:</div>
         <mat-form-field style="width: 100%;" appearance="fill">
-            <input matInput type="number" [disabled]="!canEdit" step="0.01" [(ngModel)]="offset">
+            <input matInput type="number" [disabled]="!calibrate" step="0.01" [(ngModel)]="offset">
         </mat-form-field>
     </div>
     <div class="border-t pt-4">

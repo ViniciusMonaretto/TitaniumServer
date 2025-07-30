@@ -1,17 +1,12 @@
 <div class="main-div-display">
     <div class="group-header">Eventos</div>
-    <mat-card style="height: calc(100% - 60px);">
-        <mat-card-content style="height: 100%;">
-             <div style="height: 40px;">
-                <button (click)="eraseAllEvents()">
-                    Limpar eventos
-                </button>
-             </div>
-            <div style="height: calc(100% - 45px);">
-                <io-cloud-table [headerInfo]="headerInfo" 
-                                [models]="getEvents()">
-                </io-cloud-table>
-            </div>
-        </mat-card-content>
-    </mat-card>
+    <div style="height: 40px;">
+        <button (click)="eraseAllEvents()">
+            Limpar eventos
+        </button>
+    </div>
+    <div class="table-div">
+        <io-cloud-table [headerInfo]="headerInfo" [models]="getEvents()">
+        </io-cloud-table>
+    </div>
 </div>

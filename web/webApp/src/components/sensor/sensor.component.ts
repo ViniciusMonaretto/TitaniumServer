@@ -4,6 +4,7 @@ import { SensorTypesEnum } from '../../enum/sensor-type';
 
 import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
+import { throwDialogContentAlreadyAttachedError } from '@angular/cdk/dialog';
 
 @Component({
   selector: 'sensor',
