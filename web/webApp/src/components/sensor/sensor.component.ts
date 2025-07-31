@@ -31,7 +31,7 @@ export class SensorComponent implements OnInit {
       return "ºC"
     }
     if (this.sensorInfo.sensorType == SensorTypesEnum.POWER) {
-      return "Kw"
+      return "kW"
     }
     if (this.sensorInfo.sensorType == SensorTypesEnum.CURRENT) {
       return "A"

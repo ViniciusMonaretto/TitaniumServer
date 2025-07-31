@@ -74,7 +74,7 @@ try:
         {"value": 20, "active": True, "unit": "kPa"},
         {"value": 220, "active": True, "unit": "V"},
         {"value": 2, "active": True, "unit": "A"},
-        {"value": 96, "active": True, "unit": "%"}
+        {"value": 0.96, "active": True, "unit": "%"}
     ]
     while True:
         sensors = []

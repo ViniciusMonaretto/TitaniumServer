@@ -7,27 +7,30 @@ from .visualization.visualization_manager import Visualization, VisualizationWeb
 
 from middleware.client_middleware import ClientMiddleware
 
+
 class AppManager:
     def __init__(self, middleware):
         self._middleware = ClientMiddleware(middleware)
         self._server = AppServer(self._middleware)
-        self._thread = Thread(target = self.threaded_function)   
+        self._thread = Thread(target=self.threaded_function)
 
     def threaded_function(self):
         self._server.run()
-    
+
     def run(self):
         self._thread.start()
 
     def join(self):
         self._thread.join()
 
+
 class AppServer:
     _logger: Logger
+
     def __init__(self, middleware: ClientMiddleware):
         self._middleware = middleware
         self.app = self.make_app()
-        self._logger = Logger()       
+        self._logger = Logger()
 
     def run(self):
         self.app.listen(8888)  # Listen on port 8888
@@ -39,13 +42,14 @@ class AppServer:
         self._middleware.run_middleware_update()
 
     def make_app(self):
-        base_dir = os.path.dirname(__file__)  # Current directory of the server script
+        # Current directory of the server script
+        base_dir = os.path.dirname(__file__)
         angular_dist = os.path.join(base_dir, "../webApp/browser")
         return tornado.web.Application([
-            (r"/websocket", VisualizationWebSocketHandler, {'middleware': self._middleware}),
-            (r"/(.*\.(js|css|ico|png|jpg|jpeg|woff|woff2|ttf|svg))", tornado.web.StaticFileHandler, {"path": angular_dist}),
+            (r"/websocket", VisualizationWebSocketHandler,
+             {'middleware': self._middleware}),
+            (r"/(.*\.(js|css|ico|png|jpg|jpeg|woff|woff2|ttf|svg))",
+             tornado.web.StaticFileHandler, {"path": angular_dist}),
             (r"/", Visualization),
             (r"/main", Visualization)
-        ],
-        static_path="C:/Titanium/TitaniumServer/web/titanium-server/dist/titanium-server")
-    
+        ])
