@@ -91,7 +91,8 @@ class ConfigHandler(ServiceInterface):
         self.send_ui_update_action()
 
     def subscribe_to_status(self, gateway, status_name, indicator, group, index):
-        topic = ClientMiddleware.get_calibrate_topic(gateway, status_name, indicator)
+        topic = ClientMiddleware.get_calibrate_topic(
+            gateway, status_name, indicator)
         if not topic in self._status_subscribers:
             self._status_subscribers[topic] = StatuSubscribers(
                 lambda status_info: self.calibration_update_received(
@@ -106,7 +107,8 @@ class ConfigHandler(ServiceInterface):
     def _find_panel_from_id(self, panel_id):
         for group_name in self._panels_info:
             panel: Panel | None = next(
-                (item for item in self._panels_info[group_name] if item.id == panel_id),
+                (item for item in self._panels_info[group_name]
+                 if item.id == panel_id),
                 None,
             )
             if panel != None:
@@ -121,7 +123,7 @@ class ConfigHandler(ServiceInterface):
         return (True, "Sucess")
 
     def add_panels(self, panels_info):
-        for group_name in panels_info.keys():
+        for group_name in panels_info:
             if group_name not in self._panels_info:
                 self._panels_info[group_name] = []
             for panel_info in panels_info[group_name]:
@@ -172,17 +174,21 @@ class ConfigHandler(ServiceInterface):
 
         if result:
             self._middleware.send_command_answear(
-                result, self._panels_info[data["group"]][-1], command["requestId"]
+                result, self._panels_info[data["group"]
+                                          ][-1], command["requestId"]
             )
         else:
-            self._middleware.send_command_answear(result, message, command["requestId"])
+            self._middleware.send_command_answear(
+                result, message, command["requestId"])
 
     def update_panel_functions_command(self, command):
         try:
             self.update_panel_functions(command["data"])
-            self._middleware.send_command_answear(True, {}, command["requestId"])
+            self._middleware.send_command_answear(
+                True, {}, command["requestId"])
         except Exception as e:
-            self._middleware.send_command_answear(False, f"{e}", command["requestId"])
+            self._middleware.send_command_answear(
+                False, f"{e}", command["requestId"])
 
     def update_panel_functions(self, update_panel_info):
         gain = update_panel_info["gain"]
@@ -281,15 +287,35 @@ class ConfigHandler(ServiceInterface):
         result, message = self.remove_panel(data["id"])
 
         if result:
-            self._middleware.send_command_answear(result, {}, command["requestId"])
+            self._middleware.send_command_answear(
+                result, {}, command["requestId"])
         else:
-            self._middleware.send_command_answear(result, message, command["requestId"])
+            self._middleware.send_command_answear(
+                result, message, command["requestId"])
 
     def create_object_from_panels_info(self):
         obj = {}
 
-        for group in self._panels_info.keys():
-            obj[group] = [panel.to_json() for panel in self._panels_info[group]]
+        for group, panels in self._panels_info.items():
+            panels_with_last_values = []
+            for panel in panels:
+                panel_json = panel.to_json()
+
+                # Get the last value/active status from sensor data storage
+                topic = ClientMiddleware.get_status_topic(
+                    panel.gateway, panel.topic, panel.indicator)
+                last_status = self._sensor_data_storage.get_last_status_for_topic(
+                    topic)
+
+                if last_status:
+                    if hasattr(last_status, 'value'):
+                        panel_json["value"] = last_status.value
+                    if hasattr(last_status, 'is_active'):
+                        panel_json["isActive"] = last_status.is_active
+
+                panels_with_last_values.append(panel_json)
+
+            obj[group] = panels_with_last_values
 
         return obj
 

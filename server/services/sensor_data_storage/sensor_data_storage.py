@@ -42,6 +42,8 @@ class SensorDataStorage(ServiceInterface):
         self._async_loop = AsyncioLoopThread()
         self._indexes_created = False
         self._status_subscribers: Dict[str, StatuSubscribers] = {}
+        self._last_status_by_sub_status_name: Dict[str, Dict[str, Any]] = {}
+        self._last_status_lock = threading.Lock()
 
         self.initialize_commands()
         self.initialize_system()
@@ -145,12 +147,27 @@ class SensorDataStorage(ServiceInterface):
     def add_sensor_data_to_queue(self, status_info: Dict[str, Any]) -> None:
         """Add sensor data to the write queue."""
         try:
-            self._write_queue.put(SensorInfo(status_info["subStatusName"],
+            # Store the last status sent for each subStatusName
+            sub_status_name = status_info["subStatusName"]
+            with self._last_status_lock:
+                self._last_status_by_sub_status_name[sub_status_name] = status_info["data"]
+
+            self._write_queue.put(SensorInfo(sub_status_name,
                                              status_info["data"].timestamp,
                                              status_info["data"].value))
         except Exception as e:
             self._logger.error(
                 f"SensorDataStorage::add_sensor_data_to_queue: Error adding data to queue {e}")
+
+    def get_last_status_for_topic(self, topic: str) -> Optional[Dict[str, Any]]:
+        """Get the last status sent for a specific topic in a thread-safe manner."""
+        with self._last_status_lock:
+            return self._last_status_by_sub_status_name.get(topic)
+
+    def get_all_last_statuses(self) -> Dict[str, Dict[str, Any]]:
+        """Get all last statuses for all topics in a thread-safe manner."""
+        with self._last_status_lock:
+            return self._last_status_by_sub_status_name.copy()
 
     def subscribe_to_status(self, gateway: str, status_name: str, indicator: str) -> None:
         """Subscribe to status updates for a specific sensor."""

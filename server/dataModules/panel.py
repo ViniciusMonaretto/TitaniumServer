@@ -24,8 +24,9 @@ class SensorTypes:
             return cls.Tension
         elif panelName == cls.PowerFactor:
             return cls.PowerFactor
-        
+
         return cls.Unknow
+
 
 class Panel:
     id = None
@@ -40,6 +41,7 @@ class Panel:
     min_alarm: Alarm = None
     max_alarm: Alarm = None
     sensor_type = SensorTypes.Unknow
+
     def __init__(self, obj):
         if "id" in obj:
             self.id = obj["id"]
@@ -60,14 +62,14 @@ class Panel:
 
         if "minAlarm" in obj and "id" in obj["minAlarm"]:
             self.min_alarm = Alarm(obj["minAlarm"])
-        
+
         if "maxAlarm" in obj and "id" in obj["maxAlarm"]:
             self.max_alarm = Alarm(obj["maxAlarm"])
         self.sensor_type = SensorTypes.GetType(obj["sensorType"])
-    
+
     def get_full_name(self):
         return self.gateway + "-" + self.topic
-    
+
     def to_json(self):
         return {
             "id": self.id,
