@@ -60,11 +60,10 @@ export class SensorInfoDialogComponent {
   }
 
   validForm() {
-    var validAlarm = !this.enableAlarms || (this.maxAlarm != null && this.minAlarm != null)
     var validCalibration = !this.calibrate ||   
-                           (this.gain && this.gain !== null && this.offset && this.offset !== null)
+                           (this.gain !== null && this.offset !== null)
     console.log(validCalibration)
-    return this.canEdit && (this.calibrate || this.enableAlarms) && (validAlarm && validCalibration)
+    return this.canEdit && (this.calibrate || this.enableAlarms) && (validCalibration)
   }
 
   getChangeInfoPanel() {
