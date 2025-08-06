@@ -30,7 +30,15 @@ def on_message(client, userdata, msg):
     response_topic = msg.topic.replace("iocloudcommand/", "iocloud/", 1)
     response_topic = response_topic.replace("request/", "response/", 1)
 
-    client.publish(response_topic, msg.payload)
+    obj = json.loads(msg.payload)
+    obj["command_index"] = 1
+    obj["command_status"] = 0
+    obj["sensor_id"] = obj["params"]["sensor_id"]
+    obj["gain"] = obj["params"]["gain"]
+    obj["offset"] = obj["params"]["offset"]
+    obj["unit"] = "°C"
+
+    client.publish(response_topic, json.dumps(obj))
     print(f"Responded to topic: {response_topic}")
 
 

@@ -61,7 +61,7 @@ class TitaniumMqtt:
             self._middleware.send_command_answear(
                 False,
                 "calibrate_command: Mqtt not connected",
-                command_data["requestId"],
+                command["requestId"],
             )
         topic = f"iocloud/request/{command_data['gateway']}/command"
         payload = {

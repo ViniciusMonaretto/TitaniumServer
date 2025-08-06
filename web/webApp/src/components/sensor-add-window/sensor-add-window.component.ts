@@ -1,4 +1,4 @@
-import { Component, Inject } from '@angular/core';
+import { Component, Inject, HostListener, ElementRef } from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef, MatDialogModule} from '@angular/material/dialog';
 import {SensorTypesEnum} from "../../enum/sensor-type"
 import {SensorModule} from "../../models/sensor-module"
@@ -37,7 +37,8 @@ export class SensorAddWindowComponent {
   group: string = ""
 
   constructor(public dialogRef: MatDialogRef<SensorAddWindowComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: any
+    @Inject(MAT_DIALOG_DATA) public data: any,
+    private elementRef: ElementRef
   ) {
     this.settedType = data.sensorType
     this.group = data.group
@@ -73,6 +74,21 @@ export class SensorAddWindowComponent {
   onAddCLick(): void{
     this.data.callback(this.getSensorData())
     this.dialogRef.close();
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: Event): void {
+    if (this.showPicker) {
+      const clickedElement = event.target as HTMLElement;
+      const colorPickerElement = this.elementRef.nativeElement.querySelector('color-chrome');
+      const inputElement = this.elementRef.nativeElement.querySelector('input[readonly]');
+      
+      // Check if click is outside both the color picker and the input field
+      if (colorPickerElement && !colorPickerElement.contains(clickedElement) && 
+          inputElement && !inputElement.contains(clickedElement)) {
+        this.showPicker = false;
+      }
+    }
   }
 
 }

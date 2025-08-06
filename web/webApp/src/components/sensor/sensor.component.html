@@ -4,11 +4,11 @@
     <img src="assets/icon/wifiIcon.svg" alt="">
   </div>
   <div class="measure-display" (click)="infoCLick()">
-    <div class="middle-measure" >
+    <div [style.color]="getColorOfReading()" class="middle-measure" >
       {{ getCurrentReading() + " " + getMeasureIcon() }}
     </div>
   </div>
-  <div class="footer-display" [style.color]="getColorOfSensor()">
+  <div class="footer-display" [style.color]="getColorOfSensorStatus()">
       {{getStatusMessageOfSensor()}}
   </div>
 </div>

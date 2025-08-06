@@ -14,6 +14,7 @@ from .config_storage_commands import ConfigStorageCommand
 DB_CONFIG = "db_status_saves.json"
 DB_NAME = "titanium_server_db.db"
 
+
 class ConfigStorage(ServiceInterface):
     def __init__(self, middleware: ClientMiddleware):
         self._logger = Logger()
@@ -26,17 +27,17 @@ class ConfigStorage(ServiceInterface):
         self.create_db()
 
         self._logger.info("ConfigStorage initialized")
-    
+
     def initialize_commands(self):
         commands = {
             ConfigStorageCommand.GET_ALARM_INFO: self.get_alarm_info_command,
             ConfigStorageCommand.GET_EVENTS_LIST: self.get_events_info_command
-            }
+        }
         self._middleware.add_commands(commands)
 
     def create_db(self):
         try:
-            conn = sqlite3.connect(DB_NAME) 
+            conn = sqlite3.connect(DB_NAME)
             cursor = conn.cursor()
 
             cursor.execute("""
@@ -50,7 +51,8 @@ class ConfigStorage(ServiceInterface):
                 indicator TEXT NOT NULL,
                 sensorType TEXT NOT NULL,
                 gain FLOAT,
-                offset FLOAT
+                offset FLOAT,
+                multiplier INTEGER
             );
             """)
 
@@ -78,13 +80,13 @@ class ConfigStorage(ServiceInterface):
             """)
 
             conn.commit()
-            
+
             conn.close()
         except Exception as e:
             message = f"ConfigStorage::create_db: Exceptio creating new table {e}"
             self._logger.error(message)
             return False, message
-        
+
     def add_panel(self, panel: Panel):
         new_id = -1
         try:
@@ -92,19 +94,19 @@ class ConfigStorage(ServiceInterface):
             cursor = conn.cursor()
 
             cursor.execute('''
-                INSERT INTO Panels (name, gateway, topic, color, panelGroup, indicator, sensorType)
-                VALUES (?, ?, ?, ?, ?, ?, ?)
-            ''', (panel.name, panel.gateway, panel.topic, panel.color, panel.group, panel.indicator, panel.sensor_type))
+                INSERT INTO Panels (name, gateway, topic, color, panelGroup, indicator, sensorType, multiplier)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            ''', (panel.name, panel.gateway, panel.topic, panel.color, panel.group, panel.indicator, panel.sensor_type, panel.multiplier))
 
             conn.commit()
             new_id = cursor.lastrowid
 
         except Exception as e:
-            self._logger.error(f"Panel Add error: {e}" )
+            self._logger.error(f"Panel Add error: {e}")
         finally:
             conn.close()
         return new_id
-    
+
     def remove_panel(self, panel_id: int):
         result = False
         try:
@@ -112,7 +114,7 @@ class ConfigStorage(ServiceInterface):
             cursor = conn.cursor()
 
             cursor.execute("PRAGMA foreign_keys = ON;")
-            
+
             cursor.execute("DELETE FROM Panels WHERE id = ?;", (panel_id,))
             conn.commit()
 
@@ -126,7 +128,7 @@ class ConfigStorage(ServiceInterface):
         finally:
             conn.close()
         return result
-    
+
     def update_alarm(self, alarm: Alarm):
         result = None
         try:
@@ -145,7 +147,7 @@ class ConfigStorage(ServiceInterface):
                     panelId = ?,
                 WHERE id = ?;
                 """
-            
+
             new_values = (
                 alarm.name,
                 alarm.topic,
@@ -153,7 +155,7 @@ class ConfigStorage(ServiceInterface):
                 alarm.type,
                 alarm.panel_id
             )
-            
+
             cursor.execute(update_query, new_values)
             conn.commit()
 
@@ -164,7 +166,7 @@ class ConfigStorage(ServiceInterface):
         finally:
             conn.close()
         return result
-    
+
     def update_panel(self, panel: Panel):
         result = False
         try:
@@ -184,10 +186,11 @@ class ConfigStorage(ServiceInterface):
                     indicator = ?,
                     sensorType = ?,
                     gain = ?,
-                    offset = ?
+                    offset = ?,
+                    multiplier = ?
                 WHERE id = ?;
                 """
-            
+
             new_values = (
                 panel.name,           # name
                 panel.gateway,        # gateway
@@ -198,9 +201,10 @@ class ConfigStorage(ServiceInterface):
                 panel.sensor_type,        # sensorType
                 panel.gain,                  # gain
                 panel.offset,                  # offset
-                panel.id                     # id (which row to update)
+                panel.multiplier,            # multiplier
+                panel.id,                     # id (which row to update)
             )
-            
+
             cursor.execute(update_query, new_values)
             conn.commit()
 
@@ -211,7 +215,7 @@ class ConfigStorage(ServiceInterface):
         finally:
             conn.close()
         return result
-    
+
     def get_panels(self) -> list[dict]:
         panels: list[dict] = []
         try:
@@ -242,7 +246,8 @@ class ConfigStorage(ServiceInterface):
                         p.sensorType,
                         p.gain,
                         p.offset,
-                        
+                        p.multiplier,
+
                         a.alarmId,
                         a.alarmName,
                         a.alarmTopic,
@@ -263,7 +268,7 @@ class ConfigStorage(ServiceInterface):
                 info = dict(row)
 
                 if last_panel_id != info['panelId']:
-                    panel =  {
+                    panel = {
                         'id': info['panelId'],
                         'name': row['panelName'],
                         'gateway': row['gateway'],
@@ -273,7 +278,8 @@ class ConfigStorage(ServiceInterface):
                         'indicator': row['indicator'],
                         'sensorType': row['sensorType'],
                         'gain': row['gain'],
-                        'offset': row['offset']
+                        'offset': row['offset'],
+                        'multiplier': row['multiplier'],
                     }
                     panels.append(panel)
                     last_panel_id = info['panelId']
@@ -293,12 +299,12 @@ class ConfigStorage(ServiceInterface):
                         panels[-1]['minAlarm'] = alarm
 
         except sqlite3.Error as e:
-            self._logger.error(f"Status_saver::get_panels: SQLite error: {e}" )
+            self._logger.error(f"Status_saver::get_panels: SQLite error: {e}")
             return []
         finally:
             conn.close()
         return panels
-    
+
     def add_alarm(self, alarm: Alarm):
         new_id = -1
         try:
@@ -321,11 +327,11 @@ class ConfigStorage(ServiceInterface):
             new_id = cursor.lastrowid
 
         except Exception as e:
-            self._logger.error(f"Alarm Add error: {e}" )
+            self._logger.error(f"Alarm Add error: {e}")
         finally:
             conn.close()
         return new_id
-    
+
     def remove_alarm(self, alarm_id: int):
         result = False
         try:
@@ -352,11 +358,12 @@ class ConfigStorage(ServiceInterface):
 
     def get_alarm_info_command(self, command):
         alarms, result = self.get_alarm_info(command["id"], command["topic"])
-        if(result):
-            self._middleware.send_command_answear( alarms, "", command["requestId"])
+        if (result):
+            self._middleware.send_command_answear(
+                alarms, "", command["requestId"])
         else:
-            self._middleware.send_command_answear( [], "Error Getting Alarms", command["requestId"])
-        
+            self._middleware.send_command_answear(
+                [], "Error Getting Alarms", command["requestId"])
 
     def get_alarm_info(self, alarm_id=None, topic=None):
         rows = []
@@ -389,20 +396,23 @@ class ConfigStorage(ServiceInterface):
             result = True
 
         except Exception as e:
-            self._logger.error(f"ConfigStorage::get_table_info_command: Error trying to fetch info from table {e}")
+            self._logger.error(
+                f"ConfigStorage::get_table_info_command: Error trying to fetch info from table {e}")
         finally:
             conn.close()
 
         return rows, result
-    
+
     def get_events_info_command(self, command):
         data = command["data"]
         events, result = self.get_events_info()
-        if(result):
+        if (result):
             panel_id = data["panelId"] if "panelId" in data else None
-            self._middleware.send_command_answear( result, {'events':events, 'panelId': panel_id}, command["requestId"])
+            self._middleware.send_command_answear(
+                result, {'events': events, 'panelId': panel_id}, command["requestId"])
         else:
-            self._middleware.send_command_answear( result, "Error Getting Events", command["requestId"])
+            self._middleware.send_command_answear(
+                result, "Error Getting Events", command["requestId"])
 
     def get_events_info(self, panel_id=None, alarm_id=None, limit=None):
         rows = []
@@ -444,24 +454,25 @@ class ConfigStorage(ServiceInterface):
             rows = [dict(row) for row in rows]
             local_tz = pytz.timezone("America/Sao_Paulo")
             for row in rows:
-                row["timestamp"] = datetime.fromtimestamp(row["timestamp"], local_tz).isoformat()
+                row["timestamp"] = datetime.fromtimestamp(
+                    row["timestamp"], local_tz).isoformat()
             result = True
         except Exception as e:
-            self._logger.error(f"ConfigStorage::get_events_info: Error trying to fetch info from table {e}")
+            self._logger.error(
+                f"ConfigStorage::get_events_info: Error trying to fetch info from table {e}")
         finally:
             conn.close()
 
         return rows, result
 
-    
     def add_event_array(self, events: list[EventModel]):
         result = False
         conn: sqlite3.Connection | None = None
         try:
             event_data = [
-            (e.alarm_id, e.panel_id, e.value, e.timestamp.timestamp()) 
-            for e in events
-        ]
+                (e.alarm_id, e.panel_id, e.value, e.timestamp.timestamp())
+                for e in events
+            ]
             conn = sqlite3.connect(DB_NAME)
             cursor = conn.cursor()
 
@@ -479,13 +490,13 @@ class ConfigStorage(ServiceInterface):
             conn.commit()
             result = True
         except Exception as e:
-            self._logger.error(f"Event Add error: {e}" )
+            self._logger.error(f"Event Add error: {e}")
         finally:
             if conn != None:
                 conn.close()
-            
+
         return result
-    
+
     def remove_events(self, event_info):
         conn: sqlite3.Connection | None = None
         result = False
@@ -501,10 +512,9 @@ class ConfigStorage(ServiceInterface):
             conn.commit()
             result = True
         except Exception as e:
-            self._logger.error(f"Event Add error: {e}" )
+            self._logger.error(f"Event Add error: {e}")
         finally:
             if conn:
                 conn.close()
-        
+
         return result
-        

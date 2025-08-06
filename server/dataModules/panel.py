@@ -41,6 +41,7 @@ class Panel:
     min_alarm: Alarm = None
     max_alarm: Alarm = None
     sensor_type = SensorTypes.Unknow
+    multiplier = 1
 
     def __init__(self, obj):
         if "id" in obj:
@@ -50,6 +51,10 @@ class Panel:
         self.topic = obj["topic"]
         self.color = obj["color"]
         self.indicator = obj["indicator"]
+        if "multiplier" in obj:
+            self.multiplier = obj["multiplier"]
+        else:
+            self.multiplier = 1
         if "panelGroup" in obj:
             self.group = obj["panelGroup"]
         else:
@@ -83,5 +88,6 @@ class Panel:
             "indicator": self.indicator,
             "sensorType": self.sensor_type,
             "minAlarm": (self.min_alarm.to_json() if self.min_alarm else {}),
-            "maxAlarm": (self.max_alarm.to_json() if self.max_alarm else {})
+            "maxAlarm": (self.max_alarm.to_json() if self.max_alarm else {}),
+            "multiplier": self.multiplier
         }

@@ -1,7 +1,6 @@
 import json
 import os
 import threading
-from typing import Union
 from middleware.client_middleware import ClientMiddleware
 
 from dataModules.panel import Panel
@@ -209,6 +208,12 @@ class ConfigHandler(ServiceInterface):
             panel.min_alarm = self.handle_change_panel_alarm(
                 panel, panel.min_alarm, min_alarm, False
             )
+            panel.color = update_panel_info["color"]
+            panel.name = update_panel_info["name"]
+            panel.multiplier = update_panel_info["multiplier"]
+            if not self._config_storage.update_panel(panel):
+                self._logger.error(
+                    f"ConfigHandler::update_panel_functions: Error saving panel update {panel.id}")
             if gain != panel.gain or offset != panel.offset:
                 self._middleware.send_command(
                     MqttCommands.CALIBRATION, update_panel_info

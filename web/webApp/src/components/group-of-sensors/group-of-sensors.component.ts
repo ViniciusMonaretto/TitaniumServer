@@ -69,9 +69,9 @@ export class GroupOfSensorsComponent implements OnInit {
     this.serverConnector.sendCommand("removePanel", sensorData)
   }
 
-  calibrateSensor(calibrateInfo: any)
+  updatePanelInfo(updatePanelInfo: any)
   {
-    this.serverConnector.sendCommand("calibrate", calibrateInfo)
+    this.serverConnector.sendCommand("updatePanelInfo", updatePanelInfo)
   }
 
   openSensorDialog(sensorInfo: SensorModule)
@@ -82,7 +82,7 @@ export class GroupOfSensorsComponent implements OnInit {
       sensorType: this.type,
       canEdit: this.canEdit,
       callback: (calibrateInfo: any) => {
-        this.calibrateSensor(calibrateInfo)
+        this.updatePanelInfo(calibrateInfo)
       }
     }
     });

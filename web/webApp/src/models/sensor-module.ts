@@ -15,6 +15,7 @@ export class SensorModule{
     public offset: number = 0
     public maxAlarm: AlarmModule | null = null
     public minAlarm: AlarmModule | null = null
+    public multiplier: number = 1
 
     constructor(){
         

@@ -108,7 +108,7 @@ class IoCloudApiTranslator(PayloadTranslator):
                 data.append(reading)
 
         if current_reading and tension_reading:
-            power = current_reading * tension_reading/1000
+            power = current_reading * tension_reading
             power_reading = self._create_reading(
                 gateway, timestamp, {"value": f"{power:.2f}", "unit": "kW", "active": True}, index_obj)
             data.append(power_reading)

@@ -24,23 +24,34 @@ export class SensorComponent implements OnInit {
   constructor() { }
 
   getMeasureIcon(): String {
+    let scaleString = ""
+    if (this.sensorInfo.multiplier == 10) {
+      scaleString = "d";
+    }
+    if (this.sensorInfo.multiplier == 100) {
+      scaleString = "c";
+    }
+    if (this.sensorInfo.multiplier == 1000) {
+      scaleString = "k";
+    }
+
     if (this.sensorInfo.sensorType == SensorTypesEnum.PREASSURE) {
-      return "Pa"
+      return scaleString + "Pa"
     }
     if (this.sensorInfo.sensorType == SensorTypesEnum.TEMPERATURE) {
-      return "ºC"
+      return scaleString + "ºC"
     }
     if (this.sensorInfo.sensorType == SensorTypesEnum.POWER) {
-      return "kW"
+      return scaleString + "W"
     }
     if (this.sensorInfo.sensorType == SensorTypesEnum.CURRENT) {
-      return "A"
+      return scaleString + "A"
     }
     if (this.sensorInfo.sensorType == SensorTypesEnum.TENSION) {
-      return "V"
+      return scaleString + "V"
     }
     if (this.sensorInfo.sensorType == SensorTypesEnum.POWER_FACTOR) {
-      return "%"
+      return scaleString + "%"
     }
 
     return ""
@@ -74,7 +85,11 @@ export class SensorComponent implements OnInit {
     return 'OK';
   }
 
-  getColorOfSensor() {
+  getColorOfReading() {
+    return this.sensorInfo.color
+  }
+
+  getColorOfSensorStatus() {
     var value = this.sensorInfo?.value
     var maxValue = this.sensorInfo?.maxAlarm?.threshold
     var minValue = this.sensorInfo?.minAlarm?.threshold
@@ -103,7 +118,8 @@ export class SensorComponent implements OnInit {
   }
 
   getCurrentReading() {
-    return this.sensorInfo?.isActive ? this.sensorInfo?.value : "--"
+    return this.sensorInfo && this.sensorInfo?.isActive && this.sensorInfo?.value != null ? 
+                    Number(this.sensorInfo.value)/this.sensorInfo.multiplier : "--"
   }
 
 }
