@@ -1,9 +1,9 @@
-<div class="sensor">
+<div class="sensor" (click)="infoCLick()">
   <div class="header-sensor">
     {{ sensorInfo.name }}
     <img src="assets/icon/wifiIcon.svg" alt="">
   </div>
-  <div class="measure-display" (click)="infoCLick()">
+  <div class="measure-display">
     <div [style.color]="getColorOfReading()" class="middle-measure" >
       {{ getCurrentReading() + " " + getMeasureIcon() }}
     </div>

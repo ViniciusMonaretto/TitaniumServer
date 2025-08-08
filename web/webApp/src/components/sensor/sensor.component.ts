@@ -119,7 +119,7 @@ export class SensorComponent implements OnInit {
 
   getCurrentReading() {
     return this.sensorInfo && this.sensorInfo?.isActive && this.sensorInfo?.value != null ? 
-                    Number(this.sensorInfo.value)/this.sensorInfo.multiplier : "--"
+                    (Number(this.sensorInfo.value)/this.sensorInfo.multiplier).toFixed(2) : "--"
   }
 
 }

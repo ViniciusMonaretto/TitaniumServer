@@ -175,7 +175,11 @@ export class ServerConectorService {
     console.log('Received message:', message);
     let data = JSON.parse(message["data"])
     if (data["status"] == "uiConfig") {
-      this.uiPanelService.SetNewUiConfig(data["message"])
+      this.uiPanelService.SetNewUiConfig(data["message"]["PanelsInfo"])
+
+      if (data["message"]["calibrateUpdate"]) {
+        this.dialogHelper.openInfoDialog("Novo valor calibrado no Sensor, verifique o valor.", "Calibração concluída")
+      }
 
       if (this.isConnecting) {
         this.isConnecting = false

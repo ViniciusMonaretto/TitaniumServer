@@ -6,7 +6,7 @@ import paho.mqtt.client as mqtt
 import copy
 
 # Define the broker and port
-BROKER = 'broker.hivemq.com'  # "mqtt.eclipseprojects.io"
+BROKER = 'localhost'  # 'broker.hivemq.com'  # "mqtt.eclipseprojects.io"
 PORT = 1883
 MESSAGES_TO_SEND = 1
 

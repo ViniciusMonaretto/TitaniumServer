@@ -87,7 +87,7 @@ class ConfigHandler(ServiceInterface):
         panel.offset = data.offset
         panel.gain = data.gain
         self._config_storage.update_panel(panel)
-        self.send_ui_update_action()
+        self.send_ui_update_action(True)
 
     def subscribe_to_status(self, gateway, status_name, indicator, group, index):
         topic = ClientMiddleware.get_calibrate_topic(
@@ -243,6 +243,7 @@ class ConfigHandler(ServiceInterface):
                 alarm.id, new_alarm_value, panel.topic
             )
 
+        # If alarm exists and new value is the same, return existing alarm unchanged
         return alarm
 
     def remove_panel(self, panel_id) -> tuple[bool, str]:
@@ -298,7 +299,7 @@ class ConfigHandler(ServiceInterface):
             self._middleware.send_command_answear(
                 result, message, command["requestId"])
 
-    def create_object_from_panels_info(self):
+    def create_object_from_panels_info(self, calibrate_update=False):
         obj = {}
 
         for group, panels in self._panels_info.items():
@@ -322,14 +323,15 @@ class ConfigHandler(ServiceInterface):
 
             obj[group] = panels_with_last_values
 
-        return obj
+        return {"calibrateUpdate": calibrate_update, 'PanelsInfo': obj}
 
     def get_panels_list_command(self, command):
         self._middleware.send_command_answear(
             True, self.create_object_from_panels_info(), command["requestId"]
         )
 
-    def send_ui_update_action(self):
+    def send_ui_update_action(self, calibrate_update=False):
         self._middleware.send_status(
-            "ui-update-*", self.create_object_from_panels_info()
+            "ui-update-*", self.create_object_from_panels_info(
+                calibrate_update)
         )

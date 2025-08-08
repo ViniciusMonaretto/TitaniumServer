@@ -123,7 +123,12 @@ class VisualizationWebSocketHandler(tornado.websocket.WebSocketHandler):
 
     def safe_write_message(self, obj):
         try:
+            if not self.ws_connection or self.ws_connection.is_closing():
+                return
             self.write_message(obj)
+        except tornado.websocket.WebSocketClosedError:
+            # Client disconnected, this is normal
+            pass
         except Exception as e:
             self._logger.error(f"Failed to write message to UI: {e}")
 
@@ -286,9 +291,10 @@ class VisualizationWebSocketHandler(tornado.websocket.WebSocketHandler):
             self.send_message_to_ui("report", message)
 
 ################# Subscriber Functions #############################
-    def add_subscribers(self, panels_info: dict[str, list[any]]):
-        for panels in panels_info.values():
-            for panel in panels:
+    def add_subscribers(self, info: {'CalibrateUpdate': bool, 'PanelsInfo': dict[str, list[any]]}):
+        panels_info = info['PanelsInfo']
+        for panels_group in panels_info.keys():
+            for panel in panels_info[panels_group]:
                 self.add_panel_subscriber(Panel(panel))
 
         self.send_panel_info()

@@ -5,6 +5,7 @@ import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { QuestionDialogComponent } from '../components/question-dialog/question-dialog.component';
 import { ErrorDialogComponent } from '../components/error-dialog/error-dialog.component';
 import { SpinnerComponent } from '../components/spinner/spinner.component';
+import { InfoDialogComponent } from '../components/info-dialog/info-dialog.component';
 
 @Injectable({
     providedIn: 'root'
@@ -30,6 +31,14 @@ export class DialogHelper {
             data: { message: message },
         });
     }
+
+    public openInfoDialog(message: string, title: string): void {
+      this.dialog.open(InfoDialogComponent, {
+          width: '400px',
+          data: { message: message, title: title },
+      });
+  }
+
 
     public showSpinnerDialog(): void {
         if (!this.dialogRef) {
