@@ -31,10 +31,7 @@ export class GraphComponent {
       datasets: [...newValue]
     }
 
-    if (this.first) {
-      this.first = false
-      this.fitAllGraph()
-    }
+    this.fitAllGraph()
   }
 
   lineChartOptions: ChartOptions<'line'> = {
@@ -217,6 +214,19 @@ export class GraphComponent {
     }
 
     this.chart?.chart?.resetZoom();
+    
+    // Force chart update to apply the new scales
+    if (this.chart?.chart) {
+      // Trigger change detection by creating a new options object
+      this.lineChartOptions = { ...this.lineChartOptions };
+      
+      // Use setTimeout to ensure the change detection cycle completes
+      setTimeout(() => {
+        if (this.chart?.chart) {
+          this.chart.chart.update('none'); // 'none' prevents animation during update
+        }
+      }, 0);
+    }
 
   }
 }
