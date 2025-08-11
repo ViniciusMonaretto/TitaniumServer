@@ -1,17 +1,11 @@
 <div class="main-table-screen">
     <div class="graph-options-header">
-        <!-- <button mat-icon-button 
-                class="example-icon" 
-                aria-label="Example icon-button with menu icon" 
-                (click)="''">
-            <mat-icon>insert_drive_file</mat-icon>
-        </button>
         <button mat-icon-button 
-                class="example-icon" 
+                class="example-icon"
                 aria-label="Example icon-button with menu icon" 
-                (click)="''">
-            <mat-icon>settings</mat-icon>
-        </button> -->
+                (click)="drawingMode = selectDrawingMode()">
+            <mat-icon>{{getDrawingModeIcon()}}</mat-icon>
+        </button>
         <button mat-icon-button 
                 class="example-icon"
                 aria-label="Example icon-button with menu icon" 
@@ -27,6 +21,7 @@
         <ng-container *ngIf="lineChartData.length; else noSize">
             <graph style="height: 100%;" 
                    [inputInfo]="$any(lineChartData)" 
+                   [drawingMode]="drawingMode"
                    [zoomEnabled]="zoomWindowActivate"
                    [resize]="resizeTrigger">
             </graph>
