@@ -4,8 +4,12 @@ import { CommonModule } from '@angular/common';
 import { Chart, ChartData, ChartOptions, Point } from 'chart.js';
 import 'chartjs-adapter-date-fns';
 import zoomPlugin from 'chartjs-plugin-zoom';
+import annotationPlugin from 'chartjs-plugin-annotation';
 import { BaseChartDirective } from 'ng2-charts';
 import 'chartjs-adapter-date-fns';
+
+// Register the annotation plugin
+Chart.register(annotationPlugin);
 
 export enum DrawingMode {
   None = 0,
@@ -32,14 +36,14 @@ export class GraphComponent {
   @Input() zoomEnabled: boolean = true
   @Input() set drawingMode(value: number) {
     this._drawingMode = value as DrawingMode;
-    
+
     // Clear all lines when switching back to None mode
     if (this._drawingMode === DrawingMode.None) {
       this._horizontalLines = [];
       this._verticalLines = [];
       this.updateLines();
     }
-    
+
     this.updateMouseEvents();
   }
   get drawingMode(): number {
@@ -59,15 +63,15 @@ export class GraphComponent {
 
   @Input() set inputInfo(newValue: any) {
     console.log('Novo info de gráfico recebido:');
-    
+
     // Remove dots from all data datasets by setting pointRadius to 0 and ensure straight lines
     const datasetsWithoutDots = newValue.map((dataset: any) => ({
       ...dataset,
       pointRadius: 2,
       tension: 0 // Force straight lines between points
     }));
-    
-    this.lineChartData = 
+
+    this.lineChartData =
     {
       datasets: datasetsWithoutDots
     }
@@ -93,16 +97,16 @@ export class GraphComponent {
         time: {
           displayFormats: {
             millisecond: 'HH:mm:ss.SSS',
-            second:     'HH:mm:ss',
-            minute:     'HH:mm',
-            hour:       'HH:mm',
-            day:        'dd/MM',
-            week:       'dd/MM',
-            month:      'MMM yyyy',
-            quarter:    '[Q]Q - yyyy',
-            year:       'yyyy',
+            second: 'HH:mm:ss',
+            minute: 'HH:mm',
+            hour: 'HH:mm',
+            day: 'dd/MM',
+            week: 'dd/MM',
+            month: 'MMM yyyy',
+            quarter: '[Q]Q - yyyy',
+            year: 'yyyy',
           },
-          tooltipFormat: 'MMM dd, HH:mm', 
+          tooltipFormat: 'MMM dd, HH:mm',
         },
         ticks: {
           source: 'auto',
@@ -110,7 +114,7 @@ export class GraphComponent {
         title: {
           display: true,
           text: 'Tempo',
-          
+
         },
         min: undefined,
         max: undefined
@@ -140,6 +144,37 @@ export class GraphComponent {
           boxWidth: 12
         }
       },
+      tooltip: {
+        enabled: true,
+        mode: 'nearest',
+        intersect: true,
+        backgroundColor: 'rgba(255, 255, 255, 0.95)',
+        titleColor: 'rgba(0, 0, 0, 0.8)',
+        bodyColor: 'rgba(0, 0, 0, 0.8)',
+        borderWidth: 2,
+        cornerRadius: 6,
+        displayColors: false,
+        callbacks: {
+          title: (context) => {
+            const date = new Date(context[0].parsed.x);
+            return date.toLocaleString('pt-BR', {
+              day: '2-digit',
+              month: '2-digit',
+              year: 'numeric',
+              hour: '2-digit',
+              minute: '2-digit',
+              second: '2-digit'
+            });
+          },
+          label: (context) => {
+            const value = context.parsed.y;
+            return `${context.dataset.label}: ${value}`;
+          }
+        }
+      },
+      annotation: {
+        annotations: {}
+      },
       zoom: {
         zoom: {
           wheel: { enabled: true, speed: 0.1 },
@@ -147,7 +182,7 @@ export class GraphComponent {
           mode: 'xy',
           onZoomStart: ({ chart, event }) => {
             const mouseEvent = event as MouseEvent;
-            
+
             if (mouseEvent.ctrlKey) {
               chart.options.plugins!.zoom!.zoom!.mode = 'x';
             } else if (mouseEvent.shiftKey) {
@@ -155,13 +190,11 @@ export class GraphComponent {
             } else {
               chart.options.plugins!.zoom!.zoom!.mode = 'xy';
             }
-            if(this.zoomEnabled)
-            {
+            if (this.zoomEnabled) {
               chart.options.plugins!.zoom!.zoom!.drag!.enabled = true;
               chart.options.plugins!.zoom!.pan!.enabled = false;
             }
-            else
-            {
+            else {
               chart.options.plugins!.zoom!.zoom!.drag!.enabled = false;
               chart.options.plugins!.zoom!.pan!.enabled = true;
             }
@@ -179,13 +212,11 @@ export class GraphComponent {
           enabled: false,
           mode: 'xy',
           onPanStart: ({ chart, event }) => {
-            if(this.zoomEnabled)
-            {
+            if (this.zoomEnabled) {
               chart.options.plugins!.zoom!.zoom!.drag!.enabled = true;
               chart.options.plugins!.zoom!.pan!.enabled = false;
             }
-            else
-            {
+            else {
               chart.options.plugins!.zoom!.zoom!.drag!.enabled = false;
               chart.options.plugins!.zoom!.pan!.enabled = true;
             }
@@ -198,7 +229,7 @@ export class GraphComponent {
 
   public lineChartData: ChartData<'line'> = {
     datasets: [
-      
+
     ]
   };
   filteredData: Array<{ name: string, series: Array<any> }> = [];
@@ -214,11 +245,11 @@ export class GraphComponent {
     setTimeout(() => {
       if (this.chart?.chart) {
         const canvas = this.chart.chart.canvas;
-        
+
         // Remove existing listeners to avoid duplicates
         canvas.removeEventListener('click', this.handleCanvasClick.bind(this));
         canvas.removeEventListener('mousemove', this.handleMouseMove.bind(this));
-        
+
         // Add new listeners
         canvas.addEventListener('click', (event) => {
           if (this._drawingMode !== DrawingMode.None) {
@@ -246,10 +277,10 @@ export class GraphComponent {
     const chartArea = this.chart.chart.chartArea;
     const yScale = this.chart.chart.scales['y'];
     const xScale = this.chart.chart.scales['x'];
-    
+
     const yValue = yScale.getValueForPixel(y);
     const xValue = xScale.getValueForPixel(x);
-    
+
     if (this._drawingMode === DrawingMode.Horizontal) {
       if (yValue !== null && yValue !== undefined && !isNaN(yValue)) {
         this.addHorizontalLine(Number(yValue));
@@ -282,7 +313,7 @@ export class GraphComponent {
   addHorizontalLine(yValue: number) {
     // Round to 2 decimal places for cleaner display
     const roundedValue = Math.round(yValue * 100) / 100;
-    
+
     // Clear existing lines and add the new one
     this._horizontalLines = [roundedValue];
     this.updateLines();
@@ -292,7 +323,7 @@ export class GraphComponent {
   addVerticalLine(xValue: number) {
     // Round to 2 decimal places for cleaner display
     const roundedValue = Math.round(xValue * 100) / 100;
-    
+
     // Clear existing lines and add the new one
     this._verticalLines = [roundedValue];
     this.updateLines();
@@ -317,6 +348,7 @@ export class GraphComponent {
   updateMouseEvents() {
     if (this.chart?.chart?.canvas) {
       const canvas = this.chart.chart.canvas;
+      
       if (this._drawingMode !== DrawingMode.None) {
         canvas.style.cursor = 'crosshair';
         // Disable zoom when drawing mode is on
@@ -336,63 +368,66 @@ export class GraphComponent {
           this.lineChartOptions.plugins.zoom.pan!.enabled = !this.zoomEnabled;
         }
       }
-      
-      // Force chart update to apply zoom changes
+
+      // Update chart without resetting zoom by only updating the zoom plugin
       if (this.chart?.chart) {
-        this.lineChartOptions = { ...this.lineChartOptions };
-        setTimeout(() => {
-          if (this.chart?.chart) {
-            this.chart.chart.update('none');
-          }
-        }, 0);
+        // Update the chart's zoom plugin options directly without recreating the entire options object
+        const chart = this.chart.chart;
+        if (chart.options.plugins?.zoom) {
+          chart.options.plugins.zoom.zoom!.wheel!.enabled = this._drawingMode === DrawingMode.None;
+          chart.options.plugins.zoom.zoom!.pinch!.enabled = this._drawingMode === DrawingMode.None;
+          chart.options.plugins.zoom.zoom!.drag!.enabled = this._drawingMode === DrawingMode.None ? this.zoomEnabled : false;
+          chart.options.plugins.zoom.pan!.enabled = this._drawingMode === DrawingMode.None ? !this.zoomEnabled : false;
+        }
+        
+        // Update without animation to preserve zoom
+        chart.update('none');
       }
     }
   }
 
-  calculateMargin(linesInfos: any)
-  {
+  calculateMargin(linesInfos: any) {
     let minYaxis = Number.MAX_SAFE_INTEGER
-      let maxYaxis = Number.MIN_SAFE_INTEGER
+    let maxYaxis = Number.MIN_SAFE_INTEGER
 
-      let minXaxis = new Date(8640000000000000).getTime();
-      let maxXaxis = new Date(-8640000000000000).getTime()
-      for (var infos of linesInfos) {
-        for (let info of infos.data) {
-          let point: Point = <any>(info)
-          let dt = point.x;
-          let value = point.y
+    let minXaxis = new Date(8640000000000000).getTime();
+    let maxXaxis = new Date(-8640000000000000).getTime()
+    for (var infos of linesInfos) {
+      for (let info of infos.data) {
+        let point: Point = <any>(info)
+        let dt = point.x;
+        let value = point.y
 
-          if (minXaxis > dt) {
-            minXaxis = dt
-          }
-          if (maxXaxis < dt) {
-            maxXaxis = dt
-          }
-
-          if (minYaxis > value) {
-            minYaxis = value
-          }
-          if (maxYaxis < value) {
-            maxYaxis = value
-          }
-          
-
+        if (minXaxis > dt) {
+          minXaxis = dt
         }
-      }
+        if (maxXaxis < dt) {
+          maxXaxis = dt
+        }
 
-      this.marginY = (maxYaxis - minYaxis) * 0.2
-      this.maxY = maxYaxis + this.marginY
-      this.minY = minYaxis - this.marginY
-      this.maxX = maxXaxis
-      this.minX = minXaxis
+        if (minYaxis > value) {
+          minYaxis = value
+        }
+        if (maxYaxis < value) {
+          maxYaxis = value
+        }
+
+
+      }
+    }
+
+    this.marginY = (maxYaxis - minYaxis) * 0.2
+    this.maxY = maxYaxis + this.marginY
+    this.minY = minYaxis - this.marginY
+    this.maxX = maxXaxis
+    this.minX = minXaxis
   }
 
   fitAllGraph() {
     if (this.lineChartData && !this.blockFitAll) {
-      if(this.lineChartOptions.scales && 
-         this.lineChartOptions.scales['y'] &&
-         this.lineChartOptions.scales['x'])
-      {
+      if (this.lineChartOptions.scales &&
+        this.lineChartOptions.scales['y'] &&
+        this.lineChartOptions.scales['x']) {
         this.lineChartOptions.scales['y'].max = this.maxY
         this.lineChartOptions.scales['y'].min = this.minY
 
@@ -408,12 +443,12 @@ export class GraphComponent {
     }
 
     this.chart?.chart?.resetZoom();
-    
+
     // Force chart update to apply the new scales
     if (this.chart?.chart) {
       // Trigger change detection by creating a new options object
       this.lineChartOptions = { ...this.lineChartOptions };
-      
+
       // Use setTimeout to ensure the change detection cycle completes
       setTimeout(() => {
         if (this.chart?.chart) {
@@ -426,62 +461,163 @@ export class GraphComponent {
 
   updateLines() {
     console.log('Updating lines:', { horizontal: this._horizontalLines, vertical: this._verticalLines });
-    
-    // Add horizontal lines as additional datasets
-    const horizontalLineDatasets = this._horizontalLines.map((yValue, index) => ({
-      label: `Linha Horizontal ${yValue}`,
-      data: this.lineChartData.datasets[0]?.data?.map((point: any) => ({
-        x: point.x,
-        y: yValue
-      })) || [],
-      borderColor: 'rgba(255, 0, 0, 0.8)',
-      backgroundColor: 'rgba(255, 0, 0, 0.1)',
-      borderWidth: 2,
-      borderDash: [5, 5],
-      fill: false,
-      pointRadius: 0,
-      tension: 0
-    }));
 
-    // Add vertical lines as additional datasets
-    const verticalLineDatasets = this._verticalLines.map((xValue, index) => ({
-      label: `Linha Vertical ${ new Date(xValue).toLocaleString('pt-BR', { 
-        day: '2-digit', 
-        month: '2-digit', 
-        year: 'numeric',
-        hour: '2-digit', 
-        minute: '2-digit', 
-        second: '2-digit' 
-      }) }`,
-      data: [
-        { x: xValue, y: this.minY },
-        { x: xValue, y: this.maxY }
-      ],
-      borderColor: 'rgba(255, 0, 0, 0.8)',
-      backgroundColor: 'rgba(255, 0, 0, 0.1)',
-      borderWidth: 2,
-      borderDash: [5, 5],
-      fill: false,
-      pointRadius: 0,
-      tension: 0
-    }));
+    // Create annotations object
+    const annotations: any = {};
 
-    // Combine original datasets with line datasets
-    const originalDatasets = this.lineChartData.datasets.filter(dataset => 
-      !dataset.label?.startsWith('Linha Horizontal') && !dataset.label?.startsWith('Linha Vertical')
-    );
-    
-    this.lineChartData = {
-      datasets: [...originalDatasets, ...horizontalLineDatasets, ...verticalLineDatasets]
-    };
-
-    // Force chart update
-    if (this.chart?.chart) {
-      setTimeout(() => {
-        if (this.chart?.chart) {
-          this.chart.chart.update('none');
+    // Add horizontal lines as annotations
+    this._horizontalLines.forEach((yValue, index) => {
+      annotations[`horizontalLine${index}`] = {
+        type: 'line',
+        yMin: yValue,
+        yMax: yValue,
+        borderColor: 'rgba(255, 0, 0, 0.8)',
+        borderWidth: 2,
+        borderDash: [5, 5],
+        label: {
+          content: `Y = ${yValue}`,
+          enabled: true,
+          position: 'left',
+          backgroundColor: 'rgba(255, 255, 255, 0.8)',
+          color: 'rgba(255, 0, 0, 0.8)',
+          font: {
+            size: 12,
+            weight: 'bold'
+          },
+          padding: 4,
+          borderRadius: 4
+        },
+        enter: {
+          mode: 'immediate',
+          animation: {
+            duration: 0
+          }
         }
-      }, 0);
+      };
+    });
+
+    // Add vertical lines as annotations
+    this._verticalLines.forEach((xValue, index) => {
+      annotations[`verticalLine${index}`] = {
+        type: 'line',
+        xMin: xValue,
+        xMax: xValue,
+        borderColor: 'rgba(255, 0, 0, 0.8)',
+        borderWidth: 2,
+        borderDash: [5, 5],
+        label: {
+          content: new Date(xValue).toLocaleString('pt-BR', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit'
+          }),
+          enabled: true,
+          position: 'top',
+          backgroundColor: 'rgba(255, 255, 255, 0.8)',
+          color: 'rgba(255, 0, 0, 0.8)',
+          font: {
+            size: 12,
+            weight: 'bold'
+          },
+          padding: 4,
+          borderRadius: 4
+        }
+      };
+    });
+
+        // Add a persistent tooltip annotation that shows line values
+    if (this._horizontalLines.length > 0 || this._verticalLines.length > 0) {
+      // Get current chart view coordinates
+      const chart = this.chart?.chart;
+      if (chart) {
+        const xScale = chart.scales['x'];
+        const yScale = chart.scales['y'];
+        
+        if (xScale && yScale) {
+          const currentMinX = xScale.min;
+          const currentMaxX = xScale.max;
+          const currentMinY = yScale.min;
+          const currentMaxY = yScale.max;
+          
+                     // Calculate pixel distance from border (10px)
+           const chartArea = chart.chartArea;
+           const pixelOffsetX = (this._horizontalLines.length > 0 && this._verticalLines.length > 0) ? 100 : 55; // 10px from right border
+           const pixelOffsetY = 20; // 10px from top border
+           
+           // Convert pixel offset to data coordinates
+           const dataOffsetX = (pixelOffsetX / chartArea.width) * (currentMaxX - currentMinX);
+           const dataOffsetY = (pixelOffsetY / chartArea.height) * (currentMaxY - currentMinY);
+           
+           const tooltipX = currentMaxX - dataOffsetX;
+           const tooltipY = currentMaxY - dataOffsetY;
+          
+          annotations['persistentTooltip'] = {
+            type: 'label',
+            xValue: tooltipX,
+            yValue: tooltipY,
+            backgroundColor: 'rgba(255, 255, 255, 0.95)',
+            content: this.getLineValuesText(),
+            color: 'rgba(0, 0, 0, 0.8)',
+            font: {
+              size: 11,
+              weight: 'bold'
+            },
+            padding: 8,
+            borderRadius: 6,
+            borderColor: 'rgba(255, 0, 0, 0.8)',
+            borderWidth: 1
+          };
+        }
+      }
     }
+
+    // Update only the annotation plugin without recreating the entire options object
+    if (this.chart?.chart) {
+      const chart = this.chart.chart;
+      
+      // Update only the annotation plugin in the existing options
+      if (this.lineChartOptions.plugins) {
+        this.lineChartOptions.plugins.annotation = {
+          annotations: annotations
+        };
+      }
+      
+      // Update the chart's annotation plugin directly
+      if (chart.options.plugins) {
+        chart.options.plugins.annotation = {
+          annotations: annotations
+        };
+      }
+      
+      // Update without animation to preserve zoom
+      chart.update('none');
+    }
+  }
+
+  private getLineValuesText(): string {
+    let text = '';
+
+    if (this._horizontalLines.length > 0) {
+      this._horizontalLines.forEach((value, index) => {
+        text += `H${index + 1}: Y = ${value}\n`;
+      });
+    }
+
+    if (this._verticalLines.length > 0) {
+      this._verticalLines.forEach((value, index) => {
+        const date = new Date(value).toLocaleString('pt-BR', {
+          day: '2-digit',
+          month: '2-digit',
+          hour: '2-digit',
+          minute: '2-digit'
+        });
+        text += `V${index + 1}: ${date}\n`;
+      });
+    }
+
+    return text.trim();
   }
 }

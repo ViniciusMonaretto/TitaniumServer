@@ -1,6 +1,6 @@
 <div class="main-table-screen">
     <div class="graph-options-header">
-        <button mat-icon-button 
+        <button *ngIf="lineChartData.length" mat-icon-button 
                 class="example-icon"
                 aria-label="Example icon-button with menu icon" 
                 (click)="drawingMode = selectDrawingMode()">
@@ -18,7 +18,7 @@
     </div>
 
     <div class="graph-table">
-        <ng-container *ngIf="lineChartData.length; else noSize">
+        <ng-container *ngIf="lineChartData.length">
             <graph style="height: 100%;" 
                    [inputInfo]="$any(lineChartData)" 
                    [drawingMode]="drawingMode"
@@ -27,9 +27,4 @@
             </graph>
         </ng-container>
     </div>
-
-    <ng-template #noSize>
-    </ng-template>
-
-
 </div>
