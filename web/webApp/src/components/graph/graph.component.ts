@@ -34,16 +34,29 @@ export class GraphComponent {
     this.fitAllGraph()
   }
   @Input() zoomEnabled: boolean = true
+  @Input() set selectedDataLineIndex(value: number)
+  {
+    this._selectedDataLineIndex = value;
+    this.updateLines();
+  }
+  get selectedDataLineIndex(): number {
+    return this._selectedDataLineIndex;
+  }
+
+
   @Input() set drawingMode(value: number) {
     this._drawingMode = value as DrawingMode;
-
-    // Clear all lines when switching back to None mode
+    
     if (this._drawingMode === DrawingMode.None) {
       this._horizontalLines = [];
       this._verticalLines = [];
-      this.updateLines();
+    } else if (this._drawingMode === DrawingMode.Horizontal) {
+      this._verticalLines = [];
+    } else if (this._drawingMode === DrawingMode.Vertical) {
+      this._horizontalLines = [];
     }
-
+    
+    this.updateLines();
     this.updateMouseEvents();
   }
   get drawingMode(): number {
@@ -54,6 +67,8 @@ export class GraphComponent {
   private _horizontalLines: number[] = [];
   private _verticalLines: number[] = [];
   private isDrawingMode: boolean = false;
+  private _minMaxPoints: { min: { x: number, y: number } | null, max: { x: number, y: number } | null } = { min: null, max: null };
+  private _selectedDataLineIndex: number = -1;
   private marginY: number = 0
   private marginX: number = 0
   private maxY: number = 0
@@ -462,8 +477,15 @@ export class GraphComponent {
   updateLines() {
     console.log('Updating lines:', { horizontal: this._horizontalLines, vertical: this._verticalLines });
 
+    // Calculate min/max points if enabled
+    this.calculateMinMaxPoints();
+
     // Create annotations object
     const annotations: any = {};
+
+    // Add min/max annotations
+    const minMaxAnnotations = this.getMinMaxAnnotations();
+    Object.assign(annotations, minMaxAnnotations);
 
     // Add horizontal lines as annotations
     this._horizontalLines.forEach((yValue, index) => {
@@ -619,5 +641,113 @@ export class GraphComponent {
     }
 
     return text.trim();
+  }
+
+  private calculateMinMaxPoints(): void {
+    if (this.selectedDataLineIndex < 0 || !this.lineChartData?.datasets) {
+      this._minMaxPoints = { min: null, max: null };
+      return;
+    }
+
+    const selectedDataset = this.lineChartData.datasets[this.selectedDataLineIndex];
+    if (!selectedDataset || !selectedDataset.data || selectedDataset.data.length === 0) {
+      this._minMaxPoints = { min: null, max: null };
+      return;
+    }
+
+    let minPoint: { x: number, y: number } | null = null;
+    let maxPoint: { x: number, y: number } | null = null;
+
+    // Find min and max points
+    selectedDataset.data.forEach((point: any) => {
+      if (point && typeof point.x === 'number' && typeof point.y === 'number') {
+        if (!minPoint || point.y < minPoint.y) {
+          minPoint = { x: point.x, y: point.y };
+        }
+        if (!maxPoint || point.y > maxPoint.y) {
+          maxPoint = { x: point.x, y: point.y };
+        }
+      }
+    });
+
+    this._minMaxPoints = { min: minPoint, max: maxPoint };
+  }
+
+  private getMinMaxAnnotations(): any {
+    const annotations: any = {};
+
+    if (this._minMaxPoints.min) {
+      // Min point annotation
+      annotations['minPoint'] = {
+        type: 'point',
+        xValue: this._minMaxPoints.min.x,
+        yValue: this._minMaxPoints.min.y,
+        backgroundColor: 'rgba(0, 255, 0, 0.8)',
+        borderColor: 'rgba(0, 255, 0, 1)',
+        borderWidth: 3,
+        radius: 6,
+        label: {
+          content: `MIN: ${this._minMaxPoints.min.y.toFixed(2)}`,
+          enabled: true,
+          position: 'bottom',
+          backgroundColor: 'rgba(0, 255, 0, 0.9)',
+          color: 'rgba(0, 0, 0, 0.8)',
+          font: {
+            size: 11,
+            weight: 'bold'
+          },
+          padding: 4,
+          borderRadius: 4
+        }
+      };
+
+      // Min point vertical line
+      annotations['minVerticalLine'] = {
+        type: 'line',
+        xMin: this._minMaxPoints.min.x,
+        xMax: this._minMaxPoints.min.x,
+        borderColor: 'rgba(0, 255, 0, 0.6)',
+        borderWidth: 2,
+        borderDash: [3, 3]
+      };
+    }
+
+    if (this._minMaxPoints.max) {
+      // Max point annotation
+      annotations['maxPoint'] = {
+        type: 'point',
+        xValue: this._minMaxPoints.max.x,
+        yValue: this._minMaxPoints.max.y,
+        backgroundColor: 'rgba(255, 0, 0, 0.8)',
+        borderColor: 'rgba(255, 0, 0, 1)',
+        borderWidth: 3,
+        radius: 6,
+        label: {
+          content: `MAX: ${this._minMaxPoints.max.y.toFixed(2)}`,
+          enabled: true,
+          position: 'top',
+          backgroundColor: 'rgba(255, 0, 0, 0.9)',
+          color: 'rgba(0, 0, 0, 0.8)',
+          font: {
+            size: 11,
+            weight: 'bold'
+          },
+          padding: 4,
+          borderRadius: 4
+        }
+      };
+
+      // Max point vertical line
+      annotations['maxVerticalLine'] = {
+        type: 'line',
+        xMin: this._minMaxPoints.max.x,
+        xMax: this._minMaxPoints.max.x,
+        borderColor: 'rgba(255, 0, 0, 0.6)',
+        borderWidth: 2,
+        borderDash: [3, 3]
+      };
+    }
+
+    return annotations;
   }
 }

@@ -24,6 +24,10 @@ export class GraphViewComponent implements OnInit {
   }
 
   drawingMode: number = DrawingMode.None;
+  horizontalModeActive: boolean = false;
+  verticalModeActive: boolean = false;
+  selectedDataLineIndex: number = -1;
+  showDataLineDropdown: boolean = false;
   resizeTrigger: boolean = false
   zoomWindowActivate: boolean = true
   lineChartData: Array<any> = [];
@@ -64,6 +68,37 @@ export class GraphViewComponent implements OnInit {
 
     this.lineChartData = [...this.lineChartData ]
   };
+
+  toggleHorizontalMode(): void {
+    this.horizontalModeActive = !this.horizontalModeActive;
+    this.updateDrawingMode();
+  }
+
+  toggleVerticalMode(): void {
+    this.verticalModeActive = !this.verticalModeActive;
+    this.updateDrawingMode();
+  }
+
+  updateDrawingMode(): void {
+    if (this.horizontalModeActive && this.verticalModeActive) {
+      this.drawingMode = DrawingMode.Both;
+    } else if (this.horizontalModeActive) {
+      this.drawingMode = DrawingMode.Horizontal;
+    } else if (this.verticalModeActive) {
+      this.drawingMode = DrawingMode.Vertical;
+    } else {
+      this.drawingMode = DrawingMode.None;
+    }
+  }
+
+  toggleDataLineDropdown(): void {
+    this.showDataLineDropdown = !this.showDataLineDropdown;
+  }
+
+  selectDataLine(index: number): void {
+    this.selectedDataLineIndex = index;
+    this.showDataLineDropdown = false; // Close dropdown after selection
+  }
 
   getDrawingModeIcon(): string {
     switch (this.drawingMode) {

@@ -2,10 +2,41 @@
     <div class="graph-options-header">
         <button *ngIf="lineChartData.length" mat-icon-button 
                 class="example-icon"
-                aria-label="Example icon-button with menu icon" 
-                (click)="drawingMode = selectDrawingMode()">
-            <mat-icon>{{getDrawingModeIcon()}}</mat-icon>
+                [class.active-drawing-mode]="horizontalModeActive"
+                aria-label="Toggle horizontal lines" 
+                (click)="toggleHorizontalMode()">
+            <mat-icon>more_horiz</mat-icon>
         </button>
+        <button *ngIf="lineChartData.length" mat-icon-button 
+                class="example-icon"
+                [class.active-drawing-mode]="verticalModeActive"
+                aria-label="Toggle vertical lines" 
+                (click)="toggleVerticalMode()">
+            <mat-icon>more_vert</mat-icon>
+        </button>
+        <div class="dropdown-container" *ngIf="lineChartData.length">
+            <button mat-icon-button 
+                    class="example-icon"
+                    [class.active-drawing-mode]="selectedDataLineIndex != -1"
+                    aria-label="Select data line for min/max" 
+                    (click)="toggleDataLineDropdown()">
+                <mat-icon>show_chart</mat-icon>
+            </button>
+            <div class="dropdown-menu" *ngIf="showDataLineDropdown">
+                <div class="dropdown-item" 
+                     [class.selected]="selectedDataLineIndex === -1"
+                     (click)="selectDataLine(-1)">
+                    <span>Desabilitar</span>
+                </div>
+                <div class="dropdown-item" 
+                     *ngFor="let line of lineChartData; let i = index"
+                     [class.selected]="selectedDataLineIndex === i"
+                     (click)="selectDataLine(i)">
+                    <span>{{line.label || `Line ${i + 1}`}}</span>
+                </div>
+            </div>
+        </div>
+        <div style="width: 40px;" *ngIf="lineChartData.length"></div>
         <button mat-icon-button 
                 class="example-icon"
                 aria-label="Example icon-button with menu icon" 
@@ -22,6 +53,7 @@
             <graph style="height: 100%;" 
                    [inputInfo]="$any(lineChartData)" 
                    [drawingMode]="drawingMode"
+                   [selectedDataLineIndex]="selectedDataLineIndex"
                    [zoomEnabled]="zoomWindowActivate"
                    [resize]="resizeTrigger">
             </graph>
