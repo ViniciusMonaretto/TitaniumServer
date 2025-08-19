@@ -23,7 +23,8 @@ import mimetypes
 
 
 class Visualization(tornado.web.RequestHandler):
-    def get(self):
+    def get(self, path=None):
+        # Serve the main Angular app for all routes
         self.render("../../webApp/browser/index.html")
 
     def data_received(self, chunk: bytes):

@@ -50,6 +50,6 @@ class AppServer:
              {'middleware': self._middleware}),
             (r"/(.*\.(js|css|ico|png|jpg|jpeg|woff|woff2|ttf|svg))",
              tornado.web.StaticFileHandler, {"path": angular_dist}),
-            (r"/", Visualization),
-            (r"/main", Visualization)
-        ])
+            (r"/(.*)", Visualization),  # Catch all routes for SPA
+        ],
+            static_url_prefix="/")

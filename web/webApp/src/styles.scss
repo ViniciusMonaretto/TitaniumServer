@@ -2,11 +2,9 @@
 
 html {
   color-scheme: light dark;
-  @include mat.theme((
-    color: mat.$violet-palette,
-    typography: 'Segoe UI',
-    density: 0
-  ));
+  @include mat.theme((color: mat.$violet-palette,
+      typography: 'Segoe UI',
+      density: 0));
 }
 
 @font-face {
@@ -14,6 +12,30 @@ html {
   src: url('assets/fonts/DigitalNumbers-Regular.ttf') format('truetype');
   font-weight: normal;
   font-style: normal;
+}
+
+// Fallback for Material Icons
+@font-face {
+  font-family: 'Material Icons';
+  font-style: normal;
+  font-weight: 400;
+  src: url('https://fonts.gstatic.com/s/materialicons/v143/flUhRq6tzZclQEJ-Vdg-IuiaDsNc.woff2') format('woff2');
+}
+
+.material-icons {
+  font-family: 'Material Icons';
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-feature-settings: 'liga';
+  -webkit-font-smoothing: antialiased;
 }
 
 @font-face {
@@ -25,8 +47,12 @@ html {
 }
 
 
-html, body { 
+html,
+body {
   height: 100%;
- }
-body { margin: 0; font-family: 'Segoe UI', sans-serif; } 
+}
 
+body {
+  margin: 0;
+  font-family: 'Segoe UI', sans-serif;
+}

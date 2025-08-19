@@ -295,6 +295,9 @@ class ReportGenerator(ServiceInterface):
         total_power_consumption = 0
         power_factor_values = []
         current_values = []
+        has_power = False
+        has_power_factor = False
+        has_current = False
 
         # Coletar todos os valores para cálculos
         for topic in electrical_topics:
@@ -305,10 +308,13 @@ class ReportGenerator(ServiceInterface):
 
                     if sensor_type == "Power":
                         total_power_consumption += value
+                        has_power = True
                     elif sensor_type == "PowerFactor":
                         power_factor_values.append(value)
+                        has_power_factor = True
                     elif sensor_type == "Current":
                         current_values.append(value)
+                        has_current = True
                 except (ValueError, TypeError):
                     # Skip invalid values
                     continue
@@ -321,12 +327,24 @@ class ReportGenerator(ServiceInterface):
         # 4. Criar cabeçalho com informações adicionais
         ws_electrical.append(
             ["Instrumento:", "Câmara 2 s/ trad externo", "", "", ""])
-        ws_electrical.append(
-            ["Consumo Total de Energia: ", f"{total_power_consumption:.2f} W", "", "", ""])
-        ws_electrical.append(
-            ["Fator de Potência Médio: ", f"{avg_power_factor:.3f}", "", "", ""])
-        ws_electrical.append(
-            ["Corrente Máxima: ", f"{max_current:.2f} A", "", "", ""])
+
+        # Adicionar linhas de cabeçalho apenas se os sensores correspondentes existirem
+        header_row_count = 1  # Começa com 1 (linha do instrumento)
+
+        if has_power:
+            ws_electrical.append(
+                ["Consumo Total de Energia: ", f"{total_power_consumption:.2f} W", "", "", ""])
+            header_row_count += 1
+
+        if has_power_factor:
+            ws_electrical.append(
+                ["Fator de Potência Médio: ", f"{avg_power_factor:.3f}", "", "", ""])
+            header_row_count += 1
+
+        if has_current:
+            ws_electrical.append(
+                ["Corrente Máxima: ", f"{max_current:.2f} A", "", "", ""])
+            header_row_count += 1
 
         # 5. Cabeçalho dos sensores
         header = ["Data"] + electrical_names
@@ -389,43 +407,25 @@ class ReportGenerator(ServiceInterface):
             bottom=Side(style='thin')
         )
 
-        # Aplicar cor de fundo e estilo para linha 1 (Instrumento)
-        for cell in ws_electrical[1]:
-            cell.fill = color_row1
-            cell.font = bold_font
-            cell.border = thin_border
-            cell.alignment = Alignment(horizontal="left")
+        # Aplicar cor de fundo e estilo para todas as linhas de cabeçalho (linha 1 até header_row_count)
+        for row_num in range(1, header_row_count + 1):
+            for cell in ws_electrical[row_num]:
+                cell.fill = color_row1
+                cell.font = bold_font
+                cell.border = thin_border
+                cell.alignment = Alignment(horizontal="left")
 
-        # Aplicar cor de fundo e estilo para linha 2 (Consumo Total de Energia)
-        for cell in ws_electrical[2]:
-            cell.fill = color_row1
-            cell.font = bold_font
-            cell.border = thin_border
-            cell.alignment = Alignment(horizontal="left")
-
-        # Aplicar cor de fundo e estilo para linha 3 (Fator de Potência Médio)
-        for cell in ws_electrical[3]:
-            cell.fill = color_row1
-            cell.font = bold_font
-            cell.border = thin_border
-            cell.alignment = Alignment(horizontal="left")
-
-        # Aplicar cor de fundo e estilo para linha 4 (Corrente Máxima)
-        for cell in ws_electrical[4]:
-            cell.fill = color_row1
-            cell.font = bold_font
-            cell.border = thin_border
-            cell.alignment = Alignment(horizontal="left")
-
-        # Aplicar cor de fundo e estilo para linha 5 (cabeçalho dos sensores)
-        for cell in ws_electrical[5]:
+        # Aplicar cor de fundo e estilo para linha do cabeçalho dos sensores
+        sensor_header_row = header_row_count + 1
+        for cell in ws_electrical[sensor_header_row]:
             cell.fill = color_row3
             cell.font = bold_font
             cell.border = thin_border
             cell.alignment = Alignment(horizontal="center")
 
         # Aplicar bordas para todas as linhas de dados
-        for row_num in range(6, len(sorted_timestamps) + 6):
+        data_start_row = sensor_header_row + 1
+        for row_num in range(data_start_row, len(sorted_timestamps) + data_start_row):
             for cell in ws_electrical[row_num]:
                 cell.border = thin_border
 
