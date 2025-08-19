@@ -60,7 +60,8 @@ class ReportGenerator(ServiceInterface):
         """
         if result and data_out and 'info' in data_out:
             try:
-                excel_file_path = self._create_excel_chart_report(data_out['info'])
+                excel_file_path = self._create_excel_chart_report(
+                    data_out['info'])
                 self._logger.info(
                     f"Excel chart report created successfully: {excel_file_path}")
                 self._middleware.send_command_answear(
@@ -73,11 +74,13 @@ class ReportGenerator(ServiceInterface):
                 self._logger.error(f"Failed to create Excel chart report: {e}")
                 self._middleware.send_command_answear(
                     False,
-                    {"status": "error", "message": f"Failed to create Excel chart report: {e}"},
+                    {"status": "error",
+                        "message": f"Failed to create Excel chart report: {e}"},
                     data_out.get('requestId', '')
                 )
         else:
-            self._logger.error("Failed to generate chart report - no data received")
+            self._logger.error(
+                "Failed to generate chart report - no data received")
             self._middleware.send_command_answear(
                 False,
                 {"status": "error",
@@ -105,7 +108,7 @@ class ReportGenerator(ServiceInterface):
                 self._middleware.send_command_answear(
                     False,
                     {"status": "error", "message": f"Failed to create Excel report: {e}"},
-                   data_out["commandId"]
+                    data_out["commandId"]
                 )
         else:
             self._logger.error("Failed to generate report - no data received")
@@ -122,18 +125,26 @@ class ReportGenerator(ServiceInterface):
         Linha 2 do Excel são os nomes amigáveis dos sensores.
         """
 
+        if (len(sensor_data) == 0):
+            self._logger.error(
+                "Sem dados para gerar relatório")
+            return ""
+
         # 1. Carregar o mapeamento de nomes amigáveis dos sensores
-        config_path = os.path.join(os.path.dirname(__file__), '../../config/ui_config.json')
+        config_path = os.path.join(os.path.dirname(
+            __file__), '../../config/ui_config.json')
         with open(config_path, 'r', encoding='utf-8') as f:
             ui_config = json.load(f)
 
-        # 2. Criar um dicionário para mapear sensor_full_topic para nome amigável
+        # 2. Criar um dicionário para mapear sensor_full_topic para nome amigável e tipo
         topic_to_name = {}
+        topic_to_type = {}
         for group in ui_config.values():
             for sensor in group:
                 # O nome do tópico completo é gateway-topic-indicator
                 full_topic = f"{sensor['gateway']}-{sensor['topic']}-{sensor['indicator']}"
                 topic_to_name[full_topic] = sensor['name']
+                topic_to_type[full_topic] = sensor['sensorType']
 
         # 3. Definir a ordem das colunas dinamicamente conforme os sensores presentes
         # Pega os nomes amigáveis dos sensores presentes em sensor_data, na ordem do ui_config.json
@@ -144,7 +155,8 @@ class ReportGenerator(ServiceInterface):
                 if full_topic in sensor_data:
                     present_names.append(sensor['name'])
         col_names = present_names
-        topics_in_order = [k for k, v in topic_to_name.items() if v in col_names]
+        topics_in_order = [
+            k for k, v in topic_to_name.items() if v in col_names]
 
         # 4. Coletar todos os timestamps únicos e ordenar
         all_timestamps = set()
@@ -159,14 +171,15 @@ class ReportGenerator(ServiceInterface):
         for topic in topics_in_order:
             topic_time_value[topic] = {}
             last_known_value = None
-            
+
             # Ordenar as entradas por timestamp para garantir ordem cronológica
-            sorted_entries = sorted(sensor_data.get(topic, []), key=lambda x: x['timestamp'])
-            
+            sorted_entries = sorted(sensor_data.get(
+                topic, []), key=lambda x: x['timestamp'])
+
             for entry in sorted_entries:
                 topic_time_value[topic][entry['timestamp']] = entry['value']
                 last_known_value = entry['value']
-            
+
             # Agora preencher todos os timestamps com interpolação
             for ts in sorted_timestamps:
                 if ts not in topic_time_value[topic]:
@@ -176,9 +189,10 @@ class ReportGenerator(ServiceInterface):
         wb = Workbook()
         ws = wb.active
         if (ws == None):
-            self._logger.error("Failed to create Excel report - no worksheet found")
+            self._logger.error(
+                "Failed to create Excel report - no worksheet found")
             return ""
-        
+
         ws.title = "Relatório"
 
         # Linha 1: cabeçalho superior
@@ -195,20 +209,23 @@ class ReportGenerator(ServiceInterface):
                 formatted_timestamp = dt.strftime("%d/%m/%Y %H:%M:%S")
             except:
                 formatted_timestamp = ts  # fallback se não conseguir converter
-            
+
             row = [formatted_timestamp]
             for topic in topics_in_order:
-                value = topic_time_value[topic][ts]  # Agora sempre tem valor devido à interpolação
+                # Agora sempre tem valor devido à interpolação
+                value = topic_time_value[topic][ts]
                 row.append(value)
             ws.append(row)
 
         # 8. Ajustar estilos (cores de fundo e bordas)
         bold_font = Font(bold=True)
-        
+
         # Definir cores de fundo
-        color_row1 = PatternFill(start_color="b7e1cd", end_color="b7e1cd", fill_type="solid")
-        color_row2 = PatternFill(start_color="cecece", end_color="cecece", fill_type="solid")
-        
+        color_row1 = PatternFill(start_color="b7e1cd",
+                                 end_color="b7e1cd", fill_type="solid")
+        color_row2 = PatternFill(start_color="cecece",
+                                 end_color="cecece", fill_type="solid")
+
         # Definir borda
         thin_border = Border(
             left=Side(style='thin'),
@@ -216,21 +233,21 @@ class ReportGenerator(ServiceInterface):
             top=Side(style='thin'),
             bottom=Side(style='thin')
         )
-        
+
         # Aplicar cor de fundo e estilo para linha 1
         for cell in ws[1]:
             cell.fill = color_row1
             cell.font = bold_font
             cell.border = thin_border
             cell.alignment = Alignment(horizontal="left")
-        
+
         # Aplicar cor de fundo e estilo para linha 2
         for cell in ws[2]:
             cell.fill = color_row2
             cell.font = bold_font
             cell.border = thin_border
             cell.alignment = Alignment(horizontal="center")
-        
+
         # Aplicar bordas para todas as linhas de dados
         for row_num in range(3, len(sorted_timestamps) + 3):
             for cell in ws[row_num]:
@@ -238,13 +255,184 @@ class ReportGenerator(ServiceInterface):
 
         # 9. Ajustar largura das colunas
         for i, col in enumerate(header, 1):
-            ws.column_dimensions[get_column_letter(i)].width = 22 if i == 1 else 18
+            ws.column_dimensions[get_column_letter(
+                i)].width = 22 if i == 1 else 18
 
-        # 10. Salvar o arquivo
+        # 10. Criar nova aba para sensores elétricos (power, current, tension, powerFactor)
+        self._create_electrical_sensors_tab(
+            wb, sensor_data, topic_to_name, topic_to_type, sorted_timestamps)
+
+        # 11. Salvar o arquivo
         now_str = datetime.now().strftime("%Y%m%d_%H%M%S")
         file_path = os.path.abspath(f"report_{now_str}.xlsx")
         wb.save(file_path)
         return file_path
+
+    def _create_electrical_sensors_tab(self, wb, sensor_data: Dict[str, Any], topic_to_name: Dict[str, str],
+                                       topic_to_type: Dict[str, str], sorted_timestamps: list) -> None:
+        """
+        Create a new tab for electrical sensors (power, current, tension, powerFactor) with additional header information.
+        """
+        # 1. Identificar sensores elétricos
+        electrical_sensor_types = [
+            "Power", "Current", "Tension", "PowerFactor"]
+        electrical_topics = []
+        electrical_names = []
+
+        for topic, sensor_type in topic_to_type.items():
+            if sensor_type in electrical_sensor_types and topic in sensor_data:
+                electrical_topics.append(topic)
+                electrical_names.append(topic_to_name[topic])
+
+        # Se não há sensores elétricos, não criar a aba
+        if not electrical_topics:
+            return
+
+        # 2. Criar nova aba
+        ws_electrical = wb.create_sheet("Sensores Elétricos")
+
+        # 3. Calcular estatísticas para o cabeçalho
+        total_power_consumption = 0
+        power_factor_values = []
+        current_values = []
+
+        # Coletar todos os valores para cálculos
+        for topic in electrical_topics:
+            for entry in sensor_data.get(topic, []):
+                try:
+                    value = float(entry['value'])
+                    sensor_type = topic_to_type[topic]
+
+                    if sensor_type == "Power":
+                        total_power_consumption += value
+                    elif sensor_type == "PowerFactor":
+                        power_factor_values.append(value)
+                    elif sensor_type == "Current":
+                        current_values.append(value)
+                except (ValueError, TypeError):
+                    # Skip invalid values
+                    continue
+
+        # Calcular médias e máximos
+        avg_power_factor = sum(power_factor_values) / \
+            len(power_factor_values) if power_factor_values else 0
+        max_current = max(current_values) if current_values else 0
+
+        # 4. Criar cabeçalho com informações adicionais
+        ws_electrical.append(
+            ["Instrumento:", "Câmara 2 s/ trad externo", "", "", ""])
+        ws_electrical.append(
+            ["Consumo Total de Energia: ", f"{total_power_consumption:.2f} W", "", "", ""])
+        ws_electrical.append(
+            ["Fator de Potência Médio: ", f"{avg_power_factor:.3f}", "", "", ""])
+        ws_electrical.append(
+            ["Corrente Máxima: ", f"{max_current:.2f} A", "", "", ""])
+
+        # 5. Cabeçalho dos sensores
+        header = ["Data"] + electrical_names
+        ws_electrical.append(header)
+
+        # 6. Montar dados com interpolação para sensores elétricos
+        topic_time_value = {}
+        for topic in electrical_topics:
+            topic_time_value[topic] = {}
+            last_known_value = None
+
+            sorted_entries = sorted(sensor_data.get(
+                topic, []), key=lambda x: x['timestamp'])
+
+            for entry in sorted_entries:
+                try:
+                    value = float(entry['value'])
+                    topic_time_value[topic][entry['timestamp']] = value
+                    last_known_value = value
+                except (ValueError, TypeError):
+                    # Use 0 as fallback for invalid values
+                    topic_time_value[topic][entry['timestamp']] = 0
+                    if last_known_value is None:
+                        last_known_value = 0
+
+            for ts in sorted_timestamps:
+                if ts not in topic_time_value[topic]:
+                    topic_time_value[topic][ts] = last_known_value
+
+        # 7. Preencher os dados
+        for ts in sorted_timestamps:
+            try:
+                dt = datetime.fromisoformat(ts.replace('Z', '+00:00'))
+                formatted_timestamp = dt.strftime("%d/%m/%Y %H:%M:%S")
+            except:
+                formatted_timestamp = ts
+
+            row = [formatted_timestamp]
+            for topic in electrical_topics:
+                value = topic_time_value[topic][ts]
+                row.append(value)
+            ws_electrical.append(row)
+
+        # 8. Aplicar estilos
+        bold_font = Font(bold=True)
+
+        # Definir cores de fundo
+        color_row1 = PatternFill(start_color="b7e1cd",
+                                 end_color="b7e1cd", fill_type="solid")
+        color_row2 = PatternFill(start_color="cecece",
+                                 end_color="cecece", fill_type="solid")
+        color_row3 = PatternFill(start_color="e6f3ff",
+                                 end_color="e6f3ff", fill_type="solid")
+
+        # Definir borda
+        thin_border = Border(
+            left=Side(style='thin'),
+            right=Side(style='thin'),
+            top=Side(style='thin'),
+            bottom=Side(style='thin')
+        )
+
+        # Aplicar cor de fundo e estilo para linha 1 (Instrumento)
+        for cell in ws_electrical[1]:
+            cell.fill = color_row1
+            cell.font = bold_font
+            cell.border = thin_border
+            cell.alignment = Alignment(horizontal="left")
+
+        # Aplicar cor de fundo e estilo para linha 2 (Consumo Total de Energia)
+        for cell in ws_electrical[2]:
+            cell.fill = color_row1
+            cell.font = bold_font
+            cell.border = thin_border
+            cell.alignment = Alignment(horizontal="left")
+
+        # Aplicar cor de fundo e estilo para linha 3 (Fator de Potência Médio)
+        for cell in ws_electrical[3]:
+            cell.fill = color_row1
+            cell.font = bold_font
+            cell.border = thin_border
+            cell.alignment = Alignment(horizontal="left")
+
+        # Aplicar cor de fundo e estilo para linha 4 (Corrente Máxima)
+        for cell in ws_electrical[4]:
+            cell.fill = color_row1
+            cell.font = bold_font
+            cell.border = thin_border
+            cell.alignment = Alignment(horizontal="left")
+
+        # Aplicar cor de fundo e estilo para linha 5 (cabeçalho dos sensores)
+        for cell in ws_electrical[5]:
+            cell.fill = color_row3
+            cell.font = bold_font
+            cell.border = thin_border
+            cell.alignment = Alignment(horizontal="center")
+
+        # Aplicar bordas para todas as linhas de dados
+        for row_num in range(6, len(sorted_timestamps) + 6):
+            for cell in ws_electrical[row_num]:
+                cell.border = thin_border
+
+        # 9. Ajustar largura das colunas
+        for i, col in enumerate(header, 1):
+            ws_electrical.column_dimensions[get_column_letter(
+                i)].width = 22 if i == 1 else 18
 
     def _create_excel_chart_report(self, sensor_data: Dict[str, Any]) -> str:
         """
@@ -252,7 +440,8 @@ class ReportGenerator(ServiceInterface):
         Gera gráficos de linha para cada sensor.
         """
         # 1. Carregar o mapeamento de nomes amigáveis dos sensores
-        config_path = os.path.join(os.path.dirname(__file__), '../../config/ui_config.json')
+        config_path = os.path.join(os.path.dirname(
+            __file__), '../../config/ui_config.json')
         with open(config_path, 'r', encoding='utf-8') as f:
             ui_config = json.load(f)
 
@@ -271,7 +460,8 @@ class ReportGenerator(ServiceInterface):
                 if full_topic in sensor_data:
                     present_names.append(sensor['name'])
         col_names = present_names
-        topics_in_order = [k for k, v in topic_to_name.items() if v in col_names]
+        topics_in_order = [
+            k for k, v in topic_to_name.items() if v in col_names]
 
         # 4. Coletar todos os timestamps únicos e ordenar
         all_timestamps = set()
@@ -285,13 +475,14 @@ class ReportGenerator(ServiceInterface):
         for topic in topics_in_order:
             topic_time_value[topic] = {}
             last_known_value = None
-            
-            sorted_entries = sorted(sensor_data.get(topic, []), key=lambda x: x['timestamp'])
-            
+
+            sorted_entries = sorted(sensor_data.get(
+                topic, []), key=lambda x: x['timestamp'])
+
             for entry in sorted_entries:
                 topic_time_value[topic][entry['timestamp']] = entry['value']
                 last_known_value = entry['value']
-            
+
             for ts in sorted_timestamps:
                 if ts not in topic_time_value[topic]:
                     topic_time_value[topic][ts] = last_known_value
@@ -300,7 +491,8 @@ class ReportGenerator(ServiceInterface):
         wb = Workbook()
         ws = wb.active
         if (ws == None):
-            self._logger.error("Failed to create Excel report - no worksheet found")
+            self._logger.error(
+                "Failed to create Excel report - no worksheet found")
             return ""
         ws.title = "Dados dos Sensores"
 
@@ -315,7 +507,7 @@ class ReportGenerator(ServiceInterface):
                 formatted_timestamp = dt.strftime("%d/%m/%Y %H:%M:%S")
             except:
                 formatted_timestamp = ts
-            
+
             row = [formatted_timestamp]
             for topic in topics_in_order:
                 value = topic_time_value[topic][ts]
@@ -331,11 +523,12 @@ class ReportGenerator(ServiceInterface):
 
         # Definir dados para o gráfico
         # Categorias (eixo X) - timestamps
-        categories = Reference(ws, min_col=1, min_row=2, max_row=len(sorted_timestamps) + 1)
-        
+        categories = Reference(ws, min_col=1, min_row=2,
+                               max_row=len(sorted_timestamps) + 1)
+
         # Dados (eixo Y) - valores dos sensores
-        data = Reference(ws, min_col=2, max_col=len(col_names) + 1, 
-                        min_row=1, max_row=len(sorted_timestamps) + 1)
+        data = Reference(ws, min_col=2, max_col=len(col_names) + 1,
+                         min_row=1, max_row=len(sorted_timestamps) + 1)
 
         chart.add_data(data, titles_from_data=True)
         chart.set_categories(categories)
@@ -347,10 +540,8 @@ class ReportGenerator(ServiceInterface):
         for i, col in enumerate(header, 1):
             ws.column_dimensions[get_column_letter(i)].width = 20
 
-
         # 12. Salvar o arquivo
         now_str = datetime.now().strftime("%Y%m%d_%H%M%S")
         file_path = os.path.abspath(f"chart_report_{now_str}.xlsx")
         wb.save(file_path)
         return file_path
-
