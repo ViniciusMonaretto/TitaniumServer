@@ -80,7 +80,7 @@ try:
         {"value": 140.7, "active": True, "unit": "°C"},
         {"value": 20, "active": True, "unit": "kPa"},
         {"value": 20, "active": True, "unit": "kPa"},
-        {"value": 220, "active": True, "unit": "V"},
+        {"value": 221, "active": True, "unit": "V"},
         {"value": 2, "active": True, "unit": "A"},
         {"value": 0.96, "active": True, "unit": "%"}
     ]

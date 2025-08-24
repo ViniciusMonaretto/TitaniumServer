@@ -58,7 +58,7 @@
             "name": "Temp7",
             "gateway": "1C69209DFC08",
             "topic": "temperature",
-            "color": "",
+            "color": "#123fd2",
             "sensorType": "Temperature",
             "indicator": "6",
             "group": "camera 1"

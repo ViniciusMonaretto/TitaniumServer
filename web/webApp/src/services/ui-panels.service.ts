@@ -175,6 +175,21 @@ export class UiPanelService {
           let panel = this.panels[obj.group].temperature.find(x=> GetTableName(x.gateway, 
                                                                                x.topic, 
                                                                                x.indicator.toString()) == tableName)
+
+          if(!panel)
+          {
+            panel = this.panels[obj.group].pressure.find(x=> GetTableName(x.gateway, 
+              x.topic, 
+              x.indicator.toString()) == tableName)
+          }
+
+          if(!panel)
+          {
+            panel = this.panels[obj.group].power.find(x=> GetTableName(x.gateway, 
+              x.topic, 
+              x.indicator.toString()) == tableName)
+          }
+                                                                               
           if(panel)
           {
             info = {
