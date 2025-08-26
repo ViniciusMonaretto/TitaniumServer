@@ -15,6 +15,9 @@
             [componentText]="group" (buttonCallback)="setSensor(group)"
             [isSelected]="isPanelSelected(panelOptions.SENSORS)">
         </side-nav-option>
+        <side-nav-option *ngIf="CanEdit()" [isSuboption]="true"
+            [icon]="'assets/icon/plusIcon.svg'" [componentText]="'Novo'" (buttonCallback)="addNewGroup()">
+        </side-nav-option>
     </side-nav-option>
     <side-nav-option [icon]="'assets/icon/graphIcon.svg'" [iconSelected]="'assets/icon/graphSelectedIcon.svg'"
         [componentText]="'Gráficos'" (buttonCallback)="setStatusLog()"

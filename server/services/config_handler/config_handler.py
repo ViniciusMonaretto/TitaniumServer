@@ -7,6 +7,7 @@ from dataModules.panel import Panel
 from middleware.status_subscriber import StatuSubscribers
 from dataModules.alarm import Alarm, AlarmType
 from modules.titanium_mqtt.mqtt_commands import MqttCommands
+from dataModules.panel_group import PanelGroup
 from services.alarm_manager.alarm_manager import AlarmManager
 from services.sensor_data_storage.sensor_data_storage import SensorDataStorage
 from support.logger import Logger
@@ -22,7 +23,7 @@ DB_NAME = "titanium_server_db.db"
 
 
 class ConfigHandler(ServiceInterface):
-    _panels_info: dict[str, list[Panel]] = {}
+    _panel_groups: dict[int, PanelGroup] = {}
     _status_subscribers = {}
 
     def __init__(
@@ -49,6 +50,9 @@ class ConfigHandler(ServiceInterface):
             ConfigHandlerCommands.REMOVE_PANEL: self.remove_panel_command,
             ConfigHandlerCommands.GET_PANEL_LIST: self.get_panels_list_command,
             ConfigHandlerCommands.UPDATE_PANEL_FUNCTIONALITIES: self.update_panel_functions_command,
+            ConfigHandlerCommands.ADD_PANEL_GROUP: self.add_panel_group_command,
+            ConfigHandlerCommands.REMOVE_PANEL_GROUP: self.remove_panel_group_command,
+            ConfigHandlerCommands.UPDATE_PANEL_GROUP: self.update_panel_group_command,
         }
         self._middleware.add_commands(commands)
 
@@ -69,33 +73,36 @@ class ConfigHandler(ServiceInterface):
                     f"VisualizationWebSocketHandler:: Error processing file {json_directory}: {e}"
                 )
 
-    def initialize_panels_from_db(self, panels_infos):
+    def initialize_panels_from_db(self, panels_infos, groups_infos):
+        for group_info in groups_infos:
+            self.add_panel_group(group_info["name"])
         for panel_info in panels_infos:
             self.add_panel(panel_info)
 
     def initialize_system(self):
+        groups_infos = self._config_storage.get_panel_groups()
         panels_infos = self._config_storage.get_panels()
-        if len(panels_infos) == 0:
+        if len(panels_infos) == 0 or len(groups_infos) == 0:
             self.read_default_config()
         else:
-            self.initialize_panels_from_db(panels_infos)
+            self.initialize_panels_from_db(panels_infos, groups_infos)
 
-    def calibration_update_received(self, status_info, group, index):
+    def calibration_update_received(self, status_info, group_id, index):
         data = status_info["data"]
 
-        panel: Panel = self._panels_info[group][index]
+        panel: Panel = self._panel_groups[group_id].panels[index]
         panel.offset = data.offset
         panel.gain = data.gain
         self._config_storage.update_panel(panel)
         self.send_ui_update_action(True)
 
-    def subscribe_to_status(self, gateway, status_name, indicator, group, index):
+    def subscribe_to_status(self, gateway, status_name, indicator, group_id, index):
         topic = ClientMiddleware.get_calibrate_topic(
             gateway, status_name, indicator)
         if not topic in self._status_subscribers:
             self._status_subscribers[topic] = StatuSubscribers(
                 lambda status_info: self.calibration_update_received(
-                    status_info, group, index
+                    status_info, group_id, index
                 ),
                 topic,
             )
@@ -104,9 +111,9 @@ class ConfigHandler(ServiceInterface):
             )
 
     def _find_panel_from_id(self, panel_id):
-        for group_name in self._panels_info:
+        for group_id in self._panel_groups:
             panel: Panel | None = next(
-                (item for item in self._panels_info[group_name]
+                (item for item in self._panel_groups[group_id].panels
                  if item.id == panel_id),
                 None,
             )
@@ -115,17 +122,12 @@ class ConfigHandler(ServiceInterface):
 
         return None
 
-    def add_group(self, group_name) -> tuple[bool, str]:
-        if group_name in self._panels_info:
-            return (False, "Group name already added")
-        self._panels_info[group_name] = []
-        return (True, "Sucess")
-
     def add_panels(self, panels_info):
-        for group_name in panels_info:
-            if group_name not in self._panels_info:
-                self._panels_info[group_name] = []
-            for panel_info in panels_info[group_name]:
+        for group_id in panels_info:
+            if group_id not in self._panel_groups:
+                self.add_panel_group(group_id)
+
+            for panel_info in panels_info[group_id]:
                 self.add_panel(panel_info)
 
     def add_panel(self, panel_info) -> tuple[bool, str]:
@@ -133,10 +135,7 @@ class ConfigHandler(ServiceInterface):
         message = ""
         panel = Panel(panel_info)
 
-        group_name = panel.group
-
-        if group_name not in self._panels_info:
-            self.add_group(group_name)
+        group_id = panel.group_id
 
         index = -1
         if not panel.id:
@@ -155,13 +154,13 @@ class ConfigHandler(ServiceInterface):
                 message = "Subscription result"
 
             if result:
-                self._panels_info[group_name].append(panel)
+                self._panel_groups[group_id].panels.append(panel)
                 self.subscribe_to_status(
                     panel.gateway,
                     panel.topic,
                     panel.indicator,
-                    group_name,
-                    len(self._panels_info[group_name]) - 1,
+                    group_id,
+                    len(self._panel_groups[group_id].panels) - 1,
                 )
 
         return result, message
@@ -173,8 +172,8 @@ class ConfigHandler(ServiceInterface):
 
         if result:
             self._middleware.send_command_answear(
-                result, self._panels_info[data["group"]
-                                          ][-1], command["requestId"]
+                result, self._panel_groups[data["group"]
+                                           ].panels[-1], command["requestId"]
             )
         else:
             self._middleware.send_command_answear(
@@ -248,8 +247,8 @@ class ConfigHandler(ServiceInterface):
 
     def remove_panel(self, panel_id) -> tuple[bool, str]:
         try:
-            for panels in self._panels_info.values():
-                for idx, panel in enumerate(panels):
+            for group in self._panel_groups.values():
+                for idx, panel in enumerate(group.panels):
                     if panel.id == panel_id:
                         wait_flag = threading.Event()
                         self._sensor_data_storage.erase_sensor_info(
@@ -267,8 +266,8 @@ class ConfigHandler(ServiceInterface):
                         result = self._config_storage.remove_panel(panel_id)
 
                         if result:
-                            self.remove_panel_subscription(panels[idx])
-                            del panels[idx]
+                            self.remove_panel_subscription(group.panels[idx])
+                            del group.panels[idx]
                             return True, "Painél Removido"
         except Exception as e:
             self._logger.error(
@@ -302,9 +301,9 @@ class ConfigHandler(ServiceInterface):
     def create_object_from_panels_info(self, calibrate_update=False):
         obj = {}
 
-        for group, panels in self._panels_info.items():
+        for group in self._panel_groups.values():
             panels_with_last_values = []
-            for panel in panels:
+            for panel in group.panels:
                 panel_json = panel.to_json()
 
                 # Get the last value/active status from sensor data storage
@@ -321,7 +320,7 @@ class ConfigHandler(ServiceInterface):
 
                 panels_with_last_values.append(panel_json)
 
-            obj[group] = panels_with_last_values
+            obj[group.name] = panels_with_last_values
 
         return {"calibrateUpdate": calibrate_update, 'PanelsInfo': obj}
 
@@ -335,3 +334,48 @@ class ConfigHandler(ServiceInterface):
             "ui-update-*", self.create_object_from_panels_info(
                 calibrate_update)
         )
+
+    # Panel Groups
+    def add_panel_group_command(self, command):
+        data = command["data"]
+        result, message = self.add_panel_group(data["name"])
+        self._middleware.send_command_answear(
+            result, {}, command["requestId"])
+
+    def remove_panel_group_command(self, command):
+        data = command["data"]
+        result, message = self.remove_panel_group(data["id"])
+        self._middleware.send_command_answear(
+            result, {}, command["requestId"])
+
+    def update_panel_group_command(self, command):
+        data = command["data"]
+        result, message = self.update_panel_group(data["id"], data["name"])
+        self._middleware.send_command_answear(
+            result, {}, command["requestId"])
+
+    def add_panel_group(self, name):
+        group_id = self._config_storage.add_panel_group(name)
+        if group_id != -1:
+            # Check if group already exists in memory
+            if group_id not in self._panel_groups:
+                self._panel_groups[group_id] = PanelGroup(name, group_id)
+                return True, "Success"
+            else:
+                return True, "Group already exists"
+        return False, "Error adding panel group"
+
+    def remove_panel_group(self, group_id):
+        result = self._config_storage.remove_panel_group(group_id)
+        if result:
+            del self._panel_groups[group_id]
+            return True, "Success"
+        return False, "Error removing panel group"
+
+    def update_panel_group(self, group_id, name):
+        result = self._config_storage.update_panel_group(group_id, name)
+        if result:
+            self._panel_groups[name] = self._panel_groups[group_id]
+            del self._panel_groups[group_id]
+            return True, "Success"
+        return False, "Error updating panel group"

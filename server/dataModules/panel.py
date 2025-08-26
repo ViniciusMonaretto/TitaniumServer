@@ -34,7 +34,7 @@ class Panel:
     gateway = ""
     topic = ""
     color = ""
-    group = ""
+    group_id = ""
     indicator = ""
     offset: float = None
     gain: float = None
@@ -55,10 +55,10 @@ class Panel:
             self.multiplier = obj["multiplier"]
         else:
             self.multiplier = 1
-        if "panelGroup" in obj:
-            self.group = obj["panelGroup"]
+        if "panelGroupId" in obj:
+            self.group_id = obj["panelGroupId"]
         else:
-            self.group = obj["group"]
+            self.group_id = obj["group"]
 
         if "offset" in obj:
             self.offset = obj["offset"]
@@ -82,7 +82,7 @@ class Panel:
             "gateway": self.gateway,
             "topic": self.topic,
             "color": self.color,
-            "group": self.group,
+            "group": self.group_id,
             "gain": self.gain,
             "offset": self.offset,
             "indicator": self.indicator,

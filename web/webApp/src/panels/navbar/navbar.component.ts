@@ -48,6 +48,10 @@ export class NavbarComponent implements OnInit {
     });
   }
 
+  addNewGroup(): void {
+  
+  }
+
   getGroupSensorUi() {
     let info = Object.keys(this.UiPanelsService.GetUiConfig())
     return info

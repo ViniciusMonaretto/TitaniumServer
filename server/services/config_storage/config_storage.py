@@ -47,12 +47,13 @@ class ConfigStorage(ServiceInterface):
                 gateway TEXT NOT NULL,
                 topic TEXT NOT NULL,
                 color TEXT NOT NULL,
-                panelGroup TEXT NOT NULL,
+                panelGroupId INTEGER NOT NULL,
                 indicator TEXT NOT NULL,
                 sensorType TEXT NOT NULL,
                 gain FLOAT,
                 offset FLOAT,
-                multiplier INTEGER
+                multiplier INTEGER,
+                FOREIGN KEY (panelGroupId) REFERENCES PanelsGroups (id) ON DELETE CASCADE
             );
             """)
 
@@ -79,6 +80,13 @@ class ConfigStorage(ServiceInterface):
             );
             """)
 
+            cursor.execute("""
+            CREATE TABLE IF NOT EXISTS PanelsGroups (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL UNIQUE
+            );
+            """)
+
             conn.commit()
 
             conn.close()
@@ -94,9 +102,9 @@ class ConfigStorage(ServiceInterface):
             cursor = conn.cursor()
 
             cursor.execute('''
-                INSERT INTO Panels (name, gateway, topic, color, panelGroup, indicator, sensorType, multiplier)
+                INSERT INTO Panels (name, gateway, topic, color, panelGroupId, indicator, sensorType, multiplier)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-            ''', (panel.name, panel.gateway, panel.topic, panel.color, panel.group, panel.indicator, panel.sensor_type, panel.multiplier))
+            ''', (panel.name, panel.gateway, panel.topic, panel.color, panel.group_id, panel.indicator, panel.sensor_type, panel.multiplier))
 
             conn.commit()
             new_id = cursor.lastrowid
@@ -182,7 +190,7 @@ class ConfigStorage(ServiceInterface):
                     gateway = ?,
                     topic = ?,
                     color = ?,
-                    panelGroup = ?,
+                    panelGroupId = ?,
                     indicator = ?,
                     sensorType = ?,
                     gain = ?,
@@ -196,7 +204,7 @@ class ConfigStorage(ServiceInterface):
                 panel.gateway,        # gateway
                 panel.topic,          # topic
                 panel.color,                # color
-                panel.group,             # panelGroup
+                panel.group,             # panelGroupId
                 panel.indicator,         # indicator
                 panel.sensor_type,        # sensorType
                 panel.gain,                  # gain
@@ -241,7 +249,7 @@ class ConfigStorage(ServiceInterface):
                         p.gateway,
                         p.topic AS panelTopic,
                         p.color,
-                        p.panelGroup,
+                        p.panelGroupId,
                         p.indicator,
                         p.sensorType,
                         p.gain,
@@ -274,7 +282,7 @@ class ConfigStorage(ServiceInterface):
                         'gateway': row['gateway'],
                         'topic': row['panelTopic'],
                         'color': row['color'],
-                        'panelGroup': row['panelGroup'],
+                        'panelGroupId': row['panelGroupId'],
                         'indicator': row['indicator'],
                         'sensorType': row['sensorType'],
                         'gain': row['gain'],
@@ -518,3 +526,120 @@ class ConfigStorage(ServiceInterface):
                 conn.close()
 
         return result
+
+    def add_panel_group(self, name: str):
+        new_id = -1
+        try:
+            conn = sqlite3.connect(DB_NAME)
+            cursor = conn.cursor()
+
+            # First check if a group with this name already exists
+            cursor.execute('''
+                SELECT id FROM PanelsGroups WHERE name = ?
+            ''', (name,))
+
+            existing_group = cursor.fetchone()
+            if existing_group:
+                # Group already exists, return its ID
+                new_id = existing_group[0]
+                self._logger.info(
+                    f"PanelGroup '{name}' already exists with id {new_id}")
+            else:
+                # Group doesn't exist, create it
+                cursor.execute('''
+                    INSERT INTO PanelsGroups (name)
+                    VALUES (?)
+                ''', (name,))
+
+                conn.commit()
+                new_id = cursor.lastrowid
+
+        except Exception as e:
+            self._logger.error(f"PanelGroup Add error: {e}")
+        finally:
+            conn.close()
+        return new_id
+
+    def remove_panel_group(self, group_id: int):
+        result = False
+        try:
+            conn = sqlite3.connect(DB_NAME)
+            cursor = conn.cursor()
+
+            cursor.execute("PRAGMA foreign_keys = ON;")
+
+            cursor.execute(
+                "DELETE FROM PanelsGroups WHERE id = ?;", (group_id,))
+            conn.commit()
+
+            if cursor.rowcount == 0:
+                self._logger.warning(
+                    f"No panel group found with id {group_id}.")
+            else:
+                result = True
+
+        except sqlite3.Error as e:
+            self._logger.error(f"remove_panel_group error: {e}")
+        finally:
+            conn.close()
+        return result
+
+    def update_panel_group(self, group_id: int, name: str):
+        result = False
+        try:
+            conn = sqlite3.connect(DB_NAME)
+            cursor = conn.cursor()
+
+            cursor.execute("PRAGMA foreign_keys = ON;")
+
+            update_query = """
+                UPDATE PanelsGroups
+                SET name = ?
+                WHERE id = ?;
+                """
+
+            cursor.execute(update_query, (name, group_id))
+            conn.commit()
+
+            if cursor.rowcount == 0:
+                self._logger.warning(
+                    f"No panel group found with id {group_id}.")
+            else:
+                result = True
+
+        except sqlite3.Error as e:
+            self._logger.error(f"update_panel_group error: {e}")
+        finally:
+            conn.close()
+        return result
+
+    def get_panel_groups(self) -> list[dict]:
+        groups: list[dict] = []
+        try:
+            conn = sqlite3.connect(DB_NAME)
+            conn.row_factory = sqlite3.Row  # So we can access columns by name
+            cursor = conn.cursor()
+
+            query = """
+                    SELECT id, name
+                    FROM PanelsGroups
+                    ORDER BY id
+                    """
+
+            cursor.execute(query)
+            rows = cursor.fetchall()
+
+            for row in rows:
+                group = {
+                    'id': row['id'],
+                    'name': row['name']
+                }
+                groups.append(group)
+
+        except sqlite3.Error as e:
+            self._logger.error(
+                f"ConfigStorage::get_panel_groups: SQLite error: {e}")
+            return []
+        finally:
+            conn.close()
+        return groups

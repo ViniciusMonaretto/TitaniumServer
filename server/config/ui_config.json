@@ -7,7 +7,7 @@
             "color": "#32a852",
             "sensorType": "Temperature",
             "indicator": "0",
-            "group": "camera 1"
+            "panelGroupId": 1
         },
         {
             "name": "Temp2",
@@ -16,7 +16,7 @@
             "color": "#a83244",
             "sensorType": "Temperature",
             "indicator": "1",
-            "group": "camera 1"
+            "panelGroupId": 1
         },
         {
             "name": "Temp3",
@@ -25,7 +25,7 @@
             "color": "#a83295",
             "sensorType": "Temperature",
             "indicator": "2",
-            "group": "camera 1"
+            "panelGroupId": 1
         },
         {
             "name": "Temp4",
@@ -34,7 +34,7 @@
             "color": "#32a88b",
             "sensorType": "Temperature",
             "indicator": "3",
-            "group": "camera 1"
+            "panelGroupId": 1
         },
         {
             "name": "Temp5",
@@ -43,7 +43,7 @@
             "color": "#d61515",
             "sensorType": "Temperature",
             "indicator": "4",
-            "group": "camera 1"
+            "panelGroupId": 1
         },
         {
             "name": "Temp6",
@@ -52,7 +52,7 @@
             "color": "#15d6bc",
             "sensorType": "Temperature",
             "indicator": "5",
-            "group": "camera 1"
+            "panelGroupId": 1
         },
         {
             "name": "Temp7",
@@ -61,7 +61,7 @@
             "color": "#123fd2",
             "sensorType": "Temperature",
             "indicator": "6",
-            "group": "camera 1"
+            "panelGroupId": 1
         },
         {
             "name": "Temp8",
@@ -70,7 +70,7 @@
             "color": "#151fd6",
             "sensorType": "Temperature",
             "indicator": "7",
-            "group": "camera 1"
+            "panelGroupId": 1
         },
         {
             "name": "Temp9",
@@ -79,7 +79,7 @@
             "color": "#7f15d6",
             "sensorType": "Temperature",
             "indicator": "8",
-            "group": "camera 1"
+            "panelGroupId": 1
         },
         {
             "name": "Temp10",
@@ -88,7 +88,7 @@
             "color": "#d615d0",
             "sensorType": "Temperature",
             "indicator": "9",
-            "group": "camera 1"
+            "panelGroupId": 1
         },
         {
             "name": "Temp11",
@@ -97,7 +97,7 @@
             "color": "#d6d015",
             "sensorType": "Temperature",
             "indicator": "10",
-            "group": "camera 1"
+            "panelGroupId": 1
         },
         {
             "name": "Temp12",
@@ -106,7 +106,7 @@
             "color": "#1fd615",
             "sensorType": "Temperature",
             "indicator": "11",
-            "group": "camera 1"
+            "panelGroupId": 1
         },
         {
             "name": "Temp13",
@@ -115,7 +115,7 @@
             "color": "#15d68c",
             "sensorType": "Temperature",
             "indicator": "12",
-            "group": "camera 1"
+            "panelGroupId": 1
         },
         {
             "name": "Temp14",
@@ -124,7 +124,7 @@
             "color": "#156cd6",
             "sensorType": "Temperature",
             "indicator": "13",
-            "group": "camera 1"
+            "panelGroupId": 1
         },
         {
             "name": "Temp15",
@@ -133,7 +133,7 @@
             "color": "#d61599",
             "sensorType": "Temperature",
             "indicator": "14",
-            "group": "camera 1"
+            "panelGroupId": 1
         },
         {
             "name": "Temp16",
@@ -142,7 +142,7 @@
             "color": "#b6d615",
             "sensorType": "Temperature",
             "indicator": "15",
-            "group": "camera 1"
+            "panelGroupId": 1
         },
         {
             "name": "Temp17",
@@ -151,7 +151,7 @@
             "color": "#15d659",
             "sensorType": "Temperature",
             "indicator": "16",
-            "group": "camera 1"
+            "panelGroupId": 1
         },
         {
             "name": "Temp18",
@@ -160,7 +160,7 @@
             "color": "#d64f15",
             "sensorType": "Temperature",
             "indicator": "17",
-            "group": "camera 1"
+            "panelGroupId": 1
         },
         {
             "name": "Temp19",
@@ -169,7 +169,7 @@
             "color": "#1599d6",
             "sensorType": "Temperature",
             "indicator": "18",
-            "group": "camera 1"
+            "panelGroupId": 1
         },
         {
             "name": "Temp20",
@@ -178,7 +178,7 @@
             "color": "#1542d6",
             "sensorType": "Temperature",
             "indicator": "19",
-            "group": "camera 1"
+            "panelGroupId": 1
         },
         {
             "name": "P1",
@@ -187,7 +187,7 @@
             "color": "#000000",
             "sensorType": "Pressure",
             "indicator": "20",
-            "group": "camera 1"
+            "panelGroupId": 1
         },
         {
             "name": "P2",
@@ -196,7 +196,7 @@
             "color": "#000000",
             "sensorType": "Pressure",
             "indicator": "21",
-            "group": "camera 1"
+            "panelGroupId": 1
         },
         {
             "name": "Tensão",
@@ -205,7 +205,7 @@
             "color": "#000000",
             "sensorType": "Tension",
             "indicator": "22",
-            "group": "camera 1"
+            "panelGroupId": 1
         },
         {
             "name": "Corrente",
@@ -214,7 +214,7 @@
             "color": "#000000",
             "sensorType": "Current",
             "indicator": "23",
-            "group": "camera 1"
+            "panelGroupId": 1
         },
         {
             "name": "Fator de Potencia",
@@ -223,7 +223,7 @@
             "color": "#000000",
             "sensorType": "PowerFactor",
             "indicator": "24",
-            "group": "camera 1"
+            "panelGroupId": 1
         },
         {
             "name": "Potencia",
@@ -232,7 +232,7 @@
             "color": "#000000",
             "sensorType": "Power",
             "indicator": "25",
-            "group": "camera 1"
+            "panelGroupId": 1
         }
     ]
 }
