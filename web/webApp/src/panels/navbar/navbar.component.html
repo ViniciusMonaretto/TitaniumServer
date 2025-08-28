@@ -7,13 +7,13 @@
                     font-size: 24px;
                     color: #3E5CAF;">IoCloud</div>
     </div>
-    <side-nav-option *ngFor="let group of getGroupSensorUi()" [icon]="'assets/icon/homeIcon.svg'"
+    <side-nav-option [icon]="'assets/icon/homeIcon.svg'"
         [iconSelected]="'assets/icon/homeSelectedIcon.svg'" [componentText]="'Status Sensores'"
         [isSelected]="isPanelSelected(panelOptions.SENSORS)">
         <side-nav-option *ngFor="let group of getGroupSensorUi()" [isSuboption]="true"
             [icon]="'assets/icon/homeIcon.svg'" [iconSelected]="'assets/icon/homeSelectedIcon.svg'"
             [componentText]="group" (buttonCallback)="setSensor(group)"
-            [isSelected]="isPanelSelected(panelOptions.SENSORS)">
+            [isSelected]="isPanelSelected(panelOptions.SENSORS) && checkIfGroupIsSelected(group)">
         </side-nav-option>
         <side-nav-option *ngIf="CanEdit()" [isSuboption]="true"
             [icon]="'assets/icon/plusIcon.svg'" [componentText]="'Novo'" (buttonCallback)="addNewGroup()">

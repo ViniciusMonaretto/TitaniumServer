@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import {SensorModule} from "../models/sensor-module"
 import {MainScreenOptions} from "../enum/screen-type"
+import { UiPanelService } from './ui-panels.service';
 type Panel = Array<SensorModule> 
 
 @Injectable({
@@ -10,9 +11,8 @@ export class MainScreenSelector {
     
     canEdit = false
     screenOption: MainScreenOptions = MainScreenOptions.SENSORS
-    selectedGroup: string|null = ""
      
-    constructor() 
+    constructor(private UiPanelsService: UiPanelService,) 
     { 
         
     }
@@ -20,7 +20,8 @@ export class MainScreenSelector {
     SelectScreen(option: MainScreenOptions, group: string|null)
     {
       this.screenOption = option
-      this.selectedGroup = group
+      if(group)
+        this.UiPanelsService.SelectGroup(group)
     }
 
     GetScreen()

@@ -9,6 +9,8 @@ import { CommonModule } from '@angular/common';
 import { SideNavOptionComponent } from '../../components/side-nav-option/side-nav-option.component';
 import { ReportGeneratorComponent } from '../../components/report_generator/report_generator.component';
 import { ServerConectorService } from '../../services/server-conector.service';
+import { GroupAddWindowComponent } from '../../components/group-add-window/group-add-window.component';
+import { TransitionCheckState } from '@angular/material/checkbox';
 
 @Component({
   selector: 'app-navbar',
@@ -49,12 +51,22 @@ export class NavbarComponent implements OnInit {
   }
 
   addNewGroup(): void {
-  
+    const dialogRef = this.dialog.open(GroupAddWindowComponent, {
+      width: '250px',
+      data: { callback: (data: any) => {
+        this.serverConnector.sendCommand("addGroupPanel", data)
+      } }
+    });
   }
 
   getGroupSensorUi() {
     let info = Object.keys(this.UiPanelsService.GetUiConfig())
     return info
+  }
+
+  checkIfGroupIsSelected(group: string)
+  {
+    return this.UiPanelsService.groupSelected == group
   }
 
   setSensor(group: string) {

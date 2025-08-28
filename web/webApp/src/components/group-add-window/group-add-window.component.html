@@ -1,0 +1,13 @@
+<h2 mat-dialog-title>Adicionar Grupo</h2>
+<mat-dialog-content>
+    <div>
+        <div>Novo Nome</div>
+        <mat-form-field style="width: 100%;" appearance="fill">
+                <input matInput [(ngModel)]="groupName" />
+        </mat-form-field>
+    </div>
+</mat-dialog-content>
+<mat-dialog-actions>
+    <button mat-button (click)="onCancelClick()">Cancelar</button>
+    <button mat-button [disabled]="!validForm()" (click)="onAddCLick()" cdkFocusInitial>Adicionar</button>
+</mat-dialog-actions>

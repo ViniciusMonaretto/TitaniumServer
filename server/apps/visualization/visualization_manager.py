@@ -99,6 +99,12 @@ class VisualizationWebSocketHandler(tornado.websocket.WebSocketHandler):
                 self.remove_all_events()
             elif "updatePanelInfo" in message_obj["commandName"]:
                 self.update_panel_info(payload)
+            elif "addGroupPanel" in message_obj["commandName"]:
+                self.add_panel_group(payload)
+            elif "removeGroupPanel" in message_obj["commandName"]:
+                self.remove_panel_group(payload)
+            elif "updateGroupPanel" in message_obj["commandName"]:
+                self.update_panel_group(payload)
             elif "generaterReport" in message_obj["commandName"]:
                 self.generate_report(payload)
             else:
@@ -197,6 +203,22 @@ class VisualizationWebSocketHandler(tornado.websocket.WebSocketHandler):
     def update_panel_info(self, update_panel_command):
         self._middleware.send_command(
             ConfigHandlerCommands.UPDATE_PANEL_FUNCTIONALITIES, update_panel_command)
+
+################# Panel Group commands #############################
+    def add_panel_group(self, group_info):
+        self._middleware.send_command(ConfigHandlerCommands.ADD_PANEL_GROUP, group_info,
+                                      lambda data: self.send_panel_info(),
+                                      self.send_error_message)
+
+    def remove_panel_group(self, group_info):
+        self._middleware.send_command(ConfigHandlerCommands.REMOVE_PANEL_GROUP, group_info,
+                                      lambda data: self.send_panel_info(),
+                                      self.send_error_message)
+
+    def update_panel_group(self, group_info):
+        self._middleware.send_command(ConfigHandlerCommands.UPDATE_PANEL_GROUP, group_info,
+                                      lambda data: self.send_panel_info(),
+                                      self.send_error_message)
 
     def send_panel_info(self):
         self._middleware.send_command(ConfigHandlerCommands.GET_PANEL_LIST, {},
