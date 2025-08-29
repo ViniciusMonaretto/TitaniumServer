@@ -17,7 +17,9 @@ export class SideNavOptionComponent implements OnInit {
   @Input() componentText: string = "";
   @Input() isSuboption: boolean = false;
   @Input() isSelected: boolean = false;
+  @Input() canEdit: boolean = false;
   @Output() buttonCallback: EventEmitter<any> = new EventEmitter();
+  @Output() deleteCallback: EventEmitter<any> = new EventEmitter();
 
   unfoldOptions: boolean = false
 

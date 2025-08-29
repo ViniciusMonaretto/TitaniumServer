@@ -23,7 +23,7 @@ export class GroupOfSensorsComponent implements OnInit {
 
   @Input() canEdit: boolean = false;
   @Input() name: string = "";
-  @Input() group: string = "";
+  @Input() group: number = 0;
   @Input() type: string = "";
   @Input() sensorArray: Array<SensorModule> = [];
   @Input() width: string | undefined
@@ -47,11 +47,11 @@ export class GroupOfSensorsComponent implements OnInit {
     };
   }
 
-  addSensor(groupName: string): void {
+  addSensor(groupId: number): void {
     const dialogRef = this.dialog.open(SensorAddWindowComponent, {
       width: '300px',
       data: {callback: (sensorData: any)=>{
-        sensorData["group"] = groupName
+        sensorData["group"] = groupId
         this.addNewSensorCallback(sensorData)
       },
       sensorType: this.type

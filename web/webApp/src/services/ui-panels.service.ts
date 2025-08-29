@@ -3,6 +3,12 @@ import {GetTableName, SensorModule} from "../models/sensor-module"
 import { SensorTypesEnum } from '../enum/sensor-type';
 import { table } from 'console';
 
+export class GroupInfo {
+  public id: number = -1
+  public name: string = ""
+  public panels: PanelInfo = new PanelInfo()
+}
+
 export class PanelInfo {
   public temperature: Array<SensorModule> = [];
   public pressure: Array<SensorModule>  = [];
@@ -14,7 +20,7 @@ export class PanelInfo {
 })
 export class UiPanelService {
     
-    panels: {[id: string]:  PanelInfo} = {}
+    groups: {[id: string]:  GroupInfo} = {}
     subscriptioMap: {[id: string]: Array<SensorModule | Function>} = {}
     subscriptionInfoArrayMap: {[id: string]: {"callback": Function, "tableNames": Array<string>, "group": string}} = {}
 
@@ -29,35 +35,64 @@ export class UiPanelService {
         
     }
 
-    SetNewUiConfig(uiConfig: {[id: string]: SensorModule[]} )
+    SetNewUiConfig(uiConfig: any )
     {
-      for(let groupName in uiConfig)
+      // Remove groups that don't exist in the new uiConfig
+      const currentGroupIds = Object.keys(this.groups)
+      const newGroupIds = Object.keys(uiConfig)
+      
+      for(let groupId of currentGroupIds)
       {
-        this.panels[groupName] = new PanelInfo()
-        this.CreateSensorSubscriptionFromPanel(uiConfig[groupName], groupName)
-        if(this.groupSelected == "")
+        if(!newGroupIds.includes(groupId))
         {
-          this.groupSelected = groupName
+          delete this.groups[groupId]
         }
       }
+      
+      // Check if the currently selected group was deleted
+      if(this.groupSelected && !newGroupIds.includes(this.groupSelected))
+      {
+        this.groupSelected = ""
+      }
+      
+      // Add new groups and update existing ones
+      for(let groupId in uiConfig)
+      {
+        if(!this.groups[groupId])
+        {
+          // Create new group
+          this.groups[groupId] = new GroupInfo()
+          this.CreateSensorSubscriptionFromPanel(uiConfig[groupId].panels, groupId)
+          if(this.groupSelected == "")
+          {
+            this.groupSelected = groupId
+          }
+        }
+        
+        // Update group info
+        this.groups[groupId].name = uiConfig[groupId].groupName
+        this.groups[groupId].id = uiConfig[groupId].groupId
+      }
+
+      
     }
 
     GetPanelById(panelId: number)
     {
-      for(var groupPanelsName in this.panels)
+      for(var groupPanelsId in this.groups)
       {
-        var group = this.panels[groupPanelsName]
-        var panel = group.temperature.find(x=>x.id == panelId)
+        var group = this.groups[groupPanelsId]
+        var panel = group.panels.temperature.find(x=>x.id == panelId)
         if (panel)
         {
           return panel
         }
-        var panel = group.pressure.find(x=>x.id == panelId)
+        var panel = group.panels.pressure.find(x=>x.id == panelId)
         if (panel)
         {
           return panel
         }
-        var panel = group.power.find(x=>x.id == panelId)
+        var panel = group.panels.power.find(x=>x.id == panelId)
         if (panel)
         {
           return panel
@@ -68,33 +103,33 @@ export class UiPanelService {
 
     GetUiConfig()
     {
-      return this.panels
+      return this.groups
     }
     
-    AddSensorToPanel(sensor: SensorModule, groupName: string)
+    AddSensorToPanel(sensor: SensorModule, groupId: string)
     {
       switch(sensor.sensorType)
       {
         case SensorTypesEnum.TEMPERATURE:
-          this.panels[groupName].temperature.push(sensor)
+          this.groups[groupId].panels.temperature.push(sensor)
           break
         case SensorTypesEnum.PREASSURE:
-          this.panels[groupName]["pressure"].push(sensor)
+          this.groups[groupId].panels.pressure.push(sensor)
           break
         case SensorTypesEnum.TENSION:
         case SensorTypesEnum.CURRENT:
         case SensorTypesEnum.POWER_FACTOR:
         case SensorTypesEnum.POWER:
-          this.panels[groupName]["power"].push(sensor)
+          this.groups[groupId].panels.power.push(sensor)
           break
       }
     }
 
-    CreateSensorSubscriptionFromPanel(panel: SensorModule[], groupName: string)
+    CreateSensorSubscriptionFromPanel(panel: SensorModule[], groupId: string)
     {
       for(var sensor of panel)
       {
-        this.AddSensorToPanel(sensor, groupName);
+        this.AddSensorToPanel(sensor, groupId);
         let fullTopic = GetTableName(sensor.gateway, sensor.topic, sensor.indicator.toString())
         this.AddSubscription(fullTopic, sensor)
       }
@@ -163,6 +198,11 @@ export class UiPanelService {
       return this.groupSelected
     }
 
+    GetSelectedGroupInfo()
+    {
+      return this.groups[this.groupSelected]
+    }
+
     OnStatusInfoUpdate(requestId: any, infoArray:any)
     {
       if(requestId in this.subscriptionInfoArrayMap)
@@ -172,20 +212,20 @@ export class UiPanelService {
         {
           let info = {}
 
-          let panel = this.panels[obj.group].temperature.find(x=> GetTableName(x.gateway, 
+          let panel = this.groups[obj.group].panels.temperature.find(x=> GetTableName(x.gateway, 
                                                                                x.topic, 
                                                                                x.indicator.toString()) == tableName)
 
           if(!panel)
           {
-            panel = this.panels[obj.group].pressure.find(x=> GetTableName(x.gateway, 
+            panel = this.groups[obj.group].panels.pressure.find(x=> GetTableName(x.gateway, 
               x.topic, 
               x.indicator.toString()) == tableName)
           }
 
           if(!panel)
           {
-            panel = this.panels[obj.group].power.find(x=> GetTableName(x.gateway, 
+            panel = this.groups[obj.group].panels.power.find(x=> GetTableName(x.gateway, 
               x.topic, 
               x.indicator.toString()) == tableName)
           }

@@ -314,11 +314,13 @@ class VisualizationWebSocketHandler(tornado.websocket.WebSocketHandler):
             self.send_message_to_ui("report", message)
 
 ################# Subscriber Functions #############################
-    def add_subscribers(self, info: {'CalibrateUpdate': bool, 'PanelsInfo': dict[str, list[any]]}):
+    def add_subscribers(self, info: {'CalibrateUpdate': bool, 'PanelsInfo': dict[str, dict]}):
         panels_info = info['PanelsInfo']
-        for panels_group in panels_info.keys():
-            for panel in panels_info[panels_group]:
-                self.add_panel_subscriber(Panel(panel))
+        for group_id in panels_info.keys():
+            group_data = panels_info[group_id]
+            if "panels" in group_data:
+                for panel in group_data["panels"]:
+                    self.add_panel_subscriber(Panel(panel))
 
         self.send_panel_info()
 

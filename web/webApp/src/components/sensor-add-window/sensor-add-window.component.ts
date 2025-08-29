@@ -58,7 +58,7 @@ export class SensorAddWindowComponent {
       "topic": this.sensorModule.topic,
       "sensorType": this.sensorModule.sensorType,
       "group": this.group,
-      "indicator": this.sensorModule.indicator,
+      "indicator": this.sensorModule.indicator.toString(),
       "color": this.sensorModule.color
     }
   }

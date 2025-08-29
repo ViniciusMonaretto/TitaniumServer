@@ -320,7 +320,9 @@ class ConfigHandler(ServiceInterface):
 
                 panels_with_last_values.append(panel_json)
 
-            obj[group.name] = panels_with_last_values
+            obj[str(group.id)] = {"panels": panels_with_last_values,
+                                  "groupName": group.name,
+                                  "groupId": group.id}
 
         return {"calibrateUpdate": calibrate_update, 'PanelsInfo': obj}
 
@@ -368,6 +370,9 @@ class ConfigHandler(ServiceInterface):
     def remove_panel_group(self, group_id):
         result = self._config_storage.remove_panel_group(group_id)
         if result:
+            for panel in self._panel_groups[group_id].panels:
+                self.remove_panel_subscription(panel)
+
             del self._panel_groups[group_id]
             return True, "Success"
         return False, "Error removing panel group"

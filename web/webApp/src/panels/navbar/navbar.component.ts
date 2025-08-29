@@ -11,6 +11,7 @@ import { ReportGeneratorComponent } from '../../components/report_generator/repo
 import { ServerConectorService } from '../../services/server-conector.service';
 import { GroupAddWindowComponent } from '../../components/group-add-window/group-add-window.component';
 import { TransitionCheckState } from '@angular/material/checkbox';
+import { DialogHelper } from '../../services/dialog-helper.service';
 
 @Component({
   selector: 'app-navbar',
@@ -24,6 +25,7 @@ export class NavbarComponent implements OnInit {
   public panelOptions = MainScreenOptions
 
   constructor(public dialog: MatDialog,
+    private dialogHelper: DialogHelper,
     private mainScreenService: MainScreenSelector,
     private UiPanelsService: UiPanelService,
     private serverConnector: ServerConectorService) { }
@@ -59,9 +61,17 @@ export class NavbarComponent implements OnInit {
     });
   }
 
+  deleteGroup(group: number) {
+    this.dialogHelper.openQuestionDialog("Deletar Grupo", 
+      "Você tem certeza que deseja deletar o grupo?", () => {
+        this.serverConnector.sendCommand("removeGroupPanel", {"id": group})
+      }
+    )
+  }
+
   getGroupSensorUi() {
-    let info = Object.keys(this.UiPanelsService.GetUiConfig())
-    return info
+    var groups = this.UiPanelsService.GetUiConfig()
+    return Object.values(groups)
   }
 
   checkIfGroupIsSelected(group: string)

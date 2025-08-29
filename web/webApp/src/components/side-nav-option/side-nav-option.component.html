@@ -8,9 +8,10 @@
         <div>
             {{componentText}}
         </div>
+        <img *ngIf="canEdit" (click)="deleteCallback.emit()" src="assets/icon/deleteIcon.svg" [style]="isSuboption?'height: 20px;padding: 25px;':'height: 28px;'"/>
     </button>
     <div *ngIf="unfoldOptions">
         <ng-content></ng-content>
     </div>
-   
+    
 </div>

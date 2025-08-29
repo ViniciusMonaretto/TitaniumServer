@@ -26,15 +26,20 @@ export class SensorGroupComponent implements OnInit {
   }
 
   getInfoOfGroup() {
-    let info = this.UiPanelsService.GetUiConfig()[this.getGroupSelected()]
+    let info = this.UiPanelsService.GetSelectedGroupInfo()
     if (!info) {
       return new PanelInfo()
     }
-    return info
+    return info.panels
   }
 
   getGroupSelected() {
-    return this.UiPanelsService.GetGroup()
+    return this.UiPanelsService.GetSelectedGroupInfo()?.id
+  }
+
+  getGroupName(){
+    const groupInfo = this.UiPanelsService.GetSelectedGroupInfo()
+    return groupInfo ? groupInfo.name : ''
   }
 
   getSensorType() {
@@ -78,7 +83,7 @@ export class SensorGroupComponent implements OnInit {
         "topic": tableInfo['table'],
         "indicator": tableInfo['indicator']
       }],
-        this.getGroupSelected(),
+        this.getGroupName(),
         startDate,
         endDate)
     }
