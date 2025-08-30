@@ -1,17 +1,19 @@
 <div [ngClass]="{'nav-main': !isSuboption, 'nav-main-sub': isSuboption}">
-    <button (click)="buttonCLick()" 
-            [ngClass]="{'side-nav-inner-class': !isSuboption, 
+    <div style="display: flex; align-items: center;">
+        <button (click)="buttonCLick()" [ngClass]="{'side-nav-inner-class': !isSuboption, 
                         'side-nav-inner-class-sub': isSuboption,
-                        'transparent-button': true}"
-            aria-label="Example icon-button with heart icon">
-        <img [src]="getIcon()" [style]="isSuboption?'height: 20px;padding: 25px;':'height: 28px;'"/>
-        <div>
-            {{componentText}}
-        </div>
-        <img *ngIf="canEdit" (click)="deleteCallback.emit()" src="assets/icon/deleteIcon.svg" [style]="isSuboption?'height: 20px;padding: 25px;':'height: 28px;'"/>
-    </button>
+                        'transparent-button': true}" aria-label="Example icon-button with heart icon">
+            <img [src]="getIcon()" [style]="isSuboption?'height: 20px;padding: 25px;':'height: 28px;'" />
+            <div>
+                {{componentText}}
+            </div>
+        </button>
+        <img *ngIf="canEdit" (click)="deleteCallback.emit()" src="assets/icon/trashIcon.svg"
+            [style]="isSuboption?'height: 20px;padding: 15px; cursor: pointer;':'height: 28px; cursor: pointer;'" />
+    </div>
+
     <div *ngIf="unfoldOptions">
         <ng-content></ng-content>
     </div>
-    
+
 </div>
