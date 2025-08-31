@@ -36,45 +36,24 @@ export class UiPanelService {
     }
 
     SetNewUiConfig(uiConfig: any )
-    {
-      // Remove groups that don't exist in the new uiConfig
-      const currentGroupIds = Object.keys(this.groups)
-      const newGroupIds = Object.keys(uiConfig)
+    { 
       
-      for(let groupId of currentGroupIds)
-      {
-        if(!newGroupIds.includes(groupId))
-        {
-          delete this.groups[groupId]
-        }
-      }
-      
-      // Check if the currently selected group was deleted
-      if(this.groupSelected && !newGroupIds.includes(this.groupSelected))
-      {
-        this.groupSelected = ""
-      }
-      
-      // Add new groups and update existing ones
+      this.RemoveAllSensorModuleSubscription()
+      this.groups = {}
+
       for(let groupId in uiConfig)
       {
-        if(!this.groups[groupId])
+        this.groups[groupId] = new GroupInfo()
+        this.CreateSensorSubscriptionFromPanel(uiConfig[groupId].panels, groupId)
+        if(this.groupSelected == "")
         {
-          // Create new group
-          this.groups[groupId] = new GroupInfo()
-          this.CreateSensorSubscriptionFromPanel(uiConfig[groupId].panels, groupId)
-          if(this.groupSelected == "")
-          {
-            this.groupSelected = groupId
-          }
+          this.groupSelected = groupId
         }
         
         // Update group info
         this.groups[groupId].name = uiConfig[groupId].groupName
         this.groups[groupId].id = uiConfig[groupId].groupId
       }
-
-      
     }
 
     GetPanelById(panelId: number)
@@ -124,6 +103,15 @@ export class UiPanelService {
           break
       }
     }
+
+    RemoveAllSensorModuleSubscription()
+    {
+      for(var sensorId in  this.subscriptioMap)
+      {
+        this.subscriptioMap[sensorId] = this.subscriptioMap[sensorId].filter(x=> !("topic" in x))
+      }
+    }
+
 
     CreateSensorSubscriptionFromPanel(panel: SensorModule[], groupId: string)
     {
