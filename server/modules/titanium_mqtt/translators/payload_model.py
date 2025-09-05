@@ -8,12 +8,57 @@ class MqttActions(Enum):
     REPORT = "report"
     COMMAND = "command"
     STATUS = "status"
+    SYSTEM = "system"
 
 
 class MqttDataModel(ABC):
     @abstractmethod
     def to_dict(self) -> dict[str:Any]:
         pass
+
+
+class MqttSensorStatusModel(MqttDataModel):
+    status: str
+    gain: float
+    offset: float
+    topic: str
+    indicator: str
+    gateway: str
+
+    def to_dict(self):
+        return {
+            "status": self.status,
+            "gain": self.gain,
+            "offset": self.offset,
+            "topic": self.topic,
+            "indicator": self.indicator,
+            "gateway": self.gateway
+        }
+
+
+class MqttGatewayModel(MqttDataModel):
+    full_topic: str = ""
+    name: str
+    ip: str
+    uptime: int
+
+    def to_dict(self):
+        return {
+            "name": self.name,
+            "ip": self.ip,
+            "uptime": self.uptime
+        }
+
+
+class MqttSystemModel(MqttDataModel):
+    gateway: MqttGatewayModel
+    panels: list[MqttSensorStatusModel]
+
+    def to_dict(self):
+        return {
+            "gateway": self.gateway.to_dict(),
+            "panels": [panel.to_dict() for panel in self.panels]
+        }
 
 
 class MqttCallibrationModel(MqttDataModel):

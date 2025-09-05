@@ -8,6 +8,7 @@ from middleware.status_subscriber import StatuSubscribers
 from dataModules.alarm import Alarm, AlarmType
 from modules.titanium_mqtt.mqtt_commands import MqttCommands
 from dataModules.panel_group import PanelGroup
+from dataModules.gateway import GatewayStatus
 from services.alarm_manager.alarm_manager import AlarmManager
 from services.sensor_data_storage.sensor_data_storage import SensorDataStorage
 from support.logger import Logger
@@ -86,6 +87,22 @@ class ConfigHandler(ServiceInterface):
             self.read_default_config()
         else:
             self.initialize_panels_from_db(panels_infos, groups_infos)
+
+    def update_calibration_from_gateway_status(self, panels: list[{
+        "status": str,
+        "gain": float,
+        "offset": float,
+        "topic": str,
+        "indicator": str
+    }]):
+        for panel_info in panels:
+            panel: Panel = self._find_panel_from_topic(
+                panel_info.topic, str(panel_info.indicator), panel_info.gateway)
+            if panel:
+                panel.offset = panel_info.offset
+                panel.gain = panel_info.gain
+                self._config_storage.update_panel(panel)
+        self.send_ui_update_action(True)
 
     def calibration_update_received(self, status_info, group_id, index):
         data = status_info["data"]
@@ -384,3 +401,10 @@ class ConfigHandler(ServiceInterface):
             del self._panel_groups[group_id]
             return True, "Success"
         return False, "Error updating panel group"
+
+    def _find_panel_from_topic(self, topic, indicator, gateway):
+        for group in self._panel_groups.values():
+            for panel in group.panels:
+                if panel.topic == topic and panel.indicator == indicator and panel.gateway == gateway:
+                    return panel
+        return None

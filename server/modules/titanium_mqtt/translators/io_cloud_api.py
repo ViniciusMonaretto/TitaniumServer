@@ -4,8 +4,11 @@ from modules.titanium_mqtt.translators.translator_model import PayloadTranslator
 from modules.titanium_mqtt.translators.payload_model import (
     MqttActions,
     MqttCallibrationModel,
+    MqttGatewayModel,
     MqttPayloadModel,
     MqttReadingModel,
+    MqttSensorStatusModel,
+    MqttSystemModel,
 )
 from modules.titanium_mqtt.mqtt_helper import MqttHelper
 from support.logger import Logger
@@ -62,7 +65,8 @@ class IoCloudApiTranslator(PayloadTranslator):
             type_of_sensor = "power"
         elif reading_json["unit"] == "%":
             type_of_sensor = "powerFactor"
-            reading_json["value"] = reading_json["value"]*100
+            if "value" in reading_json:
+                reading_json["value"] = reading_json["value"]*100
         else:
             self.logger.error(
                 f"IoCloudApiTranslator::_create_reading: mqtt unit not recognized {reading_json['unit']}"
@@ -118,6 +122,35 @@ class IoCloudApiTranslator(PayloadTranslator):
     def _read_calibration_update_message(self, gateway: str, message_json: Any):
         return [self._create_calibration_update(gateway, message_json)]
 
+    def _read_system_message(self, message_json: Any):
+        return [self._create_system_update(message_json)]
+
+    def _create_system_update(self, message_json: Any):
+        system: MqttGatewayModel = MqttGatewayModel()
+
+        system.name = message_json["name"]
+        system.ip = message_json["ip"]
+        system.uptime = message_json["uptime"]
+
+        panels = []
+
+        for panel in message_json["panels"]:
+            system_panel: MqttSensorStatusModel = MqttSensorStatusModel()
+            system_panel.status = panel["active"]
+            system_panel.gain = panel["gain"]
+            system_panel.offset = panel["offset"]
+            system_panel.topic = self._get_type_of_sensor(panel)
+            system_panel.indicator = len(panels)
+            system_panel.gateway = message_json["name"]
+            panels.append(system_panel)
+
+        system_module = MqttSystemModel()
+        system_module.gateway = system
+        system_module.panels = panels
+        system_module.full_topic = "gateway-status-*"
+
+        return system_module
+
     def translate_incoming_message(self, topic: str, payload):
         out_payload = MqttPayloadModel()
 
@@ -153,5 +186,11 @@ class IoCloudApiTranslator(PayloadTranslator):
                 out_payload.data = self._read_calibration_update_message(
                     msg_split[2], message_json
                 )
+        elif action_str == MqttActions.SYSTEM.value:
+            if not len(msg_split) == 4:
+                self.logger.error(
+                    f"IoCloudApiTranslator::translate_payload: mqtt topic {topic} not valid"
+                )
+            out_payload.data = self._read_system_message(message_json)
 
         return out_payload

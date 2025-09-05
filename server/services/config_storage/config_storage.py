@@ -41,6 +41,13 @@ class ConfigStorage(ServiceInterface):
             cursor = conn.cursor()
 
             cursor.execute("""
+            CREATE TABLE IF NOT EXISTS PanelsGroups (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL UNIQUE
+            );
+            """)
+
+            cursor.execute("""
             CREATE TABLE IF NOT EXISTS Panels (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 name TEXT NOT NULL,
@@ -77,13 +84,6 @@ class ConfigStorage(ServiceInterface):
                 value FLOAT NOT NULL,
                 timestamp REAL NOT NULL,
                 FOREIGN KEY (alarmId) REFERENCES Alarms (id) ON DELETE CASCADE
-            );
-            """)
-
-            cursor.execute("""
-            CREATE TABLE IF NOT EXISTS PanelsGroups (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                name TEXT NOT NULL UNIQUE
             );
             """)
 
@@ -204,7 +204,7 @@ class ConfigStorage(ServiceInterface):
                 panel.gateway,        # gateway
                 panel.topic,          # topic
                 panel.color,                # color
-                panel.group,             # panelGroupId
+                panel.group_id,             # panelGroupId
                 panel.indicator,         # indicator
                 panel.sensor_type,        # sensorType
                 panel.gain,                  # gain

@@ -3,34 +3,117 @@ import random
 import json
 from datetime import datetime
 import paho.mqtt.client as mqtt
-import copy
 
 # Define the broker and port
 BROKER = 'localhost'  # 'broker.hivemq.com'  # "mqtt.eclipseprojects.io"
 PORT = 1883
 MESSAGES_TO_SEND = 1
 
+# Base sensor values
+base_sensors = [
+    {"value": -41.5, "active": True, "unit": "°C"},
+    {"value": -29.08, "active": True, "unit": "°C"},
+    {"value": -18.41, "active": True, "unit": "°C"},
+    {"value": -10.97, "active": True, "unit": "°C"},
+    {"value": -0.67, "active": True, "unit": "°C"},
+    {"value": 7.33, "active": True, "unit": "°C"},
+    {"value": 20.88, "active": True, "unit": "°C"},
+    {"value": 25.1, "active": True, "unit": "°C"},
+    {"value": 28.18, "active": True, "unit": "°C"},
+    {"value": 39.2, "active": True, "unit": "°C"},
+    {"value": 48.3, "active": True, "unit": "°C"},
+    {"value": 62.77, "active": True, "unit": "°C"},
+    {"value": 68.89, "active": True, "unit": "°C"},
+    {"value": 80.62, "active": True, "unit": "°C"},
+    {"value": 92.21, "active": True, "unit": "°C"},
+    {"value": 98.12, "active": True, "unit": "°C"},
+    {"value": 111.21, "active": True, "unit": "°C"},
+    {"value": 124.4, "active": True, "unit": "°C"},
+    {"value": 132.87, "active": True, "unit": "°C"},
+    {"value": 140.7, "active": True, "unit": "°C"},
+    {"value": 20, "active": True, "unit": "kPa"},
+    {"value": 20, "active": True, "unit": "kPa"},
+    {"value": 221, "active": True, "unit": "V"},
+    {"value": 2, "active": True, "unit": "A"},
+    {"value": 0.96, "active": True, "unit": "%"}
+]
+
 # Callback for successful connection
 
 
-def on_connect(client, userdata, flags, rc):
+def on_connect(mqtt_client, userdata, flags, rc):
     if rc == 0:
         print("Connected successfully")
         # Subscribe to the command topic
-        client.subscribe("iocloudcommand/#")
+        mqtt_client.subscribe("iocloud/request/#")
+
+        # Send initial gateway status message
+        send_gateway_status(mqtt_client)
     else:
         print(f"Connection failed with code {rc}")
+
+
+# Function to create and send gateway status message
+def send_gateway_status(mqtt_client):
+    panels = []
+    for sensor_data in base_sensors:
+        panel = {
+            "active": True,
+            "gain": 1,
+            "offset": 0,
+            "unit": sensor_data["unit"]
+        }
+        panels.append(panel)
+
+    status_payload = {
+        "name": "1C69209DFC08",
+        "ip": "192.168.1.100",
+        "uptime": 100,
+        "panels": panels
+    }
+
+    status_topic = "iocloud/response/1C69209DFC08/system"
+    mqtt_client.publish(status_topic, json.dumps(status_payload))
+    print(f"Sent status message to {status_topic}")
 
 
 # Callback for receiving messages
 
 
-def on_message(client, userdata, msg):
+def on_message(mqtt_client, userdata, msg):
     print(f"Received command on topic: {msg.topic}")
-    response_topic = msg.topic.replace("iocloudcommand/", "iocloud/", 1)
+    print(f"Payload: {msg.payload}")
+
+    # Handle gateway status request
+    if msg.topic == "iocloud/request/sendgatewaystatus":
+        send_gateway_status(mqtt_client)
+        return
+
+    # Handle other command topics
+    response_topic = msg.topic.replace("iocloud/", "iocloud/", 1)
     response_topic = response_topic.replace("request/", "response/", 1)
 
-    obj = json.loads(msg.payload)
+    # Check if payload is empty or invalid
+    if not msg.payload:
+        print(f"Empty payload received on topic: {msg.topic}")
+        return
+
+    try:
+        obj = json.loads(msg.payload)
+    except json.JSONDecodeError as e:
+        print(f"Invalid JSON payload on topic {msg.topic}: {e}")
+        print(f"Payload content: {msg.payload}")
+        return
+
+    # Check if required fields exist
+    if "params" not in obj:
+        print(f"Missing 'params' field in payload on topic: {msg.topic}")
+        return
+
+    if not all(key in obj["params"] for key in ["sensor_id", "gain", "offset"]):
+        print(f"Missing required fields in params on topic: {msg.topic}")
+        return
+
     obj["command_index"] = 1
     obj["command_status"] = 0
     obj["sensor_id"] = obj["params"]["sensor_id"]
@@ -38,7 +121,7 @@ def on_message(client, userdata, msg):
     obj["offset"] = obj["params"]["offset"]
     obj["unit"] = "°C"
 
-    client.publish(response_topic, json.dumps(obj))
+    mqtt_client.publish(response_topic, json.dumps(obj))
     print(f"Responded to topic: {response_topic}")
 
 
@@ -56,34 +139,6 @@ client.loop_start()
 client.subscribe("iocloud/request/#")
 
 try:
-    # Base sensor values
-    base_sensors = [
-        {"value": -41.5, "active": True, "unit": "°C"},
-        {"value": -29.08, "active": True, "unit": "°C"},
-        {"value": -18.41, "active": True, "unit": "°C"},
-        {"value": -10.97, "active": True, "unit": "°C"},
-        {"value": -0.67, "active": True, "unit": "°C"},
-        {"value": 7.33, "active": True, "unit": "°C"},
-        {"value": 20.88, "active": True, "unit": "°C"},
-        {"value": 25.1, "active": True, "unit": "°C"},
-        {"value": 28.18, "active": True, "unit": "°C"},
-        {"value": 39.2, "active": True, "unit": "°C"},
-        {"value": 48.3, "active": True, "unit": "°C"},
-        {"value": 62.77, "active": True, "unit": "°C"},
-        {"value": 68.89, "active": True, "unit": "°C"},
-        {"value": 80.62, "active": True, "unit": "°C"},
-        {"value": 92.21, "active": True, "unit": "°C"},
-        {"value": 98.12, "active": True, "unit": "°C"},
-        {"value": 111.21, "active": True, "unit": "°C"},
-        {"value": 124.4, "active": True, "unit": "°C"},
-        {"value": 132.87, "active": True, "unit": "°C"},
-        {"value": 140.7, "active": True, "unit": "°C"},
-        {"value": 20, "active": True, "unit": "kPa"},
-        {"value": 20, "active": True, "unit": "kPa"},
-        {"value": 221, "active": True, "unit": "V"},
-        {"value": 2, "active": True, "unit": "A"},
-        {"value": 0.96, "active": True, "unit": "%"}
-    ]
     while True:
         sensors = []
         for sensor in base_sensors:

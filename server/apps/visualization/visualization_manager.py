@@ -3,7 +3,7 @@ import tornado.web
 import tornado.websocket
 
 from dataModules.alarm import Alarm
-from modules.titanium_mqtt.mqtt_commands import MqttCommands
+from dataModules.gateway import GatewayStatus
 from services.report_generator.report_generator_commands import ReportGeneratorCommands
 from services.config_storage.config_storage_commands import ConfigStorageCommand
 from services.alarm_manager.alarm_manager_commands import AlarmManagerCommands
@@ -40,7 +40,8 @@ class VisualizationWebSocketHandler(tornado.websocket.WebSocketHandler):
     _status_subscribers: dict[str, SubscriberInterface] = {}
     _logger: Logger
 
-    _event_subscriber: SubscriberInterface = None
+    _alarm_event_subscriber: SubscriberInterface = None
+    _gateway_status_subscriber: SubscriberInterface = None
     _calibrate_subscriber: SubscriberInterface = None
 
     def check_origin(self, origin):
@@ -50,16 +51,21 @@ class VisualizationWebSocketHandler(tornado.websocket.WebSocketHandler):
         raise NotImplementedError()
 
     def initialize_event_sub(self):
-        self._event_subscriber = StatuSubscribers(
+        self._alarm_event_subscriber = StatuSubscribers(
             self.send_event, "alarm-newevent-*")
         self._middleware.add_subscribe_to_status(
-            self._event_subscriber, "alarm-newevent-*")
+            self._alarm_event_subscriber, "alarm-newevent-*")
 
     def initialize_ui_update_sub(self):
         self._calibrate_subscriber = StatuSubscribers(
             lambda data: self.send_ui_message(data["data"]), "ui-update-*")
         self._middleware.add_subscribe_to_status(
             self._calibrate_subscriber, "ui-update-*")
+
+        self._gateway_status_subscriber = StatuSubscribers(
+            self.send_gateway_status, "gateway-statusupdate-*")
+        self._middleware.add_subscribe_to_status(
+            self._gateway_status_subscriber, "gateway-statusupdate-*")
 
     def initialize(self, middleware):
         self._logger = Logger()
@@ -116,11 +122,16 @@ class VisualizationWebSocketHandler(tornado.websocket.WebSocketHandler):
     def on_close(self):
         self._logger.debug("WebSocket closed")
         self._middleware.remove_subscribe_from_status(
-            self._event_subscriber, self._event_subscriber.get_topic())
+            self._alarm_event_subscriber, self._alarm_event_subscriber.get_topic())
         self._middleware.remove_subscribe_from_status(
             self._calibrate_subscriber, self._calibrate_subscriber.get_topic())
+        self._middleware.remove_subscribe_from_status(
+            self._gateway_status_subscriber, self._gateway_status_subscriber.get_topic())
+
         self._calibrate_subscriber = None
-        self._event_subscriber = None
+        self._alarm_event_subscriber = None
+        self._gateway_status_subscriber = None
+
         for subscriber_topic in self._status_subscribers:
             self._middleware.remove_subscribe_from_status(
                 self._status_subscribers[subscriber_topic], subscriber_topic)
@@ -340,3 +351,10 @@ class VisualizationWebSocketHandler(tornado.websocket.WebSocketHandler):
             self._middleware.add_subscribe_to_status(
                 self._status_subscribers[panel_topic], panel_topic)
         self._status_subscribers[panel_topic].add_count()
+
+
+################# Gateway status commands #############################
+
+
+    def send_gateway_status(self, gateway_status: list[GatewayStatus]):
+        self.send_message_to_ui("gatewayStatus", gateway_status)
