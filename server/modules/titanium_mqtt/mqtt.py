@@ -53,7 +53,7 @@ class TitaniumMqtt:
 
     def initialize_commands(self):
         commands = {MqttCommands.CALIBRATION: self.calibrate_command,
-                    MqttCommands.STATUS_REQUEST: self.status_request_command}
+                    MqttCommands.SYSTEM_STATUS_REQUEST: self.status_request_command}
         self._middleware.add_commands(commands)
 
     def calibrate_command(self, command):
@@ -81,7 +81,7 @@ class TitaniumMqtt:
         if not self._client or not self._client.is_connected():
             self._middleware.send_command_answear(
                 False, "status_request_command: Mqtt not connected", command["requestId"])
-        topic = "iocloud/request/sendgatewaystatus"
+        topic = "iocloud/request/sendsystemstatus"
         self._client.publish(topic, "")
         self._middleware.send_command_answear(
             True, "sucess", command["requestId"])

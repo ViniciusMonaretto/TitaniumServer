@@ -85,7 +85,7 @@ def on_message(mqtt_client, userdata, msg):
     print(f"Payload: {msg.payload}")
 
     # Handle gateway status request
-    if msg.topic == "iocloud/request/sendgatewaystatus":
+    if msg.topic == "iocloud/request/sendsystemstatus":
         send_gateway_status(mqtt_client)
         return
 

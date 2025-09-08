@@ -1,0 +1,73 @@
+.gateway-card {
+  max-width: 380px;
+  max-height: 120px;
+  height: 100px;
+  border: solid;
+  border-width: thin;
+  border-color: #E5E7EB;
+  border-radius: 8px;
+  color: #6B7280;
+  box-shadow: 0px 1px 2px 0px #0000000D;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  background-color: #ffffff;
+  transition: box-shadow 0.2s ease-in-out;
+
+  &:hover {
+    box-shadow: 0px 4px 8px 0px #0000001A;
+  }
+}
+
+.header-gateway {
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.gateway-name {
+  color: #1F2937;
+  font-weight: 600;
+}
+
+.status-indicator {
+  height: 12px;
+  width: 12px;
+  border-radius: 50%;
+  background-color: #EF4444; // Red for offline
+  transition: background-color 0.2s ease-in-out;
+
+  &.online {
+    background-color: #10B981; // Green for online
+  }
+}
+
+.gateway-details {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  height: calc(100% - 35px);
+  justify-content: center;
+}
+
+.detail-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+}
+
+.detail-label {
+  color: #6B7280;
+  font-weight: 500;
+}
+
+.detail-value {
+  color: #1F2937;
+  font-weight: 600;
+  text-align: right;
+}

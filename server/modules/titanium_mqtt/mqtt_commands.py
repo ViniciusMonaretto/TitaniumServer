@@ -1,3 +1,3 @@
 class MqttCommands:
     CALIBRATION = "Calibration"
-    STATUS_REQUEST = "StatusRequest"
+    SYSTEM_STATUS_REQUEST = "StatusRequest"

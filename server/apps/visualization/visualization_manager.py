@@ -4,6 +4,7 @@ import tornado.websocket
 
 from dataModules.alarm import Alarm
 from dataModules.gateway import GatewayStatus
+from services.gateway_manager.gateway_manager_commands import GatewayManagerCommands
 from services.report_generator.report_generator_commands import ReportGeneratorCommands
 from services.config_storage.config_storage_commands import ConfigStorageCommand
 from services.alarm_manager.alarm_manager_commands import AlarmManagerCommands
@@ -113,6 +114,10 @@ class VisualizationWebSocketHandler(tornado.websocket.WebSocketHandler):
                 self.update_panel_group(payload)
             elif "generaterReport" in message_obj["commandName"]:
                 self.generate_report(payload)
+            elif "updateGateways" in message_obj["commandName"]:
+                self.update_gateways(payload)
+            elif "getGateways" in message_obj["commandName"]:
+                self.get_gateways(payload)
             else:
                 self._logger.error(
                     "VisualizationWebSocketHandler:: unknown command: " + message_obj["commandName"])
@@ -358,3 +363,13 @@ class VisualizationWebSocketHandler(tornado.websocket.WebSocketHandler):
 
     def send_gateway_status(self, gateway_status: list[GatewayStatus]):
         self.send_message_to_ui("gatewayStatus", gateway_status)
+
+    def update_gateways(self, payload):
+        self._middleware.send_command(GatewayManagerCommands.REQUEST_UPDATE_GATEWAYS, payload,
+                                      None,
+                                      self.send_error_message)
+
+    def get_gateways(self, payload):
+        self._middleware.send_command(GatewayManagerCommands.GET_GATEWAYS, payload,
+                                      None,
+                                      self.send_error_message)

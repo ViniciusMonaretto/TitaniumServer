@@ -9,6 +9,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatInputModule } from '@angular/material/input';
 import { FormsModule } from '@angular/forms';
 import { SensorModule } from '../../models/sensor-module';
+import { GroupInfo } from '../../services/ui-panels.service';
 
 export const MY_DATE_FORMATS = {
   parse: {
@@ -45,7 +46,7 @@ export const MY_DATE_FORMATS = {
 })
 export class GraphRequestWindowComponent implements OnInit {
 
-  uiConfig: { [id: string]: any } = {}
+  uiConfig: { [id: string]: GroupInfo } = {}
 
   selectedSensors: Array<SensorModule> = []
   selectedGroup: string = ""
@@ -80,11 +81,11 @@ export class GraphRequestWindowComponent implements OnInit {
     switch(this.option)
     {
       case "temperature":
-        return this.uiConfig[this.selectedGroup].temperature
+        return this.uiConfig[this.selectedGroup].panels.temperature
       case "pressure":
-        return this.uiConfig[this.selectedGroup].pressure
+        return this.uiConfig[this.selectedGroup].panels.pressure
       case "power":
-        return this.uiConfig[this.selectedGroup].power
+        return this.uiConfig[this.selectedGroup].panels.power
       default:
         return []
     }

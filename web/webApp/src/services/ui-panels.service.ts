@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import {GetTableName, SensorModule} from "../models/sensor-module"
 import { SensorTypesEnum } from '../enum/sensor-type';
 import { table } from 'console';
+import { GatewayModule } from '../models/gateway-model';
 
 export class GroupInfo {
   public id: number = -1
@@ -24,6 +25,8 @@ export class UiPanelService {
     subscriptioMap: {[id: string]: Array<SensorModule | Function>} = {}
     subscriptionInfoArrayMap: {[id: string]: {"callback": Function, "tableNames": Array<string>, "group": string}} = {}
 
+
+    gateways: GatewayModule[] = []
     groupSelected: string = ""
 
     sensorCachedCurrentInfo: {[id: string]: any[]} = {}
@@ -83,6 +86,11 @@ export class UiPanelService {
     GetUiConfig()
     {
       return this.groups
+    }
+
+    UpdateGateways(gateways: GatewayModule[])
+    {
+      this.gateways = gateways
     }
     
     AddSensorToPanel(sensor: SensorModule, groupId: string)

@@ -9,12 +9,13 @@ import { GraphViewComponent } from '../graph-view/graph-view.component';
 import { SensorGroupComponent } from '../sensor-group/sensor-group.component';
 import { AlarmViewComponent } from '../alarm-screen/alarm-screen.component';
 import { EventAlarmManagerService } from '../../services/event-alarm-manager.service';
+import { GatewayScreenComponent } from '../gateway-screen/gateway-screen.component';
 
 @Component({
     selector: 'app-main-screen',
     templateUrl: './main-screen.component.html',
     styleUrls: ['./main-screen.component.scss'],
-    imports: [CommonModule, GraphViewComponent, SensorGroupComponent, AlarmViewComponent],
+    imports: [CommonModule, GraphViewComponent, SensorGroupComponent, AlarmViewComponent, GatewayScreenComponent],
     standalone: true
 })
 export class MainScreenComponent implements OnInit {
@@ -39,6 +40,11 @@ export class MainScreenComponent implements OnInit {
   isStatusAlertSelected()
   {
     return this.mainScreenSelectorServce.GetScreen() === MainScreenOptions.ALERT_VIEW
+  }
+
+  isGatewaySelected()
+  {
+    return this.mainScreenSelectorServce.GetScreen() === MainScreenOptions.GATEWAY_VIEW
   }
 
 }

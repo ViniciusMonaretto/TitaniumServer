@@ -28,7 +28,9 @@ export class ServerConectorService {
     setTimeout(() => {
       this.connectToServer();
     }, 100)
-
+    this.addOnConnectCallback(()=>{
+      this.sendCommand("getGateways", {})
+  })
   }
 
   addOnConnectCallback(callback: Function) {
@@ -213,6 +215,10 @@ export class ServerConectorService {
       if (this.removeAlarmRequest) {
         this.removeAlarmRequest(message)
       }
+    }
+    else if (data["status"] == "gatewayStatus") {
+      let message = data["message"]
+      this.uiPanelService.UpdateGateways(message['data'])
     }
     else if (data["status"] == "eventListResponse") {
       let message = data["message"]

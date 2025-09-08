@@ -1,0 +1,16 @@
+<div class="gateway-card">
+  <div class="header-gateway">
+    <div class="gateway-name">{{gatewayInfo.name}}</div>
+    <div class="status-indicator" [class.online]="isGatewayOnline()"></div>
+  </div>
+  <div class="gateway-details">
+    <div class="detail-item">
+      <span class="detail-label">IP Address:</span>
+      <span class="detail-value">{{gatewayInfo.ip}}</span>
+    </div>
+    <div class="detail-item">
+      <span class="detail-label">Uptime:</span>
+      <span class="detail-value">{{formatUptime(gatewayInfo.uptime)}}</span>
+    </div>
+  </div>
+</div>

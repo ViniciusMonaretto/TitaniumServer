@@ -91,6 +91,10 @@ export class NavbarComponent implements OnInit {
     this.mainScreenService.SelectScreen(MainScreenOptions.ALERT_VIEW, null)
   }
 
+  setGatewayScreen() {
+    this.mainScreenService.SelectScreen(MainScreenOptions.GATEWAY_VIEW, null)
+  }
+
   toogleEdit() {
     this.mainScreenService.toogleEdit()
   }

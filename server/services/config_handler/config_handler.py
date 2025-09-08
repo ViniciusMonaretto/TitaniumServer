@@ -102,7 +102,7 @@ class ConfigHandler(ServiceInterface):
                 panel.offset = panel_info.offset
                 panel.gain = panel_info.gain
                 self._config_storage.update_panel(panel)
-        self.send_ui_update_action(True)
+        self.send_ui_update_action(False)
 
     def calibration_update_received(self, status_info, group_id, index):
         data = status_info["data"]

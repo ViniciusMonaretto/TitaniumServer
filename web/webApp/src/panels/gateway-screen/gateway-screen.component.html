@@ -1,0 +1,16 @@
+<div class="main-div-display">
+    <div class="group-header">Gateways</div>
+    <div class="button-container">
+        <button (click)="updateGateways()">
+           Atualizar Gateways
+        </button>
+    </div>
+    <div class="gateway-grid-container">
+        <div class="main-group-div">
+            <gateway-info-tab class="flex-item" 
+                             *ngFor="let gateway of getGateways()" 
+                             [gatewayInfo]="gateway">
+            </gateway-info-tab>
+        </div>
+    </div>
+</div>
