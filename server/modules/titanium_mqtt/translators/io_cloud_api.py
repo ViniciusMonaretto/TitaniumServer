@@ -128,20 +128,20 @@ class IoCloudApiTranslator(PayloadTranslator):
     def _create_system_update(self, message_json: Any):
         system: MqttGatewayModel = MqttGatewayModel()
 
-        system.name = message_json["name"]
-        system.ip = message_json["ip"]
+        system.name = message_json["device_id"]
+        system.ip = message_json["ip_address"]
         system.uptime = message_json["uptime"]
 
         panels = []
 
         for panel in message_json["panels"]:
             system_panel: MqttSensorStatusModel = MqttSensorStatusModel()
-            system_panel.status = panel["active"]
+            system_panel.status = panel["state"] == 0
             system_panel.gain = panel["gain"]
             system_panel.offset = panel["offset"]
             system_panel.topic = self._get_type_of_sensor(panel)
-            system_panel.indicator = len(panels)
-            system_panel.gateway = message_json["name"]
+            system_panel.indicator = panel["index"]
+            system_panel.gateway = message_json["device_id"]
             panels.append(system_panel)
 
         system_module = MqttSystemModel()

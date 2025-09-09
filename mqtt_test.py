@@ -56,19 +56,24 @@ def on_connect(mqtt_client, userdata, flags, rc):
 # Function to create and send gateway status message
 def send_gateway_status(mqtt_client):
     panels = []
+    counter = 0
     for sensor_data in base_sensors:
         panel = {
-            "active": True,
             "gain": 1,
             "offset": 0,
+            "index": counter,
+            "state": 0,
             "unit": sensor_data["unit"]
         }
         panels.append(panel)
+        counter += 1
 
     status_payload = {
-        "name": "1C69209DFC08",
-        "ip": "192.168.1.100",
-        "uptime": 100,
+        "command_index": 2,
+        "command_status": 0,
+        "device_id": "1C69209DFC08",
+        "ip_address": "192.168.3.79",
+        "uptime": 19510,
         "panels": panels
     }
 

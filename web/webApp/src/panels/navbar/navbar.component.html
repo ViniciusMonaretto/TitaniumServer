@@ -26,10 +26,12 @@
     <side-nav-option [icon]="'assets/icon/eventsIcon.svg'" [iconSelected]="'assets/icon/eventsSelectedIcon.svg'"
         [componentText]="'Alarmes'" (buttonCallback)="setAlertScreen()"
         [isSelected]="isPanelSelected(panelOptions.ALERT_VIEW)"></side-nav-option>
+    <side-nav-option [icon]="'assets/icon/gatewayIcon.svg'" [iconSelected]="'assets/icon/gatewaySelectedIcon.svg'"
+        [componentText]="'Gateways'" [isSelected]="isPanelSelected(panelOptions.GATEWAY_VIEW)"
+         (buttonCallback)="setGatewayScreen()"></side-nav-option>
     <side-nav-option [icon]="'assets/icon/downloadIcon.svg'" [iconSelected]="'assets/icon/downloadSelectedIcon.svg'"
         [componentText]="'Relatórios'" (buttonCallback)="openReportGenerator()"></side-nav-option>
-    <side-nav-option [icon]="'assets/icon/downloadIcon.svg'" [iconSelected]="'assets/icon/downloadSelectedIcon.svg'"
-        [componentText]="'Gateways'" (buttonCallback)="setGatewayScreen()"></side-nav-option>
+    
     <side-nav-option [icon]="'assets/icon/pencilIcon.svg'" [iconSelected]="'assets/icon/pencilIcon.svg'"
         [componentText]="CanEdit()?'Desabilitar':'Editar'" (buttonCallback)="toogleEdit()"></side-nav-option>
 </div>
