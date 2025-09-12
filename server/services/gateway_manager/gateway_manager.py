@@ -1,3 +1,5 @@
+import threading
+import time
 from dataModules.gateway import GatewayStatus
 from modules.titanium_mqtt.mqtt_commands import MqttCommands
 from modules.titanium_mqtt.translators.payload_model import MqttSystemModel
@@ -25,7 +27,13 @@ class GatewayManager(ServiceInterface):
         self.initialize_commands()
         self.initialize_system_callbacks()
 
-        self.send_system_status_request()
+        # Start a thread to send system status request after 5 seconds
+        def delayed_system_status_request():
+            time.sleep(5)
+            self.send_system_status_request()
+
+        threading.Thread(target=delayed_system_status_request,
+                         daemon=True).start()
 
         self._logger.info("GatewayManager initialized")
 
