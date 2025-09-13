@@ -21,6 +21,8 @@ from services.config_handler.config_handler_command import ConfigHandlerCommands
 import os
 import base64
 import mimetypes
+import copy
+import gc
 
 
 class Visualization(tornado.web.RequestHandler):
@@ -154,13 +156,26 @@ class VisualizationWebSocketHandler(tornado.websocket.WebSocketHandler):
             pass
         except Exception as e:
             self._logger.error(f"Failed to write message to UI: {e}")
+        finally:
+            # Libera memória após envio
+            if isinstance(obj, dict) and "message" in obj:
+                message = obj["message"]
+                if isinstance(message, dict) and "info" in message:
+                    message["info"].clear()  # Limpa dados grandes
+                message.clear()  # Limpa mensagem
+            obj.clear()  # Limpa objeto
+            gc.collect()  # Força garbage collection
 
     def send_message_to_ui(self, status, message):
         if (not self._is_init):
             return
+
+        # Copia os dados para evitar problemas de referência
+        message_copy = copy.deepcopy(message)
+
         obj = {
             "status": status,
-            "message": message
+            "message": message_copy
         }
         tornado.ioloop.IOLoop.current().add_callback(self.safe_write_message, obj)
 
@@ -182,9 +197,20 @@ class VisualizationWebSocketHandler(tornado.websocket.WebSocketHandler):
 
     def send_status_history(self, data):
         self._logger.info("Visualization.send_status_history: graph send")
+
+        # Log do tamanho dos dados para monitoramento
+        if 'info' in data:
+            total_points = sum(len(sensor_data)
+                               for sensor_data in data['info'].values())
+            self._logger.debug(
+                f"Enviando {total_points} pontos de dados para {len(data['info'])} sensores")
+
+        # Envia os dados (a cópia e limpeza são feitas em send_message_to_ui)
         self.send_message_to_ui("statusInfo", data)
 
+
 ################# Panel commands #############################
+
     def add_panel_request(self, panel_info):
         self._middleware.send_command(ConfigHandlerCommands.ADD_PANEL, panel_info,
                                       lambda data: (self.add_panel_subscriber_command(

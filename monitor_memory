@@ -1,0 +1,68 @@
+#!/bin/bash
+
+# Script de conveniência para acessar as ferramentas de monitoramento de memória
+# Uso: ./monitor_memory [comando] [argumentos]
+
+SCRIPT_DIR="memoryManagement"
+
+if [ $# -eq 0 ]; then
+    echo "🔍 Memory Management Tools"
+    echo ""
+    echo "Uso: ./monitor_memory [comando] [argumentos]"
+    echo ""
+    echo "Comandos disponíveis:"
+    echo "  monitor     - Monitora processos Python"
+    echo "  system      - Monitora sistema"
+    echo "  htop        - Interface visual"
+    echo "  watch       - Monitoramento contínuo"
+    echo "  valgrind    - Análise profunda"
+    echo "  analyze     - Analisa logs"
+    echo "  debug       - Debug memory leak específico"
+    echo "  fix         - Aplica correções no GatewayManager"
+    echo "  help        - Mostra este help"
+    echo ""
+    echo "Exemplos:"
+    echo "  ./monitor_memory monitor python 5"
+    echo "  ./monitor_memory system 10"
+    echo "  ./monitor_memory htop"
+    echo ""
+    exit 0
+fi
+
+COMMAND=$1
+shift
+
+case $COMMAND in
+    "monitor")
+        exec "$SCRIPT_DIR/monitor_memory.sh" "$@"
+        ;;
+    "system")
+        exec "$SCRIPT_DIR/system_memory_monitor.sh" "$@"
+        ;;
+    "htop")
+        exec "$SCRIPT_DIR/htop_memory_monitor.sh" "$@"
+        ;;
+    "watch")
+        exec "$SCRIPT_DIR/watch_memory.sh" "$@"
+        ;;
+    "valgrind")
+        exec "$SCRIPT_DIR/valgrind_memory_check.sh" "$@"
+        ;;
+    "analyze")
+        exec "$SCRIPT_DIR/analyze_memory_log.sh" "$@"
+        ;;
+    "debug")
+        exec "$SCRIPT_DIR/debug_memory_leak.sh" "$@"
+        ;;
+    "fix")
+        exec "$SCRIPT_DIR/fix_gateway_manager.py" "$@"
+        ;;
+    "help")
+        cat "$SCRIPT_DIR/README.md"
+        ;;
+    *)
+        echo "❌ Comando não reconhecido: $COMMAND"
+        echo "💡 Use: ./monitor_memory help"
+        exit 1
+        ;;
+esac

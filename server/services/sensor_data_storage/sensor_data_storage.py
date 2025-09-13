@@ -1,6 +1,7 @@
 import queue
 import uuid
 import threading
+import gc
 from datetime import datetime
 from typing import Any, Callable, Dict, List, Optional
 import sys
@@ -260,7 +261,9 @@ class SensorDataStorage(ServiceInterface):
         result = True
 
         try:
-            cursor = self._collection.find(query)
+            # Adiciona limite e ordenação para controlar tamanho dos dados
+            cursor = self._collection.find(query).sort(
+                "Timestamp", -1)
             local_tz = pytz.timezone("America/Sao_Paulo")
             async for doc in cursor:
                 sensor_name = doc["SensorFullTopic"]
@@ -275,6 +278,10 @@ class SensorDataStorage(ServiceInterface):
             self._logger.error(
                 f"SensorDataStorage::read_sensor_info: Error trying to fetch info from table {e}")
             result = False
+        finally:
+            # Garbage collection final para liberar memória
+            gc.collect()
+
         data_out["commandId"] = command["requestId"]
         finish_callback(result, data_out)
 

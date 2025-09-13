@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, Inject, InjectionToken } from '@angular/core';
 import { UiPanelService } from './ui-panels.service'
 import { v4 as uuidv4 } from 'uuid';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
@@ -6,12 +6,14 @@ import { SpinnerComponent } from '../components/spinner/spinner.component';
 import { EventAlarmModule } from '../models/event-alarm-module';
 import { DialogHelper } from './dialog-helper.service';
 
+export const WS_URL_TOKEN = new InjectionToken<string>('wsUrl');
+
 @Injectable({
   providedIn: 'root'
 })
 export class ServerConectorService {
   private socket: WebSocket | null;
-  private wsUrl = 'ws://localhost:8888/websocket'
+  private wsUrl: string;
 
   private isConnecting: boolean = false
 
@@ -23,14 +25,19 @@ export class ServerConectorService {
   private receivedEventsCallback: ((events: EventAlarmModule[], replaceValue: boolean) => void) | null = null;
   private afterConnectRequests: Function[] = []
 
-  constructor(private uiPanelService: UiPanelService, private dialogHelper: DialogHelper) {
+  constructor(
+    private uiPanelService: UiPanelService,
+    private dialogHelper: DialogHelper,
+    @Inject(WS_URL_TOKEN) wsUrl: string = 'ws://localhost:8888/websocket'
+  ) {
+    this.wsUrl = wsUrl;
     this.socket = null
     setTimeout(() => {
       this.connectToServer();
     }, 100)
-    this.addOnConnectCallback(()=>{
+    this.addOnConnectCallback(() => {
       this.sendCommand("getGateways", {})
-  })
+    })
   }
 
   addOnConnectCallback(callback: Function) {

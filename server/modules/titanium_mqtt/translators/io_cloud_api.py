@@ -61,7 +61,7 @@ class IoCloudApiTranslator(PayloadTranslator):
             type_of_sensor = "tension"
         elif reading_json["unit"] == "A":
             type_of_sensor = "current"
-        elif reading_json["unit"] == "kW":
+        elif reading_json["unit"] == "W":
             type_of_sensor = "power"
         elif reading_json["unit"] == "%":
             type_of_sensor = "powerFactor"
