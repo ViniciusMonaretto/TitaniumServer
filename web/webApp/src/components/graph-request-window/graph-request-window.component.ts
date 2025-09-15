@@ -10,6 +10,7 @@ import { MatInputModule } from '@angular/material/input';
 import { FormsModule } from '@angular/forms';
 import { SensorModule } from '../../models/sensor-module';
 import { GroupInfo } from '../../services/ui-panels.service';
+import { IoButtonComponent } from '../io-button/io-button.component';
 
 export const MY_DATE_FORMATS = {
   parse: {
@@ -35,7 +36,8 @@ export const MY_DATE_FORMATS = {
     MatInputModule,
     FormsModule,
     MatNativeDateModule,
-    MatDatepickerModule
+    MatDatepickerModule,
+    IoButtonComponent
   ],
   providers: [
     { provide: DateAdapter, useClass: NativeDateAdapter },

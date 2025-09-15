@@ -8,6 +8,7 @@ import { MatInputModule } from '@angular/material/input';
 import { FormsModule } from '@angular/forms';
 import { SensorModule } from '../../models/sensor-module';
 import { ColorChromeModule } from 'ngx-color/chrome';
+import { IoButtonComponent } from '../io-button/io-button.component';
 
 @Component({
   selector: 'sensor-info-dialog',
@@ -19,7 +20,8 @@ import { ColorChromeModule } from 'ngx-color/chrome';
     MatInputModule,
     FormsModule,
     MatDialogModule,
-    ColorChromeModule],
+    ColorChromeModule,
+    IoButtonComponent],
   standalone: true
 })
 export class SensorInfoDialogComponent {

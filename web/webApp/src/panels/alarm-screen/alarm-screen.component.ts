@@ -8,6 +8,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { UiPanelService } from '../../services/ui-panels.service';
 import { EventAlarmManagerService } from '../../services/event-alarm-manager.service';
 import { DialogHelper } from '../../services/dialog-helper.service';
+import { IoButtonComponent } from '../../components/io-button/io-button.component';
 
 @Component({
     selector: 'event-screen',
@@ -16,7 +17,8 @@ import { DialogHelper } from '../../services/dialog-helper.service';
     imports: [CommonModule, 
               MatIconModule, 
               MatCardModule,
-              IoCloudTableComponent],
+              IoCloudTableComponent,
+              IoButtonComponent],
     standalone: true
 })
 export class AlarmViewComponent implements OnInit {

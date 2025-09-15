@@ -1,9 +1,9 @@
 <div class="main-div-display">
     <div class="group-header">Eventos</div>
     <div style="height: 40px;">
-        <button (click)="eraseAllEvents()">
+        <io-button style="height: 25px;" variant="secondary" (clicked)="eraseAllEvents()">
             Limpar eventos
-        </button>
+        </io-button >
     </div>
     <div class="table-div">
         <io-cloud-table [headerInfo]="headerInfo" [models]="getEvents()">

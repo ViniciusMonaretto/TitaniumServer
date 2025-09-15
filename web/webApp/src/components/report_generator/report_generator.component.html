@@ -44,7 +44,7 @@
         
     </div>
 </mat-dialog-content>
-<mat-dialog-actions>
-    <button mat-button (click)="onCancel()">Cancelar</button>
-    <button mat-button [disabled]="!validForm()" (click)="onApply()" cdkFocusInitial>Aplicar</button>
+<mat-dialog-actions style="display: flex; gap: 10px;">
+    <io-button style="height: 30px;" variant="secondary" (clicked)="onCancel()">Cancelar</io-button>
+    <io-button style="height: 30px;" variant="primary" [disabled]="!validForm()" (clicked)="onApply()" cdkFocusInitial>Aplicar</io-button>
 </mat-dialog-actions>

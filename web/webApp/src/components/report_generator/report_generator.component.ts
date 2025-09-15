@@ -12,6 +12,7 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MY_DATE_FORMATS } from '../graph-request-window/graph-request-window.component';
 import { SensorTreeComponent } from '../sensor-tree/sensor-tree.component';
 import { MatRadioModule } from '@angular/material/radio';
+import { IoButtonComponent } from '../io-button/io-button.component';
 
 @Component({
   selector: 'sensor-info-dialog',
@@ -27,7 +28,8 @@ import { MatRadioModule } from '@angular/material/radio';
     MatNativeDateModule,
     MatDatepickerModule,
     SensorTreeComponent,
-    MatRadioModule
+    MatRadioModule,
+    IoButtonComponent
   ],
   providers: [
     { provide: DateAdapter, useClass: NativeDateAdapter },
@@ -50,9 +52,13 @@ export class ReportGeneratorComponent {
   timeRangeChoice: string = 'lastHour';
 
   constructor(public dialogRef: MatDialogRef<ReportGeneratorComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: {uiConfig: { [id: string]: any }, callback: ((obj: any) => void), canEdit: boolean}
+    @Inject(MAT_DIALOG_DATA) public data: {uiConfig: any[], callback: ((obj: any) => void), canEdit: boolean}
   ) {
-    this.uiConfig = data.uiConfig
+    this.uiConfig = {};
+    for(let groupIndex in data.uiConfig) {
+      var group = data.uiConfig[groupIndex];
+      this.uiConfig[group.name] = group.panels;
+    }
   }
 
   ngOnInit(): void {

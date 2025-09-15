@@ -1,0 +1,40 @@
+<button
+  [type]="type"
+  [disabled]="disabled || loading"
+  [attr.aria-label]="ariaLabel"
+  [class]="buttonClasses"
+  (click)="onClick($event)"
+  style="background: linear-gradient(135deg, #3E5CAF 0%, #1D4ED8 100%) !important; color: white !important; border: none !important; border-radius: 8px !important; padding: 12px 24px !important; font-weight: 600 !important; cursor: pointer !important;"
+>
+  <!-- Loading spinner -->
+  <div *ngIf="loading" class="io-button__spinner">
+    <div class="io-button__spinner-circle"></div>
+  </div>
+
+  <!-- Left icon -->
+  <mat-icon 
+    *ngIf="icon && iconPosition === 'left' && !loading" 
+    class="io-button__icon io-button__icon--left"
+  >
+    {{ icon }}
+  </mat-icon>
+
+  <!-- Button content -->
+  <span 
+    *ngIf="!loading" 
+    class="io-button__content"
+    [class.io-button__content--with-icon]="icon"
+    [class.io-button__content--icon-left]="icon && iconPosition === 'left'"
+    [class.io-button__content--icon-right]="icon && iconPosition === 'right'"
+  >
+    <ng-content></ng-content>
+  </span>
+
+  <!-- Right icon -->
+  <mat-icon 
+    *ngIf="icon && iconPosition === 'right' && !loading" 
+    class="io-button__icon io-button__icon--right"
+  >
+    {{ icon }}
+  </mat-icon>
+</button>

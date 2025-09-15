@@ -11,9 +11,9 @@
               (deleteCallback)="removeSensorCallback($event)">
       </sensor>
       <div *ngIf="canEdit">
-        <button class="add-button" mat-button (click)="addSensor(group)">
+        <io-button style="height: 30px;" variant="primary" (clicked)="addSensor(group)">
           <mat-icon >add</mat-icon>
-        </button>
+        </io-button>
       </div>
       
     </div>

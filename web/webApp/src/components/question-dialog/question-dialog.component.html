@@ -2,7 +2,7 @@
 <mat-dialog-content>
   <p>{{ data.message }}</p>
 </mat-dialog-content>
-<mat-dialog-actions align="end">
-  <button mat-button (click)="onOk()">Sim</button>
-  <button mat-button (click)="closeDialog()">Não</button>
+<mat-dialog-actions style="display: flex; gap: 10px;">
+  <io-button style="height: 30px;" variant="primary" (clicked)="onOk()">Sim</io-button>
+  <io-button style="height: 30px;" variant="primary" (clicked)="closeDialog()">Não</io-button>
 </mat-dialog-actions>

@@ -3,10 +3,10 @@
         <div *ngIf="title" style=" display: flex; align-items: center; font-size: xx-large;">
             {{title}}
         </div>
-        <button *ngIf="addCallback.observers.length" mat-icon-button class="example-icon" (click)="addCallback.emit()"
+        <io-button *ngIf="addCallback.observers.length" style="height: 30px;" variant="primary" (clicked)="addCallback.emit()"
             aria-label="Edit">
             <mat-icon>add</mat-icon>
-        </button>
+        </io-button>
     </div>
 
     <div class="rowTable">
@@ -17,14 +17,14 @@
         <div class="rowTable" *ngFor="let model of models">
             <div class="bodyCell" *ngFor="let header of headerInfo"> {{getModelInfo(header[0], model)}}</div>
             <div *ngIf="editCallback.observers.length > 0 || deleteCallback.observers.length > 0" class="bodyCell">
-                <button *ngIf="editCallback.observers.length > 0" mat-icon-button class="example-icon"
+                <io-button *ngIf="editCallback.observers.length > 0" style="height: 30px;" variant="primary" (clicked)="editCallback.emit()"
                     (click)="editCallback.emit()" aria-label="Edit">
                     <mat-icon>edit</mat-icon>
-                </button>
-                <button *ngIf="deleteCallback.observers.length > 0" mat-icon-button class="example-icon"
+                </io-button>
+                <io-button *ngIf="deleteCallback.observers.length > 0" style="height: 30px;" variant="primary" (clicked)="onDeleteCallback(model.id)"
                     (click)="onDeleteCallback(model.id)" aria-label="Delete">
                     <mat-icon>delete</mat-icon>
-                </button>
+                </io-button>
             </div>
         </div>
     </div>

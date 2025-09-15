@@ -33,7 +33,7 @@
   </div>
   
 </mat-dialog-content>
-<mat-dialog-actions> 
-  <button mat-button (click)="onNoClick()">Cancel</button>
-  <button mat-button [disabled]="!validForm()" (click)="onAddCLick()" cdkFocusInitial>Add</button>
+<mat-dialog-actions style="display: flex; gap: 10px;"> 
+  <io-button style="height: 30px;" variant="secondary" (clicked)="onNoClick()">Cancelar</io-button>
+  <io-button style="height: 30px;" variant="primary" [disabled]="!validForm()" (clicked)="onAddCLick()" cdkFocusInitial>Adicionar</io-button>
 </mat-dialog-actions>

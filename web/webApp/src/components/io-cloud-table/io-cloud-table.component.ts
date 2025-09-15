@@ -1,12 +1,13 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
+import { IoButtonComponent } from '../io-button/io-button.component';
 
 @Component({
   selector: 'io-cloud-table',
   templateUrl: './io-cloud-table.component.html',
   styleUrls: ['./io-cloud-table.component.scss'],
-  imports: [CommonModule, MatIconModule],
+  imports: [CommonModule, MatIconModule, IoButtonComponent],
   standalone: true
 })
 export class IoCloudTableComponent implements OnInit {

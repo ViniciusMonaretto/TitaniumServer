@@ -11,12 +11,13 @@ import {UiPanelService} from "../../services/ui-panels.service"
 import { SensorTypesEnum } from '../../enum/sensor-type';
 import { MatIconModule } from '@angular/material/icon';
 import { SensorInfoDialogComponent } from '../sensor_info_dialog/sensor_info_dialog.component';
+import { IoButtonComponent } from '../io-button/io-button.component';
 
 @Component({
     selector: 'group-of-sensors',
     templateUrl: './group-of-sensors.component.html',
     styleUrls: ['./group-of-sensors.component.scss'],
-    imports: [CommonModule, SensorComponent, MatIconModule],
+    imports: [CommonModule, SensorComponent, MatIconModule, IoButtonComponent],
     standalone: true
 })
 export class GroupOfSensorsComponent implements OnInit {

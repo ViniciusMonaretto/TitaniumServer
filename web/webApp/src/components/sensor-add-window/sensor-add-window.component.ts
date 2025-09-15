@@ -11,6 +11,7 @@ import { MatInputModule } from '@angular/material/input';
 import { FormsModule } from '@angular/forms';
 
 import { ColorChromeModule } from 'ngx-color/chrome';
+import { IoButtonComponent } from '../io-button/io-button.component';
 
 
 @Component({
@@ -24,7 +25,8 @@ import { ColorChromeModule } from 'ngx-color/chrome';
         FormsModule,
         MatDatepickerModule,
         MatDialogModule,
-        ColorChromeModule],
+        ColorChromeModule,
+        IoButtonComponent],
     standalone: true
 })
 export class SensorAddWindowComponent {

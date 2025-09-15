@@ -10,12 +10,13 @@ import { MatSelectModule } from '@angular/material/select';
 import { FormsModule } from '@angular/forms';
 import { IoCloudTableComponent } from '../io-cloud-table/io-cloud-table.component';
 import { MatIconModule } from '@angular/material/icon';
+import { IoButtonComponent } from '../io-button/io-button.component';
 
 @Component({
   selector: 'sensor-info',
   templateUrl: './sensor-info.component.html',
   styleUrls: ['./sensor-info.component.scss'],
-  imports: [MatCardModule,
+  imports: [MatCardModule,  
     CommonModule,
     GraphComponent,
     MatFormFieldModule,
@@ -23,7 +24,8 @@ import { MatIconModule } from '@angular/material/icon';
     MatInputModule,
     IoCloudTableComponent,
     FormsModule,
-    MatIconModule], // Add MatCardModule to imports
+    MatIconModule,
+    IoButtonComponent], // Add MatCardModule to imports
   standalone: true
 })
 export class SensorInfoComponent implements OnInit {
@@ -56,6 +58,11 @@ export class SensorInfoComponent implements OnInit {
 
   return() {
     this.onExit.emit()
+  }
+
+  calibrate() {
+    // Implementar lógica de calibração aqui
+    console.log('Calibrando sensor com offset:', this.offset, 'e slope:', this.slope);
   }
 
   setLineData(dataArr: any) {

@@ -1,0 +1,443 @@
+// Variables baseadas no design system do IoCloud
+$primary-gradient: linear-gradient(135deg, #3E5CAF 0%, #1D4ED8 100%);
+$primary-gradient-hover: linear-gradient(135deg, #2E4A9F 0%, #1A3A8F 100%);
+$secondary-gradient: linear-gradient(135deg, #6B7280 0%, #4B5563 100%);
+$secondary-gradient-hover: linear-gradient(135deg, #4B5563 0%, #374151 100%);
+$danger-gradient: linear-gradient(135deg, #DC2626 0%, #B91C1C 100%);
+$danger-gradient-hover: linear-gradient(135deg, #B91C1C 0%, #991B1B 100%);
+$success-gradient: linear-gradient(135deg, #10B981 0%, #059669 100%);
+$success-gradient-hover: linear-gradient(135deg, #059669 0%, #047857 100%);
+
+$text-primary: #FFFFFF;
+$text-secondary: #6B7280;
+$text-dark: #1F2937;
+$border-color: #E5E7EB;
+$border-color-hover: #D1D5DB;
+$background-light: #F9FAFB;
+$background-white: #FFFFFF;
+
+$border-radius: 8px;
+$font-family: 'Segoe UI', sans-serif;
+$transition: all 0.2s ease-in-out;
+$shadow-subtle: 0px 1px 2px 0px rgba(0, 0, 0, 0.05);
+$shadow-hover: 0px 4px 8px 0px rgba(0, 0, 0, 0.1);
+$shadow-active: 0px 2px 4px 0px rgba(0, 0, 0, 0.08);
+
+// Base button styles
+io-button {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-family: $font-family !important;
+  font-weight: 600 !important;
+  text-decoration: none !important;
+  border: none !important;
+  border-radius: $border-radius !important;
+  cursor: pointer !important;
+  transition: $transition !important;
+  position: relative !important;
+  box-shadow: $shadow-subtle !important;
+  outline: none !important;
+  overflow: hidden !important;
+  background: transparent !important;
+}
+
+.io-button {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-family: $font-family !important;
+  font-weight: 600 !important;
+  text-decoration: none !important;
+  border: none !important;
+  border-radius: $border-radius !important;
+  cursor: pointer !important;
+  transition: $transition !important;
+  position: relative !important;
+  box-shadow: $shadow-subtle !important;
+  outline: none !important;
+  overflow: hidden !important;
+  background: transparent !important;
+
+  // Efeito de brilho sutil
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s ease-in-out;
+  }
+
+  &:hover::before {
+    left: 100%;
+  }
+
+  &:focus-visible {
+    outline: 2px solid #3E5CAF;
+    outline-offset: 2px;
+  }
+
+  // Size variants
+  &--small {
+    .io-button__element {
+      padding: 8px 16px;
+      font-size: 14px;
+      min-height: 36px;
+      border-radius: 6px;
+    }
+
+    .io-button__icon {
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+    }
+  }
+
+  &--medium {
+    .io-button__element {
+      padding: 12px 24px;
+      font-size: 16px;
+      border-radius: $border-radius;
+    }
+
+    .io-button__icon {
+      font-size: 20px;
+      width: 20px;
+      height: 20px;
+    }
+  }
+
+  &--large {
+    .io-button__element {
+      padding: 16px 32px;
+      font-size: 18px;
+      min-height: 52px;
+      border-radius: 10px;
+    }
+
+    .io-button__icon {
+      font-size: 24px;
+      width: 24px;
+      height: 24px;
+    }
+  }
+
+  // Full width variant
+  &--full-width {
+    width: 100%;
+
+    .io-button__element {
+      width: 100%;
+    }
+  }
+
+  // Disabled state
+  &--disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+    
+    &::before {
+      display: none;
+    }
+  }
+
+  // Loading state
+  &--loading {
+    cursor: wait;
+    pointer-events: none;
+    
+    &::before {
+      display: none;
+    }
+  }
+}
+
+// Button element
+.io-button__element {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  height: 100%;
+  border: none;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: inherit;
+  border-radius: inherit;
+  transition: inherit;
+  position: relative;
+  z-index: 1;
+
+  &--with-icon {
+    gap: 10px;
+  }
+
+  &--icon-right {
+    flex-direction: row-reverse;
+  }
+}
+
+// Primary variant - Gradiente azul elegante
+io-button.io-button--primary,
+.io-button--primary {
+  background: $primary-gradient !important;
+  color: $text-primary !important;
+  border: 1px solid transparent !important;
+
+  &:hover:not(.io-button--disabled):not(.io-button--loading) {
+    background: $primary-gradient-hover;
+    box-shadow: $shadow-hover;
+    transform: translateY(-1px);
+  }
+
+  &:active:not(.io-button--disabled):not(.io-button--loading) {
+    background: $primary-gradient-hover;
+    box-shadow: $shadow-active;
+    transform: translateY(0);
+  }
+}
+
+// Secondary variant - Gradiente cinza sofisticado
+.io-button--secondary {
+  background: $secondary-gradient;
+  color: $text-primary;
+  border: 1px solid transparent;
+
+  &:hover:not(.io-button--disabled):not(.io-button--loading) {
+    background: $secondary-gradient-hover;
+    box-shadow: $shadow-hover;
+    transform: translateY(-1px);
+  }
+
+  &:active:not(.io-button--disabled):not(.io-button--loading) {
+    background: $secondary-gradient-hover;
+    box-shadow: $shadow-active;
+    transform: translateY(0);
+  }
+}
+
+// Outline variant - Estilo card com borda
+.io-button--outline {
+  background: $background-white;
+  color: $text-dark;
+  border: 1px solid $border-color;
+  box-shadow: $shadow-subtle;
+
+  &:hover:not(.io-button--disabled):not(.io-button--loading) {
+    background: $background-light;
+    border-color: $border-color-hover;
+    box-shadow: $shadow-hover;
+    transform: translateY(-1px);
+  }
+
+  &:active:not(.io-button--disabled):not(.io-button--loading) {
+    background: $background-light;
+    box-shadow: $shadow-active;
+    transform: translateY(0);
+  }
+}
+
+// Ghost variant - Transparente com hover elegante
+.io-button--ghost {
+  background: transparent;
+  color: $text-secondary;
+  border: 1px solid transparent;
+  box-shadow: none;
+
+  &:hover:not(.io-button--disabled):not(.io-button--loading) {
+    background: rgba(59, 92, 175, 0.1);
+    color: #3E5CAF;
+    box-shadow: $shadow-subtle;
+  }
+
+  &:active:not(.io-button--disabled):not(.io-button--loading) {
+    background: rgba(59, 92, 175, 0.15);
+    transform: translateY(0);
+  }
+}
+
+// Danger variant - Gradiente vermelho
+.io-button--danger {
+  background: $danger-gradient;
+  color: $text-primary;
+  border: 1px solid transparent;
+
+  &:hover:not(.io-button--disabled):not(.io-button--loading) {
+    background: $danger-gradient-hover;
+    box-shadow: $shadow-hover;
+    transform: translateY(-1px);
+  }
+
+  &:active:not(.io-button--disabled):not(.io-button--loading) {
+    background: $danger-gradient-hover;
+    box-shadow: $shadow-active;
+    transform: translateY(0);
+  }
+}
+
+// Success variant - Gradiente verde
+io-button.io-button--success,
+.io-button--success {
+  background: $success-gradient !important;
+  color: $text-primary !important;
+  border: 1px solid transparent !important;
+
+  &:hover:not(.io-button--disabled):not(.io-button--loading) {
+    background: $success-gradient-hover;
+    box-shadow: $shadow-hover;
+    transform: translateY(-1px);
+  }
+
+  &:active:not(.io-button--disabled):not(.io-button--loading) {
+    background: $success-gradient-hover;
+    box-shadow: $shadow-active;
+    transform: translateY(0);
+  }
+}
+
+// Icon styles
+.io-button__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: $transition;
+
+  &--left {
+    margin-right: 0;
+  }
+
+  &--right {
+    margin-left: 0;
+  }
+}
+
+// Content styles
+.io-button__content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  transition: $transition;
+
+  &--with-icon {
+    &.io-button__content--icon-left {
+      margin-left: 0;
+    }
+
+    &.io-button__content--icon-right {
+      margin-right: 0;
+    }
+  }
+}
+
+// Loading spinner personalizado
+.io-button__spinner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+}
+
+.io-button__spinner-circle {
+  width: 16px;
+  height: 16px;
+  border: 2px solid transparent;
+  border-top: 2px solid currentColor;
+  border-radius: 50%;
+  animation: io-button-spin 1s linear infinite;
+}
+
+@keyframes io-button-spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+// Efeitos especiais para diferentes variantes
+.io-button--primary .io-button__spinner-circle {
+  border-top-color: $text-primary;
+}
+
+.io-button--secondary .io-button__spinner-circle {
+  border-top-color: $text-primary;
+}
+
+.io-button--outline .io-button__spinner-circle {
+  border-top-color: $text-dark;
+}
+
+.io-button--ghost .io-button__spinner-circle {
+  border-top-color: $text-secondary;
+}
+
+.io-button--danger .io-button__spinner-circle {
+  border-top-color: $text-primary;
+}
+
+.io-button--success .io-button__spinner-circle {
+  border-top-color: $text-primary;
+}
+
+// Responsive adjustments
+@media (max-width: 768px) {
+  .io-button {
+    &--small {
+      .io-button__element {
+        padding: 10px 16px;
+        font-size: 14px;
+        min-height: 40px;
+      }
+    }
+
+    &--medium {
+      .io-button__element {
+        padding: 14px 24px;
+        font-size: 16px;
+        min-height: 48px;
+      }
+    }
+
+    &--large {
+      .io-button__element {
+        padding: 18px 32px;
+        font-size: 18px;
+        min-height: 56px;
+      }
+    }
+  }
+}
+
+// Efeito de ripple personalizado
+.io-button {
+  position: relative;
+  overflow: hidden;
+}
+
+.io-button::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  transform: translate(-50%, -50%);
+  transition: width 0.3s ease-out, height 0.3s ease-out;
+}
+
+.io-button:active::after {
+  width: 300px;
+  height: 300px;
+}

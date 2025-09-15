@@ -7,6 +7,7 @@ import { MatInputModule } from '@angular/material/input';
 import { FormsModule } from '@angular/forms';
 
 import { SensorAddWindowComponent } from '../sensor-add-window/sensor-add-window.component';
+import { IoButtonComponent } from '../io-button/io-button.component';
 
 
 @Component({
@@ -17,7 +18,8 @@ import { SensorAddWindowComponent } from '../sensor-add-window/sensor-add-window
         MatFormFieldModule,
         MatInputModule,
         FormsModule,
-        MatDialogModule],
+        MatDialogModule,
+        IoButtonComponent],
     standalone: true
 })
 export class GroupAddWindowComponent {
