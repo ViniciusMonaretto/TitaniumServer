@@ -34,8 +34,7 @@ export class GraphComponent {
     this.fitAllGraph()
   }
   @Input() zoomEnabled: boolean = true
-  @Input() set selectedDataLineIndex(value: number)
-  {
+  @Input() set selectedDataLineIndex(value: number) {
     this._selectedDataLineIndex = value;
     this.updateLines();
   }
@@ -46,7 +45,7 @@ export class GraphComponent {
 
   @Input() set drawingMode(value: number) {
     this._drawingMode = value as DrawingMode;
-    
+
     if (this._drawingMode === DrawingMode.None) {
       this._horizontalLines = [];
       this._verticalLines = [];
@@ -55,7 +54,7 @@ export class GraphComponent {
     } else if (this._drawingMode === DrawingMode.Vertical) {
       this._horizontalLines = [];
     }
-    
+
     this.updateLines();
     this.updateMouseEvents();
   }
@@ -79,19 +78,22 @@ export class GraphComponent {
   @Input() set inputInfo(newValue: any) {
     console.log('Novo info de gráfico recebido:');
 
-    // Remove dots from all data datasets by setting pointRadius to 0 and ensure straight lines
-    const datasetsWithoutDots = newValue.map((dataset: any) => ({
+    // Configure datasets with proper point settings
+    const datasetsWithPoints = newValue.map((dataset: any) => ({
       ...dataset,
       pointRadius: 2,
+      pointHoverRadius: 4,
+      pointBorderWidth: 1,
+      pointBorderColor: 'transparent',
       tension: 0 // Force straight lines between points
     }));
 
     this.lineChartData =
     {
-      datasets: datasetsWithoutDots
+      datasets: datasetsWithPoints
     }
 
-    this.calculateMargin(datasetsWithoutDots)
+    this.calculateMargin(datasetsWithPoints)
 
     this.fitAllGraph()
     this.updateLines()
@@ -121,7 +123,7 @@ export class GraphComponent {
             quarter: '[Q]Q - yyyy',
             year: 'yyyy',
           },
-          tooltipFormat: 'MMM dd, HH:mm',
+          tooltipFormat: 'MMM dd, HH:mm'
         },
         ticks: {
           source: 'auto',
@@ -132,7 +134,13 @@ export class GraphComponent {
 
         },
         min: undefined,
-        max: undefined
+        max: undefined,
+        // Adicionar configurações para melhor renderização durante zoom
+        grid: {
+          display: true,
+          drawOnChartArea: true,
+          drawTicks: true
+        }
       },
       y: {
         beginAtZero: true,
@@ -144,7 +152,6 @@ export class GraphComponent {
         max: undefined
       },
     },
-    parsing: false,
     plugins: {
       decimation: {
         enabled: true,
@@ -253,6 +260,37 @@ export class GraphComponent {
 
   ngAfterViewInit() {
     this.setupMouseEvents();
+    this.setupZoomEvents();
+  }
+
+  setupZoomEvents() {
+    // Aguardar o gráfico estar pronto
+    setTimeout(() => {
+      if (this.chart?.chart) {
+        const chart = this.chart.chart;
+
+        // Adicionar listener para eventos de zoom com throttling
+        let zoomTimeout: any;
+        chart.canvas.addEventListener('wheel', () => {
+          clearTimeout(zoomTimeout);
+          zoomTimeout = setTimeout(() => {
+            this.forceChartUpdate();
+          }, 200);
+        });
+      }
+    }, 200);
+  }
+
+  private forceChartUpdate() {
+    if (this.chart?.chart) {
+      // Forçar atualização completa do gráfico
+      this.chart.chart.update('none');
+
+      // Re-aplicar as anotações se existirem
+      if (this._horizontalLines.length > 0 || this._verticalLines.length > 0) {
+        this.updateLines();
+      }
+    }
   }
 
   setupMouseEvents() {
@@ -363,7 +401,7 @@ export class GraphComponent {
   updateMouseEvents() {
     if (this.chart?.chart?.canvas) {
       const canvas = this.chart.chart.canvas;
-      
+
       if (this._drawingMode !== DrawingMode.None) {
         canvas.style.cursor = 'crosshair';
         // Disable zoom when drawing mode is on
@@ -394,7 +432,7 @@ export class GraphComponent {
           chart.options.plugins.zoom.zoom!.drag!.enabled = this._drawingMode === DrawingMode.None ? this.zoomEnabled : false;
           chart.options.plugins.zoom.pan!.enabled = this._drawingMode === DrawingMode.None ? !this.zoomEnabled : false;
         }
-        
+
         // Update without animation to preserve zoom
         chart.update('none');
       }
@@ -550,32 +588,32 @@ export class GraphComponent {
       };
     });
 
-        // Add a persistent tooltip annotation that shows line values
+    // Add a persistent tooltip annotation that shows line values
     if (this._horizontalLines.length > 0 || this._verticalLines.length > 0) {
       // Get current chart view coordinates
       const chart = this.chart?.chart;
       if (chart) {
         const xScale = chart.scales['x'];
         const yScale = chart.scales['y'];
-        
+
         if (xScale && yScale) {
           const currentMinX = xScale.min;
           const currentMaxX = xScale.max;
           const currentMinY = yScale.min;
           const currentMaxY = yScale.max;
-          
-                     // Calculate pixel distance from border (10px)
-           const chartArea = chart.chartArea;
-           const pixelOffsetX = (this._horizontalLines.length > 0 && this._verticalLines.length > 0) ? 100 : 55; // 10px from right border
-           const pixelOffsetY = 20; // 10px from top border
-           
-           // Convert pixel offset to data coordinates
-           const dataOffsetX = (pixelOffsetX / chartArea.width) * (currentMaxX - currentMinX);
-           const dataOffsetY = (pixelOffsetY / chartArea.height) * (currentMaxY - currentMinY);
-           
-           const tooltipX = currentMaxX - dataOffsetX;
-           const tooltipY = currentMaxY - dataOffsetY;
-          
+
+          // Calculate pixel distance from border (10px)
+          const chartArea = chart.chartArea;
+          const pixelOffsetX = (this._horizontalLines.length > 0 && this._verticalLines.length > 0) ? 100 : 55; // 10px from right border
+          const pixelOffsetY = 20; // 10px from top border
+
+          // Convert pixel offset to data coordinates
+          const dataOffsetX = (pixelOffsetX / chartArea.width) * (currentMaxX - currentMinX);
+          const dataOffsetY = (pixelOffsetY / chartArea.height) * (currentMaxY - currentMinY);
+
+          const tooltipX = currentMaxX - dataOffsetX;
+          const tooltipY = currentMaxY - dataOffsetY;
+
           annotations['persistentTooltip'] = {
             type: 'label',
             xValue: tooltipX,
@@ -599,21 +637,21 @@ export class GraphComponent {
     // Update only the annotation plugin without recreating the entire options object
     if (this.chart?.chart) {
       const chart = this.chart.chart;
-      
+
       // Update only the annotation plugin in the existing options
       if (this.lineChartOptions.plugins) {
         this.lineChartOptions.plugins.annotation = {
           annotations: annotations
         };
       }
-      
+
       // Update the chart's annotation plugin directly
       if (chart.options.plugins) {
         chart.options.plugins.annotation = {
           annotations: annotations
         };
       }
-      
+
       // Update without animation to preserve zoom
       chart.update('none');
     }
