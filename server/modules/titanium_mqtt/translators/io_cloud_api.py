@@ -101,23 +101,11 @@ class IoCloudApiTranslator(PayloadTranslator):
         data = []
         index_obj = {"current_index": 0}
 
-        current_reading = None
-        tension_reading = None
         for raw_reading in message_json["sensors"]:
             reading = self._create_reading(
                 gateway, timestamp, raw_reading, index_obj)
             if reading:
-                if "current" in reading.full_topic:
-                    current_reading = reading.value
-                elif "tension" in reading.full_topic:
-                    tension_reading = reading.value
                 data.append(reading)
-
-        if current_reading and tension_reading:
-            power = current_reading * tension_reading
-            power_reading = self._create_reading(
-                gateway, timestamp, {"value": f"{power:.2f}", "unit": "kW", "active": True}, index_obj)
-            data.append(power_reading)
 
         return data
 

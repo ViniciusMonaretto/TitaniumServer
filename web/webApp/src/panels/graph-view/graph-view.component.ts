@@ -154,6 +154,7 @@ export class GraphViewComponent implements OnInit {
   }
 
   getTable(sensorData: any): void {
+    this.removeAllLines();
     this.serverConnector.sendRequestForTableInfo(sensorData['selectedSensors'],
                                                  sensorData['group'], 
                                                  sensorData['startDate'],

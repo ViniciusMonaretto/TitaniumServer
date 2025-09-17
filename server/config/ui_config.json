@@ -217,20 +217,20 @@
             "panelGroupId": 1
         },
         {
-            "name": "Fator de Potencia",
-            "gateway": "1C69209DFC08",
-            "topic": "powerFactor",
-            "color": "#000000",
-            "sensorType": "PowerFactor",
-            "indicator": "24",
-            "panelGroupId": 1
-        },
-        {
             "name": "Potencia",
             "gateway": "1C69209DFC08",
             "topic": "power",
             "color": "#000000",
             "sensorType": "Power",
+            "indicator": "24",
+            "panelGroupId": 1
+        },
+        {
+            "name": "Fator de Potencia",
+            "gateway": "1C69209DFC08",
+            "topic": "powerFactor",
+            "color": "#000000",
+            "sensorType": "PowerFactor",
             "indicator": "25",
             "panelGroupId": 1
         }

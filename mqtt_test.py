@@ -35,6 +35,7 @@ base_sensors = [
     {"value": 20, "active": True, "unit": "kPa"},
     {"value": 221, "active": True, "unit": "V"},
     {"value": 2, "active": True, "unit": "A"},
+    {"value": 1000, "active": True, "unit": "W"},
     {"value": 0.96, "active": True, "unit": "%"}
 ]
 

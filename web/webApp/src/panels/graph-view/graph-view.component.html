@@ -4,6 +4,13 @@
                 class="example-icon"
                 [class.active-drawing-mode]="horizontalModeActive"
                 aria-label="Toggle horizontal lines" 
+                (click)="removeAllLines()">
+            <mat-icon>delete</mat-icon>
+        </button>
+        <button *ngIf="lineChartData.length" mat-icon-button 
+                class="example-icon"
+                [class.active-drawing-mode]="horizontalModeActive"
+                aria-label="Toggle horizontal lines" 
                 (click)="toggleHorizontalMode()">
             <mat-icon>more_horiz</mat-icon>
         </button>

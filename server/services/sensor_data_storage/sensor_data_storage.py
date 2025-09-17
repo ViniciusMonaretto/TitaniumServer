@@ -264,12 +264,11 @@ class SensorDataStorage(ServiceInterface):
             # Adiciona limite e ordenação para controlar tamanho dos dados
             cursor = self._collection.find(query).sort(
                 "Timestamp", -1)
-            local_tz = pytz.timezone("America/Sao_Paulo")
             async for doc in cursor:
                 sensor_name = doc["SensorFullTopic"]
                 if sensor_name not in data_out['info']:
                     data_out['info'][sensor_name] = []
-                tm = datetime.fromtimestamp(doc["Timestamp"], local_tz)
+                tm = datetime.fromtimestamp(doc["Timestamp"])
                 data_out["info"][sensor_name].append(
                     {'timestamp': tm.isoformat(), 'value': doc["Value"]})
             data_out['requestId'] = data['websocketId']
