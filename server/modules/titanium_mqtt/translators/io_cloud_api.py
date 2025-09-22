@@ -67,8 +67,6 @@ class IoCloudApiTranslator(PayloadTranslator):
             type_of_sensor = "power"
         elif reading_json["unit"] == "%":
             type_of_sensor = "powerFactor"
-            if "value" in reading_json:
-                reading_json["value"] = reading_json["value"]*100
         else:
             self.logger.error(
                 f"IoCloudApiTranslator::_create_reading: mqtt unit not recognized {reading_json['unit']}"

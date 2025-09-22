@@ -2,7 +2,8 @@ import { Component, Inject, OnInit } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogModule } from '@angular/material/dialog';
 import { CommonModule } from '@angular/common';
 import { SensorAddWindowComponent } from '../sensor-add-window/sensor-add-window.component';
-import { DateAdapter, MAT_DATE_FORMATS, MAT_DATE_LOCALE, MatNativeDateModule, NativeDateAdapter } from '@angular/material/core';
+import { DateAdapter, MAT_DATE_FORMATS, MAT_DATE_LOCALE, MatNativeDateModule } from '@angular/material/core';
+import { BrazilianDateAdapter } from '../../app/brazilian-date-adapter';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
@@ -14,13 +15,13 @@ import { IoButtonComponent } from '../io-button/io-button.component';
 
 export const MY_DATE_FORMATS = {
   parse: {
-    dateInput: 'l, LLL d, yyyy',
+    dateInput: 'DD/MM/YYYY',
   },
   display: {
-    dateInput: 'dd/MM/yyyy',  
-    monthYearLabel: 'MMM yyyy',
-    dateA11yLabel: 'LL',
-    monthYearA11yLabel: 'MMMM yyyy',
+    dateInput: 'DD/MM/YYYY',  
+    monthYearLabel: 'MMM YYYY',
+    dateA11yLabel: 'DD/MM/YYYY',
+    monthYearA11yLabel: 'MMMM YYYY',
   }
 };
 
@@ -40,8 +41,8 @@ export const MY_DATE_FORMATS = {
     IoButtonComponent
   ],
   providers: [
-    { provide: DateAdapter, useClass: NativeDateAdapter },
-    { provide: MAT_DATE_LOCALE, useValue: 'en-US' },
+    { provide: DateAdapter, useClass: BrazilianDateAdapter },
+    { provide: MAT_DATE_LOCALE, useValue: 'pt-BR' },
     { provide: MAT_DATE_FORMATS, useValue: MY_DATE_FORMATS }
   ],
   standalone: true
