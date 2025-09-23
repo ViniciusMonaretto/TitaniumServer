@@ -3,8 +3,8 @@
         <button *ngIf="lineChartData.length" mat-icon-button 
                 class="example-icon"
                 aria-label="Toggle horizontal lines" 
-                (click)="removeAllLines()">
-            <mat-icon>delete</mat-icon>
+                (click)="clearLines = !clearLines">
+            <mat-icon>clear</mat-icon>
         </button>
         <button *ngIf="lineChartData.length" mat-icon-button 
                 class="example-icon"
@@ -43,7 +43,13 @@
             </div>
         </div>
         <div style="width: 40px;" *ngIf="lineChartData.length"></div>
-        <button mat-icon-button 
+        <button *ngIf="lineChartData.length" mat-icon-button 
+                class="example-icon"
+                aria-label="Toggle horizontal lines" 
+                (click)="removeAllLines()">
+            <mat-icon>delete</mat-icon>
+        </button>
+        <button *ngIf="lineChartData.length" mat-icon-button 
                 class="example-icon"
                 aria-label="Example icon-button with menu icon" 
                 (click)="resizeTrigger = !resizeTrigger">
@@ -61,6 +67,7 @@
                    [drawingMode]="drawingMode"
                    [selectedDataLineIndex]="selectedDataLineIndex"
                    [zoomEnabled]="zoomWindowActivate"
+                   [clearLines]="clearLines"
                    [resize]="resizeTrigger">
             </graph>
         </ng-container>

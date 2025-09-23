@@ -42,18 +42,12 @@ export class GraphComponent {
     return this._selectedDataLineIndex;
   }
 
+  @Input() set clearLines(value: boolean) {
+    this.clearAllLines();
+  }
 
   @Input() set drawingMode(value: number) {
     this._drawingMode = value as DrawingMode;
-
-    if (this._drawingMode === DrawingMode.None) {
-      this._horizontalLines = [];
-      this._verticalLines = [];
-    } else if (this._drawingMode === DrawingMode.Horizontal) {
-      this._verticalLines = [];
-    } else if (this._drawingMode === DrawingMode.Vertical) {
-      this._horizontalLines = [];
-    }
 
     // Limpar posição temporária quando o modo de desenho muda
     this._tempMousePosition = { x: null, y: null };
@@ -459,20 +453,28 @@ export class GraphComponent {
     // Round to 2 decimal places for cleaner display
     const roundedValue = Math.round(yValue * 100) / 100;
 
-    // Clear existing lines and add the new one
-    this._horizontalLines = [roundedValue];
-    this.updateLines();
-    console.log(`Placed horizontal line at Y = ${roundedValue}`);
+    // Add the new line if it doesn't already exist
+    if (!this._horizontalLines.includes(roundedValue)) {
+      this._horizontalLines.push(roundedValue);
+      this.updateLines();
+      console.log(`Added horizontal line at Y = ${roundedValue}`);
+    } else {
+      console.log(`Horizontal line at Y = ${roundedValue} already exists`);
+    }
   }
 
   addVerticalLine(xValue: number) {
     // Round to 2 decimal places for cleaner display
     const roundedValue = Math.round(xValue * 100) / 100;
 
-    // Clear existing lines and add the new one
-    this._verticalLines = [roundedValue];
-    this.updateLines();
-    console.log(`Placed vertical line at X = ${roundedValue}`);
+    // Add the new line if it doesn't already exist
+    if (!this._verticalLines.includes(roundedValue)) {
+      this._verticalLines.push(roundedValue);
+      this.updateLines();
+      console.log(`Added vertical line at X = ${roundedValue}`);
+    } else {
+      console.log(`Vertical line at X = ${roundedValue} already exists`);
+    }
   }
 
   removeHorizontalLine(yValue: number) {
@@ -488,6 +490,19 @@ export class GraphComponent {
     this._horizontalLines = [];
     this.updateLines();
     console.log('Cleared all horizontal lines');
+  }
+
+  clearAllVerticalLines() {
+    this._verticalLines = [];
+    this.updateLines();
+    console.log('Cleared all vertical lines');
+  }
+
+  clearAllLines() {
+    this._horizontalLines = [];
+    this._verticalLines = [];
+    this.updateLines();
+    console.log('Cleared all lines');
   }
 
   updateMouseEvents() {
@@ -625,7 +640,7 @@ export class GraphComponent {
         type: 'line',
         yMin: this._tempMousePosition.y,
         yMax: this._tempMousePosition.y,
-        borderColor: 'rgba(255, 165, 0, 0.8)', // Orange color for temporary line
+        borderColor: 'rgba(200, 198, 194, 0.8)', 
         borderWidth: 2,
         borderDash: [3, 3],
         enter: {
@@ -647,7 +662,7 @@ export class GraphComponent {
             xValue: xValue,
             yValue: this._tempMousePosition.y,
             content: `${this._tempMousePosition.y.toFixed(2)}`,
-            backgroundColor: 'rgba(255, 165, 0, 0.9)',
+            backgroundColor: 'rgba(200, 198, 194, 0.9)',
             color: 'rgba(0, 0, 0, 0.8)',
             font: {
               size: 11,
@@ -655,7 +670,7 @@ export class GraphComponent {
             },
             padding: 3,
             borderRadius: 3,
-            borderColor: 'rgba(255, 165, 0, 0.8)',
+            borderColor: 'rgba(200, 198, 194, 0.8)',
             borderWidth: 1
           };
         }
@@ -668,7 +683,7 @@ export class GraphComponent {
         type: 'line',
         yMin: yValue,
         yMax: yValue,
-        borderColor: 'rgba(255, 0, 0, 0.8)',
+        borderColor: 'rgba(186, 183, 178, 0.8)',
         borderWidth: 2,
         borderDash: [5, 5],
         enter: {
@@ -690,15 +705,15 @@ export class GraphComponent {
             xValue: xValue,
             yValue: yValue,
             content: `${yValue}`,
-            backgroundColor: 'rgba(255, 255, 255, 0.9)',
-            color: 'rgba(255, 0, 0, 0.8)',
+            backgroundColor: 'rgba(186, 183, 178, 0.9)',
+            color: 'rgba(0, 0, 0, 0.8)',
             font: {
               size: 11,
               weight: 'bold'
             },
             padding: 3,
             borderRadius: 3,
-            borderColor: 'rgba(255, 0, 0, 0.8)',
+            borderColor: 'rgba(72, 71, 70, 0.8)',
             borderWidth: 1
           };
         }
@@ -712,7 +727,7 @@ export class GraphComponent {
         type: 'line',
         xMin: this._tempMousePosition.x,
         xMax: this._tempMousePosition.x,
-        borderColor: 'rgba(255, 165, 0, 0.8)', // Orange color for temporary line
+        borderColor: 'rgba(200, 198, 194, 0.8)', // Orange color for temporary line
         borderWidth: 2,
         borderDash: [3, 3]
       };
@@ -733,7 +748,7 @@ export class GraphComponent {
               hour: '2-digit',
               minute: '2-digit'
             }),
-            backgroundColor: 'rgba(255, 165, 0, 0.9)',
+            backgroundColor: 'rgba(200, 198, 194, 0.9)',
             color: 'rgba(0, 0, 0, 0.8)',
             font: {
               size: 11,
@@ -741,7 +756,7 @@ export class GraphComponent {
             },
             padding: 3,
             borderRadius: 3,
-            borderColor: 'rgba(255, 165, 0, 0.8)',
+            borderColor: 'rgba(72, 71, 70, 0.8)',
             borderWidth: 1
           };
         }
@@ -754,7 +769,7 @@ export class GraphComponent {
         type: 'line',
         xMin: xValue,
         xMax: xValue,
-        borderColor: 'rgba(255, 0, 0, 0.8)',
+        borderColor: 'rgba(186, 183, 178, 0.8)',
         borderWidth: 2,
         borderDash: [5, 5]
       };
@@ -775,15 +790,15 @@ export class GraphComponent {
               hour: '2-digit',
               minute: '2-digit'
             }),
-            backgroundColor: 'rgba(255, 255, 255, 0.9)',
-            color: 'rgba(255, 0, 0, 0.8)',
+            backgroundColor: 'rgba(186, 183, 178, 0.9)',
+            color: 'rgba(0, 0, 0, 0.8)',
             font: {
               size: 11,
               weight: 'bold'
             },
             padding: 3,
             borderRadius: 3,
-            borderColor: 'rgba(255, 0, 0, 0.8)',
+            borderColor: 'rgba(72, 71, 70, 0.8)',
             borderWidth: 1
           };
         }
