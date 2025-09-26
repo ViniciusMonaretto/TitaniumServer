@@ -3,10 +3,10 @@
     <mat-form-field style="width: 100%;" appearance="fill">
         <mat-label>Selecionar Grupo</mat-label>
         <mat-select [(ngModel)]="selectedGroup">
-            <mat-option *ngFor="let group of getGroups()" [value]="group">{{group}}</mat-option>
+            <mat-option *ngFor="let group of getGroups()" [value]="group">{{group.name}}</mat-option>
         </mat-select>
     </mat-form-field>
-    <mat-form-field style="width: 100%;" appearance="fill" *ngIf="selectedGroup!=''">
+    <mat-form-field style="width: 100%;" appearance="fill" *ngIf="selectedGroup">
         <mat-label>Selecionar Tipo</mat-label>
         <mat-select [(ngModel)]="option">
             <mat-option [value]="'temperature'">Temperatura</mat-option>
@@ -14,7 +14,7 @@
             <mat-option [value]="'power'">Potência</mat-option>
         </mat-select>
     </mat-form-field>
-    <mat-form-field style="width: 100%;" appearance="fill" *ngIf="selectedGroup!='' && getAvailableSensors().length != 0">
+    <mat-form-field style="width: 100%;" appearance="fill" *ngIf="selectedGroup && getAvailableSensors().length != 0">
         <mat-label>Selecionar Sensores</mat-label>
         <mat-select [(ngModel)]="selectedSensors" multiple>
             <mat-option *ngFor="let panel of getAvailableSensors()" [value]="panel">{{panel.name}}</mat-option>

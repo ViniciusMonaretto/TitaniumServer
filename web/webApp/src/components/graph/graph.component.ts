@@ -683,7 +683,7 @@ export class GraphComponent {
         type: 'line',
         yMin: yValue,
         yMax: yValue,
-        borderColor: 'rgba(186, 183, 178, 0.8)',
+        borderColor: 'rgba(43, 42, 42, 0.8)',
         borderWidth: 2,
         borderDash: [5, 5],
         enter: {
@@ -769,7 +769,7 @@ export class GraphComponent {
         type: 'line',
         xMin: xValue,
         xMax: xValue,
-        borderColor: 'rgba(186, 183, 178, 0.8)',
+        borderColor: 'rgba(43, 42, 42, 0.8)',
         borderWidth: 2,
         borderDash: [5, 5]
       };

@@ -52,7 +52,7 @@ export class GraphRequestWindowComponent implements OnInit {
   uiConfig: { [id: string]: GroupInfo } = {}
 
   selectedSensors: Array<SensorModule> = []
-  selectedGroup: string = ""
+  selectedGroup: GroupInfo | null = null
 
   startDate: Date | null = null
   endDate: Date | null = null
@@ -68,8 +68,12 @@ export class GraphRequestWindowComponent implements OnInit {
   ngOnInit(): void {
   }
 
-  getGroups(): string[] {
-    return Object.keys(this.uiConfig);
+  getGroups(): GroupInfo[] {
+    let uiVector = []
+    for(let group in this.uiConfig) {
+      uiVector.push(this.uiConfig[group])
+    }
+    return uiVector;
   }
 
   setTime(event: any, selectedDateTime: Date | null) {
@@ -81,21 +85,24 @@ export class GraphRequestWindowComponent implements OnInit {
 
   getAvailableSensors()
   {
+    if(this.selectedGroup == null) {
+      return []
+    }
     switch(this.option)
     {
       case "temperature":
-        return this.uiConfig[this.selectedGroup].panels.temperature
+        return this.selectedGroup.panels.temperature
       case "pressure":
-        return this.uiConfig[this.selectedGroup].panels.pressure
+        return this.selectedGroup.panels.pressure
       case "power":
-        return this.uiConfig[this.selectedGroup].panels.power
+        return this.selectedGroup.panels.power
       default:
         return []
     }
   }
 
   validForm() {
-    return this.selectedGroup != "" && this.option != "" &&
+    return this.selectedGroup != null && this.option != "" &&
       ((this.startDate == null && this.endDate == null) ||
         (this.startDate != null && this.endDate == null) ||
         (this.startDate != null && this.endDate != null && this.startDate?.getTime() < this.endDate.getTime()))
@@ -123,7 +130,7 @@ export class GraphRequestWindowComponent implements OnInit {
       "selectedSensors": selectedPanels,
       "startDate": this.startDate,
       "endDate": this.endDate,
-      "group": this.selectedGroup
+      "group": this.selectedGroup?.id
     }
 
     this.data.callback(obj)
