@@ -75,7 +75,7 @@ def send_gateway_status(mqtt_client):
         "device_id": "1C69209DFC08",
         "ip_address": "192.168.3.79",
         "uptime": 19510,
-        "panels": panels
+        "sensors": panels
     }
 
     status_topic = "iocloud/response/1C69209DFC08/system"
