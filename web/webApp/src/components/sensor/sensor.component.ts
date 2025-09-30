@@ -89,7 +89,7 @@ export class SensorComponent implements OnInit {
     return this.sensorInfo.color
   }
 
-  getColorOfSensorStatus() {
+  getColorOfSensorStatusMessage() {
     var value = this.sensorInfo?.value
     var maxValue = this.sensorInfo?.maxAlarm?.threshold
     var minValue = this.sensorInfo?.minAlarm?.threshold
@@ -107,6 +107,27 @@ export class SensorComponent implements OnInit {
     }
 
     return '#22C55E';
+  }
+
+  getBackgrounColor()
+  {
+    var value = this.sensorInfo?.value
+    var maxValue = this.sensorInfo?.maxAlarm?.threshold
+    var minValue = this.sensorInfo?.minAlarm?.threshold
+
+    if (!this.sensorInfo.isActive || (!value && value !== 0)) {
+      return 'none';
+    }
+
+    if (maxValue && value > maxValue) {
+      return 'rgb(242 156 156)'
+    }
+
+    if (minValue && value < minValue) {
+      return 'rgb(196 214 243)'
+    }
+
+    return 'none';
   }
 
   deletePanel() {

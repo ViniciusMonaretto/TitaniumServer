@@ -1,4 +1,4 @@
-<div class="sensor" (click)="infoCLick()">
+<div class="sensor" (click)="infoCLick()" [style.background-color]="getBackgrounColor()">
   <div class="header-sensor">
     {{ sensorInfo.name }}
     <div [style.background-color]="getColorOfReading()" class="color-square"></div>
@@ -8,7 +8,7 @@
       {{ getCurrentReading() + " " + getMeasureIcon() }}
     </div>
   </div>
-  <div class="footer-display" [style.color]="getColorOfSensorStatus()">
+  <div class="footer-display" [style.color]="getColorOfSensorStatusMessage()">
       {{getStatusMessageOfSensor()}}
   </div>
 </div>

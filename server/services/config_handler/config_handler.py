@@ -257,7 +257,9 @@ class ConfigHandler(ServiceInterface):
             return None
         elif alarm != None and alarm.threshold != new_alarm_value:
             return self._alarm_manager.change_alarm_threshold(
-                alarm.id, new_alarm_value, panel.topic
+                alarm.id, new_alarm_value, ClientMiddleware.get_status_topic(
+                    panel.gateway, panel.topic, panel.indicator
+                )
             )
 
         # If alarm exists and new value is the same, return existing alarm unchanged
