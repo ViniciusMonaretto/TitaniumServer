@@ -67,8 +67,6 @@ class IoCloudApiTranslator(PayloadTranslator):
             type_of_sensor = "power"
         elif reading_json["unit"] == "%":
             type_of_sensor = "powerFactor"
-            if "value" in reading_json:
-                reading_json["value"] = reading_json["value"]*100
         else:
             self.logger.error(
                 f"IoCloudApiTranslator::_create_reading: mqtt unit not recognized {reading_json['unit']}"
@@ -101,23 +99,11 @@ class IoCloudApiTranslator(PayloadTranslator):
         data = []
         index_obj = {"current_index": 0}
 
-        current_reading = None
-        tension_reading = None
         for raw_reading in message_json["sensors"]:
             reading = self._create_reading(
                 gateway, timestamp, raw_reading, index_obj)
             if reading:
-                if "current" in reading.full_topic:
-                    current_reading = reading.value
-                elif "tension" in reading.full_topic:
-                    tension_reading = reading.value
                 data.append(reading)
-
-        if current_reading and tension_reading:
-            power = current_reading * tension_reading
-            power_reading = self._create_reading(
-                gateway, timestamp, {"value": f"{power:.2f}", "unit": "kW", "active": True}, index_obj)
-            data.append(power_reading)
 
         return data
 
@@ -136,7 +122,7 @@ class IoCloudApiTranslator(PayloadTranslator):
 
         panels = []
 
-        for panel in message_json["panels"]:
+        for panel in message_json["sensors"]:
             system_panel: MqttSensorStatusModel = MqttSensorStatusModel()
             system_panel.status = panel["state"] == 0
             system_panel.gain = panel["gain"]
@@ -188,11 +174,11 @@ class IoCloudApiTranslator(PayloadTranslator):
                 out_payload.data = self._read_calibration_update_message(
                     msg_split[2], message_json
                 )
-        elif action_str == MqttActions.SYSTEM.value:
-            if not len(msg_split) == 4:
-                self.logger.error(
-                    f"IoCloudApiTranslator::translate_payload: mqtt topic {topic} not valid"
-                )
-            out_payload.data = self._read_system_message(message_json)
+            elif message_json["command_index"] == 2:
+                if not len(msg_split) == 4:
+                    self.logger.error(
+                        f"IoCloudApiTranslator::translate_payload: mqtt topic {topic} not valid"
+                    )
+                out_payload.data = self._read_system_message(message_json)
 
         return out_payload

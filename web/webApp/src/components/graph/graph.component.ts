@@ -42,18 +42,16 @@ export class GraphComponent {
     return this._selectedDataLineIndex;
   }
 
+  @Input() set clearLines(value: boolean) {
+    this.clearAllLines();
+  }
 
   @Input() set drawingMode(value: number) {
     this._drawingMode = value as DrawingMode;
 
-    if (this._drawingMode === DrawingMode.None) {
-      this._horizontalLines = [];
-      this._verticalLines = [];
-    } else if (this._drawingMode === DrawingMode.Horizontal) {
-      this._verticalLines = [];
-    } else if (this._drawingMode === DrawingMode.Vertical) {
-      this._horizontalLines = [];
-    }
+    // Limpar posição temporária quando o modo de desenho muda
+    this._tempMousePosition = { x: null, y: null };
+    this._isMouseOverChart = false;
 
     this.updateLines();
     this.updateMouseEvents();
@@ -68,6 +66,10 @@ export class GraphComponent {
   private isDrawingMode: boolean = false;
   private _minMaxPoints: { min: { x: number, y: number } | null, max: { x: number, y: number } | null } = { min: null, max: null };
   private _selectedDataLineIndex: number = -1;
+  
+  // Propriedades para linha temporária que segue o mouse
+  private _tempMousePosition: { x: number | null, y: number | null } = { x: null, y: null };
+  private _isMouseOverChart: boolean = false;
   private marginY: number = 0
   private marginX: number = 0
   private maxY: number = 0
@@ -95,6 +97,7 @@ export class GraphComponent {
 
     this.calculateMargin(datasetsWithPoints)
 
+    this.updateZoomLimits()
     this.fitAllGraph()
     this.updateLines()
   }
@@ -245,6 +248,16 @@ export class GraphComponent {
             return true
           }
         },
+        limits: {
+          x: {
+            min: 0,
+            max: 0,
+          },
+          y: {
+            min: 0,
+            max: 0,
+          },
+        },
       },
     },
   };
@@ -302,6 +315,8 @@ export class GraphComponent {
         // Remove existing listeners to avoid duplicates
         canvas.removeEventListener('click', this.handleCanvasClick.bind(this));
         canvas.removeEventListener('mousemove', this.handleMouseMove.bind(this));
+        canvas.removeEventListener('mouseenter', this.handleMouseEnter.bind(this));
+        canvas.removeEventListener('mouseleave', this.handleMouseLeave.bind(this));
 
         // Add new listeners
         canvas.addEventListener('click', (event) => {
@@ -315,6 +330,18 @@ export class GraphComponent {
             this.handleMouseMove(event);
           }
         });
+
+        canvas.addEventListener('mouseenter', (event) => {
+          if (this._drawingMode !== DrawingMode.None) {
+            this.handleMouseEnter(event);
+          }
+        });
+
+        canvas.addEventListener('mouseleave', (event) => {
+          if (this._drawingMode !== DrawingMode.None) {
+            this.handleMouseLeave(event);
+          }
+        });
       }
     }, 100);
   }
@@ -322,12 +349,32 @@ export class GraphComponent {
   handleCanvasClick(event: MouseEvent) {
     if (!this.chart?.chart) return;
 
+    // Se temos posição temporária do mouse, usar ela para fixar a linha
+    if (this._tempMousePosition.x !== null || this._tempMousePosition.y !== null) {
+      if (this._drawingMode === DrawingMode.Horizontal && this._tempMousePosition.y !== null) {
+        this.addHorizontalLine(this._tempMousePosition.y);
+      } else if (this._drawingMode === DrawingMode.Vertical && this._tempMousePosition.x !== null) {
+        this.addVerticalLine(this._tempMousePosition.x);
+      } else if (this._drawingMode === DrawingMode.Both) {
+        if (this._tempMousePosition.y !== null) {
+          this.addHorizontalLine(this._tempMousePosition.y);
+        }
+        if (this._tempMousePosition.x !== null) {
+          this.addVerticalLine(this._tempMousePosition.x);
+        }
+      }
+      
+      // Limpar posição temporária após fixar
+      this._tempMousePosition = { x: null, y: null };
+      return;
+    }
+
+    // Fallback para o comportamento original se não houver posição temporária
     const rect = this.chart.chart.canvas.getBoundingClientRect();
     const x = event.clientX - rect.left;
     const y = event.clientY - rect.top;
 
     // Convert pixel coordinates to chart coordinates
-    const chartArea = this.chart.chart.chartArea;
     const yScale = this.chart.chart.scales['y'];
     const xScale = this.chart.chart.scales['x'];
 
@@ -355,32 +402,79 @@ export class GraphComponent {
   }
 
   handleMouseMove(event: MouseEvent) {
+    if (!this.chart?.chart) return;
+
     // Optional: Add visual feedback when hovering in drawing mode
     if (this._drawingMode !== DrawingMode.None && this.chart?.chart?.canvas) {
       this.chart.chart.canvas.style.cursor = 'crosshair';
     } else if (this.chart?.chart?.canvas) {
       this.chart.chart.canvas.style.cursor = 'default';
     }
+
+    // Atualizar posição da linha temporária se estiver no modo de desenho
+    if (this._drawingMode !== DrawingMode.None && this._isMouseOverChart) {
+      const rect = this.chart.chart.canvas.getBoundingClientRect();
+      const x = event.clientX - rect.left;
+      const y = event.clientY - rect.top;
+
+      // Convert pixel coordinates to chart coordinates
+      const yScale = this.chart.chart.scales['y'];
+      const xScale = this.chart.chart.scales['x'];
+
+      const yValue = yScale.getValueForPixel(y);
+      const xValue = xScale.getValueForPixel(x);
+
+      // Atualizar posição temporária baseada no modo de desenho
+      if (this._drawingMode === DrawingMode.Horizontal || this._drawingMode === DrawingMode.Both) {
+        this._tempMousePosition.y = (yValue !== null && yValue !== undefined && !isNaN(yValue)) ? Number(yValue) : null;
+      }
+      
+      if (this._drawingMode === DrawingMode.Vertical || this._drawingMode === DrawingMode.Both) {
+        this._tempMousePosition.x = (xValue !== null && xValue !== undefined && !isNaN(xValue)) ? Number(xValue) : null;
+      }
+
+      // Atualizar as linhas para mostrar a linha temporária
+      this.updateLines();
+    }
+  }
+
+  handleMouseEnter(event: MouseEvent) {
+    this._isMouseOverChart = true;
+  }
+
+  handleMouseLeave(event: MouseEvent) {
+    this._isMouseOverChart = false;
+    // Limpar posição temporária quando o mouse sai do gráfico
+    this._tempMousePosition = { x: null, y: null };
+    this.updateLines();
   }
 
   addHorizontalLine(yValue: number) {
     // Round to 2 decimal places for cleaner display
     const roundedValue = Math.round(yValue * 100) / 100;
 
-    // Clear existing lines and add the new one
-    this._horizontalLines = [roundedValue];
-    this.updateLines();
-    console.log(`Placed horizontal line at Y = ${roundedValue}`);
+    // Add the new line if it doesn't already exist
+    if (!this._horizontalLines.includes(roundedValue)) {
+      this._horizontalLines.push(roundedValue);
+      this.updateLines();
+      console.log(`Added horizontal line at Y = ${roundedValue}`);
+    } else {
+      console.log(`Horizontal line at Y = ${roundedValue} already exists`);
+    }
   }
 
   addVerticalLine(xValue: number) {
     // Round to 2 decimal places for cleaner display
     const roundedValue = Math.round(xValue * 100) / 100;
 
-    // Clear existing lines and add the new one
-    this._verticalLines = [roundedValue];
-    this.updateLines();
-    console.log(`Placed vertical line at X = ${roundedValue}`);
+    // Add the new line if it doesn't already exist
+    if (!this._verticalLines.includes(roundedValue)) {
+      this._verticalLines.push(roundedValue);
+      this.updateLines();
+      console.log(`Added vertical line at X = ${roundedValue}`);
+    } else {
+      console.log(`Vertical line at X = ${roundedValue} already exists`);
+    }
   }
 
   removeHorizontalLine(yValue: number) {
@@ -396,6 +490,19 @@ export class GraphComponent {
     this._horizontalLines = [];
     this.updateLines();
     console.log('Cleared all horizontal lines');
+  }
+
+  clearAllVerticalLines() {
+    this._verticalLines = [];
+    this.updateLines();
+    console.log('Cleared all vertical lines');
+  }
+
+  clearAllLines() {
+    this._horizontalLines = [];
+    this._verticalLines = [];
+    this.updateLines();
+    console.log('Cleared all lines');
   }
 
   updateMouseEvents() {
@@ -495,6 +602,7 @@ export class GraphComponent {
 
     }
 
+    this.updateZoomLimits();
     this.chart?.chart?.resetZoom();
 
     // Force chart update to apply the new scales
@@ -525,28 +633,16 @@ export class GraphComponent {
     const minMaxAnnotations = this.getMinMaxAnnotations();
     Object.assign(annotations, minMaxAnnotations);
 
-    // Add horizontal lines as annotations
-    this._horizontalLines.forEach((yValue, index) => {
-      annotations[`horizontalLine${index}`] = {
+    // Add temporary horizontal line if mouse is over chart and in drawing mode
+    if (this._tempMousePosition.y !== null && this._isMouseOverChart && 
+        (this._drawingMode === DrawingMode.Horizontal || this._drawingMode === DrawingMode.Both)) {
+      annotations['tempHorizontalLine'] = {
         type: 'line',
-        yMin: yValue,
-        yMax: yValue,
-        borderColor: 'rgba(255, 0, 0, 0.8)',
+        yMin: this._tempMousePosition.y,
+        yMax: this._tempMousePosition.y,
+        borderColor: 'rgba(200, 198, 194, 0.8)', 
         borderWidth: 2,
-        borderDash: [5, 5],
-        label: {
-          content: `Y = ${yValue}`,
-          enabled: true,
-          position: 'left',
-          backgroundColor: 'rgba(255, 255, 255, 0.8)',
-          color: 'rgba(255, 0, 0, 0.8)',
-          font: {
-            size: 12,
-            weight: 'bold'
-          },
-          padding: 4,
-          borderRadius: 4
-        },
+        borderDash: [3, 3],
         enter: {
           mode: 'immediate',
           animation: {
@@ -554,7 +650,118 @@ export class GraphComponent {
           }
         }
       };
+
+      // Add text annotation for temporary horizontal line value
+      if (this.chart?.chart) {
+        const chart = this.chart.chart;
+        const xScale = chart.scales['x'];
+        if (xScale) {
+          const xValue = xScale.min + (xScale.max - xScale.min) * 0.015; // Grudado no eixo Y
+          annotations['tempHorizontalLineText'] = {
+            type: 'label',
+            xValue: xValue,
+            yValue: this._tempMousePosition.y,
+            content: `${this._tempMousePosition.y.toFixed(2)}`,
+            backgroundColor: 'rgba(200, 198, 194, 0.9)',
+            color: 'rgba(0, 0, 0, 0.8)',
+            font: {
+              size: 11,
+              weight: 'bold'
+            },
+            padding: 3,
+            borderRadius: 3,
+            borderColor: 'rgba(200, 198, 194, 0.8)',
+            borderWidth: 1
+          };
+        }
+      }
+    }
+
+    // Add horizontal lines as annotations
+    this._horizontalLines.forEach((yValue, index) => {
+      annotations[`horizontalLine${index}`] = {
+        type: 'line',
+        yMin: yValue,
+        yMax: yValue,
+        borderColor: 'rgba(43, 42, 42, 0.8)',
+        borderWidth: 2,
+        borderDash: [5, 5],
+        enter: {
+          mode: 'immediate',
+          animation: {
+            duration: 0
+          }
+        }
+      };
+
+      // Add text annotation for horizontal line value
+      if (this.chart?.chart) {
+        const chart = this.chart.chart;
+        const xScale = chart.scales['x'];
+        if (xScale) {
+          const xValue = xScale.min + (xScale.max - xScale.min) * 0.015; // Grudado no eixo Y
+          annotations[`horizontalLineText${index}`] = {
+            type: 'label',
+            xValue: xValue,
+            yValue: yValue,
+            content: `${yValue}`,
+            backgroundColor: 'rgba(186, 183, 178, 0.9)',
+            color: 'rgba(0, 0, 0, 0.8)',
+            font: {
+              size: 11,
+              weight: 'bold'
+            },
+            padding: 3,
+            borderRadius: 3,
+            borderColor: 'rgba(72, 71, 70, 0.8)',
+            borderWidth: 1
+          };
+        }
+      }
     });
+
+    // Add temporary vertical line if mouse is over chart and in drawing mode
+    if (this._tempMousePosition.x !== null && this._isMouseOverChart && 
+        (this._drawingMode === DrawingMode.Vertical || this._drawingMode === DrawingMode.Both)) {
+      annotations['tempVerticalLine'] = {
+        type: 'line',
+        xMin: this._tempMousePosition.x,
+        xMax: this._tempMousePosition.x,
+        borderColor: 'rgba(200, 198, 194, 0.8)', // Orange color for temporary line
+        borderWidth: 2,
+        borderDash: [3, 3]
+      };
+
+      // Add text annotation for temporary vertical line value
+      if (this.chart?.chart) {
+        const chart = this.chart.chart;
+        const yScale = chart.scales['y'];
+        if (yScale) {
+          const yValue = yScale.min + (yScale.max - yScale.min) * 0.015; // Grudado no eixo X
+          annotations['tempVerticalLineText'] = {
+            type: 'label',
+            xValue: this._tempMousePosition.x,
+            yValue: yValue,
+            content: new Date(this._tempMousePosition.x).toLocaleString('pt-BR', {
+              day: '2-digit',
+              month: '2-digit',
+              hour: '2-digit',
+              minute: '2-digit'
+            }),
+            backgroundColor: 'rgba(200, 198, 194, 0.9)',
+            color: 'rgba(0, 0, 0, 0.8)',
+            font: {
+              size: 11,
+              weight: 'bold'
+            },
+            padding: 3,
+            borderRadius: 3,
+            borderColor: 'rgba(72, 71, 70, 0.8)',
+            borderWidth: 1
+          };
+        }
+      }
+    }
 
     // Add vertical lines as annotations
     this._verticalLines.forEach((xValue, index) => {
@@ -562,77 +769,41 @@ export class GraphComponent {
         type: 'line',
         xMin: xValue,
         xMax: xValue,
-        borderColor: 'rgba(255, 0, 0, 0.8)',
+        borderColor: 'rgba(43, 42, 42, 0.8)',
         borderWidth: 2,
-        borderDash: [5, 5],
-        label: {
-          content: new Date(xValue).toLocaleString('pt-BR', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit',
-            second: '2-digit'
-          }),
-          enabled: true,
-          position: 'top',
-          backgroundColor: 'rgba(255, 255, 255, 0.8)',
-          color: 'rgba(255, 0, 0, 0.8)',
-          font: {
-            size: 12,
-            weight: 'bold'
-          },
-          padding: 4,
-          borderRadius: 4
-        }
+        borderDash: [5, 5]
       };
-    });
 
-    // Add a persistent tooltip annotation that shows line values
-    if (this._horizontalLines.length > 0 || this._verticalLines.length > 0) {
-      // Get current chart view coordinates
-      const chart = this.chart?.chart;
-      if (chart) {
-        const xScale = chart.scales['x'];
+      // Add text annotation for vertical line value
+      if (this.chart?.chart) {
+        const chart = this.chart.chart;
         const yScale = chart.scales['y'];
-
-        if (xScale && yScale) {
-          const currentMinX = xScale.min;
-          const currentMaxX = xScale.max;
-          const currentMinY = yScale.min;
-          const currentMaxY = yScale.max;
-
-          // Calculate pixel distance from border (10px)
-          const chartArea = chart.chartArea;
-          const pixelOffsetX = (this._horizontalLines.length > 0 && this._verticalLines.length > 0) ? 100 : 55; // 10px from right border
-          const pixelOffsetY = 20; // 10px from top border
-
-          // Convert pixel offset to data coordinates
-          const dataOffsetX = (pixelOffsetX / chartArea.width) * (currentMaxX - currentMinX);
-          const dataOffsetY = (pixelOffsetY / chartArea.height) * (currentMaxY - currentMinY);
-
-          const tooltipX = currentMaxX - dataOffsetX;
-          const tooltipY = currentMaxY - dataOffsetY;
-
-          annotations['persistentTooltip'] = {
+        if (yScale) {
+          const yValue = yScale.min + (yScale.max - yScale.min) * 0.015; // Grudado no eixo X
+          annotations[`verticalLineText${index}`] = {
             type: 'label',
-            xValue: tooltipX,
-            yValue: tooltipY,
-            backgroundColor: 'rgba(255, 255, 255, 0.95)',
-            content: this.getLineValuesText(),
+            xValue: xValue,
+            yValue: yValue,
+            content: new Date(xValue).toLocaleString('pt-BR', {
+              day: '2-digit',
+              month: '2-digit',
+              hour: '2-digit',
+              minute: '2-digit'
+            }),
+            backgroundColor: 'rgba(186, 183, 178, 0.9)',
             color: 'rgba(0, 0, 0, 0.8)',
             font: {
               size: 11,
               weight: 'bold'
             },
-            padding: 8,
-            borderRadius: 6,
-            borderColor: 'rgba(255, 0, 0, 0.8)',
+            padding: 3,
+            borderRadius: 3,
+            borderColor: 'rgba(72, 71, 70, 0.8)',
             borderWidth: 1
           };
         }
       }
-    }
+    });
 
     // Update only the annotation plugin without recreating the entire options object
     if (this.chart?.chart) {
@@ -655,30 +826,6 @@ export class GraphComponent {
       // Update without animation to preserve zoom
       chart.update('none');
     }
-  }
-
-  private getLineValuesText(): string {
-    let text = '';
-
-    if (this._horizontalLines.length > 0) {
-      this._horizontalLines.forEach((value, index) => {
-        text += `H${index + 1}: Y = ${value}\n`;
-      });
-    }
-
-    if (this._verticalLines.length > 0) {
-      this._verticalLines.forEach((value, index) => {
-        const date = new Date(value).toLocaleString('pt-BR', {
-          day: '2-digit',
-          month: '2-digit',
-          hour: '2-digit',
-          minute: '2-digit'
-        });
-        text += `V${index + 1}: ${date}\n`;
-      });
-    }
-
-    return text.trim();
   }
 
   private calculateMinMaxPoints(): void {
@@ -709,6 +856,15 @@ export class GraphComponent {
     });
 
     this._minMaxPoints = { min: minPoint, max: maxPoint };
+  }
+
+  private updateZoomLimits(): void {
+    if (this.lineChartOptions.plugins?.zoom?.limits) {
+      this.lineChartOptions.plugins.zoom.limits['x']!.min = this.minX;
+      this.lineChartOptions.plugins.zoom.limits['x']!.max = this.maxX;
+      this.lineChartOptions.plugins.zoom.limits['y']!.min = this.minY;
+      this.lineChartOptions.plugins.zoom.limits['y']!.max = this.maxY;
+    }
   }
 
   private getMinMaxAnnotations(): any {

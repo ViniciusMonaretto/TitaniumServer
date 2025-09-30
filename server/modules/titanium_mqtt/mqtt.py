@@ -22,7 +22,7 @@ PUBLISH_TOPIC_LIST = ["GetLevel", "titanium/level"]
 GATEWAY_CONFIG_DIR = "titaniumGatewaysConfigs"
 
 # Get MQTT connection details from environment variables
-MQTT_SERVER = 'broker.hivemq.com'
+MQTT_SERVER = os.getenv('MQTT_HOST', 'broker.hivemq.com')
 MQTT_PORT = int(os.getenv('MQTT_PORT', '1883'))
 
 
@@ -81,13 +81,15 @@ class TitaniumMqtt:
         if not self._client or not self._client.is_connected():
             self._middleware.send_command_answear(
                 False, "status_request_command: Mqtt not connected", command["requestId"])
-        topic = "iocloud/request/sendsystemstatus"
-        self._client.publish(topic, "")
+        topic = "iocloud/request/all/command"
+        self._client.publish(
+            topic, "{'command': 2, 'params': {'user': 'root', 'password': 'root'}}")
         self._middleware.send_command_answear(
             True, "sucess", command["requestId"])
 
     def on_connect(self, client, userdata, _flags, rc):
-        self._logger.info(f"MqqtServer: Connected on {MQTT_SERVER} with result code {rc}")
+        self._logger.info(
+            f"MqqtServer: Connected on {MQTT_SERVER} with result code {rc}")
         client.subscribe(userdata["subscribe_topics"])
 
     def on_message(self, _c, _u, msg):

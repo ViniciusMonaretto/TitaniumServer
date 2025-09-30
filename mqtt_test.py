@@ -35,6 +35,7 @@ base_sensors = [
     {"value": 20, "active": True, "unit": "kPa"},
     {"value": 221, "active": True, "unit": "V"},
     {"value": 2, "active": True, "unit": "A"},
+    {"value": 1000, "active": True, "unit": "W"},
     {"value": 0.96, "active": True, "unit": "%"}
 ]
 
@@ -74,7 +75,7 @@ def send_gateway_status(mqtt_client):
         "device_id": "1C69209DFC08",
         "ip_address": "192.168.3.79",
         "uptime": 19510,
-        "panels": panels
+        "sensors": panels
     }
 
     status_topic = "iocloud/response/1C69209DFC08/system"

@@ -2,6 +2,7 @@ import logging
 import threading
 from logging.handlers import RotatingFileHandler
 
+
 class SingletonMeta(type):
     """ Thread-safe Singleton Metaclass """
     _instances = {}
@@ -13,21 +14,24 @@ class SingletonMeta(type):
                 cls._instances[cls] = super().__call__(*args, **kwargs)
         return cls._instances[cls]
 
+
 class Logger(metaclass=SingletonMeta):
     def __init__(self, log_file="app.log", level=logging.INFO, max_size=5*1024*1024, backup_count=3):
         self.logger = logging.getLogger("TitaniumLogger")
         self.logger.setLevel(level)
-        self.logger.propagate = False 
+        self.logger.propagate = False
 
         if not self.logger.hasHandlers():
-            formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
+            formatter = logging.Formatter(
+                "%(asctime)s - %(levelname)s - %(message)s")
 
             console_handler = logging.StreamHandler()
             console_handler.setFormatter(formatter)
             self.logger.addHandler(console_handler)
 
-            # Rotating File Handler
-            file_handler = RotatingFileHandler(log_file, maxBytes=max_size, backupCount=backup_count)
+            # Rotating File Handler - keeps 4 total logs (1 main + 3 backups)
+            file_handler = RotatingFileHandler(
+                log_file, maxBytes=max_size, backupCount=backup_count)
             file_handler.setFormatter(formatter)
             self.logger.addHandler(file_handler)
 

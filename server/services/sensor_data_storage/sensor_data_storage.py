@@ -264,7 +264,6 @@ class SensorDataStorage(ServiceInterface):
             # Adiciona limite e ordenação para controlar tamanho dos dados
             cursor = self._collection.find(query).sort(
                 "Timestamp", -1)
-            # local_tz = pytz.timezone("America/Sao_Paulo")
             async for doc in cursor:
                 sensor_name = doc["SensorFullTopic"]
                 if sensor_name not in data_out['info']:

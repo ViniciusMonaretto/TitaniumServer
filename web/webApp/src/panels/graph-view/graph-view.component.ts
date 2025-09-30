@@ -31,6 +31,7 @@ export class GraphViewComponent implements OnInit {
   resizeTrigger: boolean = false
   zoomWindowActivate: boolean = true
   lineChartData: Array<any> = [];
+  clearLines: boolean = false;
 
   ngOnInit(): void { }
 
@@ -154,6 +155,7 @@ export class GraphViewComponent implements OnInit {
   }
 
   getTable(sensorData: any): void {
+    this.removeAllLines();
     this.serverConnector.sendRequestForTableInfo(sensorData['selectedSensors'],
                                                  sensorData['group'], 
                                                  sensorData['startDate'],
