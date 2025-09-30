@@ -14,7 +14,7 @@ docker rm $CONTAINER_NAME 2>/dev/null
 # Step 2: Stop MongoDB and Mosquitto services using docker-compose
 echo "🛑 Stopping MongoDB and Mosquitto services..."
 cd $DOCKER_COMPOSE_DIR
-docker-compose down
+docker compose down
 cd ..
 
 echo "✅ IoCloud Titanium Server stopped successfully!"

@@ -22,7 +22,7 @@ PUBLISH_TOPIC_LIST = ["GetLevel", "titanium/level"]
 GATEWAY_CONFIG_DIR = "titaniumGatewaysConfigs"
 
 # Get MQTT connection details from environment variables
-MQTT_SERVER = os.getenv('MQTT_HOST', 'localhost')
+MQTT_SERVER = 'broker.hivemq.com'
 MQTT_PORT = int(os.getenv('MQTT_PORT', '1883'))
 
 
@@ -87,11 +87,11 @@ class TitaniumMqtt:
             True, "sucess", command["requestId"])
 
     def on_connect(self, client, userdata, _flags, rc):
-        self._logger.info(f"MqqtServer: Connected with result code {rc}")
+        self._logger.info(f"MqqtServer: Connected on {MQTT_SERVER} with result code {rc}")
         client.subscribe(userdata["subscribe_topics"])
 
     def on_message(self, _c, _u, msg):
-        self._logger.debug(f"Received message: {msg.topic} {msg.payload}")
+        self._logger.info(f"Received message: {msg.topic} {msg.payload}")
         self._read_queue.put(msg)
 
     def run(self):

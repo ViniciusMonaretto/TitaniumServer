@@ -8,7 +8,7 @@ echo "🚀 Starting IoCloud Titanium Server Docker Compose Services..."
 # Step 1: Start MongoDB and Mosquitto services using docker-compose
 echo "📦 Starting MongoDB and Mosquitto services..."
 cd $DOCKER_COMPOSE_DIR
-docker-compose up -d
+docker compose up -d
 cd ..
 
 # Step 2: Wait a moment for services to be ready
