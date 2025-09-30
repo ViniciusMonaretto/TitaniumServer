@@ -122,7 +122,7 @@ class IoCloudApiTranslator(PayloadTranslator):
 
         panels = []
 
-        for panel in message_json["panels"]:
+        for panel in message_json["sensors"]:
             system_panel: MqttSensorStatusModel = MqttSensorStatusModel()
             system_panel.status = panel["state"] == 0
             system_panel.gain = panel["gain"]
@@ -174,11 +174,11 @@ class IoCloudApiTranslator(PayloadTranslator):
                 out_payload.data = self._read_calibration_update_message(
                     msg_split[2], message_json
                 )
-        elif action_str == MqttActions.SYSTEM.value:
-            if not len(msg_split) == 4:
-                self.logger.error(
-                    f"IoCloudApiTranslator::translate_payload: mqtt topic {topic} not valid"
-                )
-            out_payload.data = self._read_system_message(message_json)
+            elif message_json["command_index"] == 2:
+                if not len(msg_split) == 4:
+                    self.logger.error(
+                        f"IoCloudApiTranslator::translate_payload: mqtt topic {topic} not valid"
+                    )
+                out_payload.data = self._read_system_message(message_json)
 
         return out_payload

@@ -1,6 +1,7 @@
 import json
 import os
 import threading
+from datetime import datetime, timedelta
 from middleware.client_middleware import ClientMiddleware
 
 from dataModules.panel import Panel
@@ -317,6 +318,7 @@ class ConfigHandler(ServiceInterface):
 
     def create_object_from_panels_info(self, calibrate_update=False):
         obj = {}
+        current_time = datetime.now()
 
         for group in self._panel_groups.values():
             panels_with_last_values = []
@@ -332,8 +334,12 @@ class ConfigHandler(ServiceInterface):
                 if last_status:
                     if hasattr(last_status, 'value'):
                         panel_json["value"] = last_status.value
-                    if hasattr(last_status, 'is_active'):
-                        panel_json["isActive"] = last_status.is_active
+                    if hasattr(last_status, 'timestamp'):
+                        # Check if timestamp is 5 minutes old
+                        if isinstance(last_status.timestamp, datetime):
+                            time_diff = current_time - last_status.timestamp
+                            panel_json["isActive"] = False if time_diff > timedelta(
+                                minutes=5) else last_status.is_active
 
                 panels_with_last_values.append(panel_json)
 
