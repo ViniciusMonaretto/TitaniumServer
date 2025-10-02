@@ -19,7 +19,6 @@ class ConfigStorage(ServiceInterface):
     def __init__(self, middleware: ClientMiddleware):
         self._logger = Logger()
         self.id = str(uuid.uuid4())
-        self._subscriptions_add = 0
         self._middleware = middleware
 
         self.initialize_commands()

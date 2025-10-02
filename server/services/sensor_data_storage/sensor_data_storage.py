@@ -2,7 +2,7 @@ import queue
 import uuid
 import threading
 import gc
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Any, Callable, Dict, List, Optional
 import sys
 import os
@@ -42,7 +42,8 @@ class SensorDataStorage(ServiceInterface):
         self._middleware = middleware
         self._async_loop = AsyncioLoopThread()
         self._indexes_created = False
-        self._status_subscribers: Dict[str, StatuSubscribers] = {}
+        self._status_subscribers: Dict[str, {
+            'subscriber': StatuSubscribers, 'lastTime': datetime}] = {}
         self._last_status_by_sub_status_name: Dict[str, Dict[str, Any]] = {}
         self._last_status_lock = threading.Lock()
 
@@ -150,6 +151,16 @@ class SensorDataStorage(ServiceInterface):
         try:
             # Store the last status sent for each subStatusName
             sub_status_name = status_info["subStatusName"]
+            current_time = datetime.now()
+
+            if sub_status_name not in self._status_subscribers:
+                return
+
+            if (self._status_subscribers[sub_status_name]['lastTime'] is not None and
+                    current_time - self._status_subscribers[sub_status_name]['lastTime'] < timedelta(minutes=1)):
+                return
+            self._status_subscribers[sub_status_name]['lastTime'] = status_info["data"].timestamp
+
             with self._last_status_lock:
                 self._last_status_by_sub_status_name[sub_status_name] = status_info["data"]
 
@@ -175,10 +186,13 @@ class SensorDataStorage(ServiceInterface):
         topic = ClientMiddleware.get_status_topic(
             gateway, status_name, indicator)
         if topic not in self._status_subscribers:
-            self._status_subscribers[topic] = StatuSubscribers(
-                self.add_sensor_data_to_queue, topic)
+            self._status_subscribers[topic] = {
+                'subscriber': StatuSubscribers(
+                    self.add_sensor_data_to_queue, topic),
+                'lastTime': None
+            }
             self._middleware.add_subscribe_to_status(
-                self._status_subscribers[topic], topic)
+                self._status_subscribers[topic]['subscriber'], topic)
 
     def remove_subscription_from_status(self, gateway: str, status_name: str, indicator: str) -> None:
         """Remove subscription from status updates."""
@@ -186,7 +200,7 @@ class SensorDataStorage(ServiceInterface):
             gateway, status_name, indicator)
         if topic in self._status_subscribers:
             self._middleware.remove_subscribe_from_status(
-                self._status_subscribers[topic], topic)
+                self._status_subscribers[topic]['subscriber'], topic)
             del self._status_subscribers[topic]
 
     def add_sensor_info_command(self, command: Dict[str, Any]) -> None:

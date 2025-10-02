@@ -163,7 +163,7 @@ try:
         print(f"Sending MQTT message to {topic}")
         client.publish(topic, payload_json)
         print("Sent MQTT message")
-        time.sleep(30)
+        time.sleep(15)
 except KeyboardInterrupt:
     print("Stopping the client.")
     client.loop_stop()

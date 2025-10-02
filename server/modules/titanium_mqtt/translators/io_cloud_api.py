@@ -95,6 +95,13 @@ class IoCloudApiTranslator(PayloadTranslator):
         return reading
 
     def _read_sensor_report_message(self, gateway: str, message_json: Any):
+
+        if message_json["timestamp"] is None or message_json["timestamp"] == 0:
+            self.logger.error(
+                "IoCloudApiTranslator::_read_sensor_report_message: timestamp is invalid"
+            )
+            return []
+
         timestamp = datetime.fromisoformat(message_json["timestamp"])
         data = []
         index_obj = {"current_index": 0}
