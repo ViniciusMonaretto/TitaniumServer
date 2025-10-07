@@ -1,4 +1,5 @@
 import queue
+import time
 import uuid
 import threading
 import gc
@@ -6,6 +7,8 @@ from datetime import datetime, timedelta
 from typing import Any, Callable, Dict, List, Optional
 import sys
 import os
+
+import psutil
 from support.logger import Logger
 from services.service_interface import ServiceInterface
 from services.sensor_data_storage.sensor_data_storage_commands import SensorDataStorageCommands
@@ -96,7 +99,7 @@ class SensorDataStorage(ServiceInterface):
                 self.create_indexes_of_db())
 
             while not self._indexes_created:
-                pass
+                time.sleep(0.05)
 
             self._logger.debug(
                 "SensorDataStorage: MongoDB connection established")
@@ -107,33 +110,38 @@ class SensorDataStorage(ServiceInterface):
     def run_mongo_commands_async_background(self, coro) -> Any:
         """Run MongoDB commands asynchronously in background."""
         future = self._async_loop.run_coro(coro)
+        future.add_done_callback(
+            lambda f: f.exception() and
+            self._logger.error(f"SensorDataStorage:run_mongo_commands_async_background:" +
+                               f"Error running MongoDB command {f.exception()}"))
         return future
 
     def write_sensor_data_loop(self) -> None:
         """Main loop for writing sensor data to database."""
         while True:
-            sensor_infos = []
-            while not self._write_queue.empty():
-                try:
-                    sensor_info: SensorInfo = self._write_queue.get(timeout=1)
-                    # Convert timestamp to string if it's not already a string
-                    if isinstance(sensor_info.timestamp, str):
-                        sensor_info.timestamp = datetime.fromisoformat(
-                            sensor_info.timestamp)
-                    # If it's already a datetime object, use it directly
-                    # (no need to reassign)
+            try:
+                # bloqueia até 1s aguardando item (evita busy spin)
+                sensor_info: SensorInfo = self._write_queue.get(timeout=1)
+                sensor_infos = [sensor_info.to_json()]
 
-                    sensor_infos.append(sensor_info.to_json())
-                except KeyboardInterrupt:
-                    break
-                except Exception as e:
-                    self._logger.error(
-                        f"SensorDataStorage::write_sensor_data_loop: Error getting data from write queue {e}")
-                    break
+                # tenta esgotar a fila rapidamente, mas sem bloquear
+                while True:
+                    try:
+                        sensor_info = self._write_queue.get_nowait()
+                        sensor_infos.append(sensor_info.to_json())
+                    except queue.Empty:
+                        break
 
-            if sensor_infos:
-                self.add_info(sensor_infos)
-            threading.Event().wait(1)
+                if sensor_infos:
+                    self.add_info(sensor_infos)
+            except KeyboardInterrupt:
+                break
+            except queue.Empty:
+                # sem dados, dormir um pouco (não criar Event repetido)
+                time.sleep(0.2)
+            except Exception as e:
+                self._logger.error(f"write_sensor_data_loop: {e}")
+                time.sleep(1)
 
     def add_new_subscription(self, topic: str, gateway: str, indicator: str) -> tuple[bool, str]:
         """Add a new subscription for sensor data."""
@@ -286,14 +294,12 @@ class SensorDataStorage(ServiceInterface):
                 data_out["info"][sensor_name].append(
                     {'timestamp': tm.isoformat(), 'value': doc["Value"]})
             data_out['requestId'] = data['websocketId']
+            await cursor.close()
 
         except Exception as e:
             self._logger.error(
                 f"SensorDataStorage::read_sensor_info: Error trying to fetch info from table {e}")
             result = False
-        finally:
-            # Garbage collection final para liberar memória
-            gc.collect()
 
         data_out["commandId"] = command["requestId"]
         finish_callback(result, data_out)
