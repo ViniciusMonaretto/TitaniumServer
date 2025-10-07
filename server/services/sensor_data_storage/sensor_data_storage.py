@@ -119,16 +119,19 @@ class SensorDataStorage(ServiceInterface):
     def write_sensor_data_loop(self) -> None:
         """Main loop for writing sensor data to database."""
         while True:
+            sensor_infos = []
             try:
                 # bloqueia até 1s aguardando item (evita busy spin)
                 sensor_info: SensorInfo = self._write_queue.get(timeout=1)
-                sensor_infos = [sensor_info.to_json()]
 
                 # tenta esgotar a fila rapidamente, mas sem bloquear
                 while True:
                     try:
-                        sensor_info = self._write_queue.get_nowait()
+                        if isinstance(sensor_info.timestamp, str):
+                            sensor_info.timestamp = datetime.fromisoformat(
+                                sensor_info.timestamp)
                         sensor_infos.append(sensor_info.to_json())
+                        sensor_info = self._write_queue.get_nowait()
                     except queue.Empty:
                         break
 
