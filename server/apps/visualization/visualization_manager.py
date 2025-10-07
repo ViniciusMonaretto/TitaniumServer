@@ -158,19 +158,18 @@ class VisualizationWebSocketHandler(tornado.websocket.WebSocketHandler):
             self._logger.error(f"Failed to write message to UI: {e}")
         finally:
             # Libera memória após envio
+            should_clear = isinstance(
+                obj, dict) and "message" in obj and "isCommand" in obj["message"] and obj["message"]["isCommand"] == True
             try:
-                if isinstance(obj, dict):
-                    if "message" in obj:
-                        message = obj["message"]
-                        if isinstance(message, dict):
-                            if "info" in message:
-                                message["info"].clear()  # Limpa dados grandes
-                            message.clear()  # Limpa mensagem
-                        elif hasattr(message, 'clear'):
-                            message.clear()
+                if should_clear:
+                    message = obj["message"]
+                    if isinstance(message, dict):
+                        if "info" in message:
+                            message["info"].clear()  # Limpa dados grandes
+                        message.clear()  # Limpa mensagem
+                    elif hasattr(message, 'clear'):
+                        message.clear()
                     obj.clear()  # Limpa objeto
-                elif hasattr(obj, 'clear'):
-                    obj.clear()
             except Exception as cleanup_error:
                 self._logger.warning(
                     f"Erro durante limpeza de memória: {cleanup_error}")
@@ -191,9 +190,7 @@ class VisualizationWebSocketHandler(tornado.websocket.WebSocketHandler):
         tornado.ioloop.IOLoop.current().add_callback(self.safe_write_message, obj)
 
         # Limpa os dados originais após criar a cópia
-        if isinstance(message, dict):
-            message.clear()
-        elif hasattr(message, 'clear'):
+        if isinstance(message, dict) and "isCommand" in message and message["isCommand"] == True:
             message.clear()
 
 ################# Status commands #############################
@@ -227,7 +224,6 @@ class VisualizationWebSocketHandler(tornado.websocket.WebSocketHandler):
 
 
 ################# Panel commands #############################
-
 
     def add_panel_request(self, panel_info):
         self._middleware.send_command(ConfigHandlerCommands.ADD_PANEL, panel_info,
@@ -403,6 +399,7 @@ class VisualizationWebSocketHandler(tornado.websocket.WebSocketHandler):
 
 
 ################# Gateway status commands #############################
+
 
     def send_gateway_status(self, gateway_status: list[GatewayStatus]):
         self.send_message_to_ui("gatewayStatus", gateway_status)

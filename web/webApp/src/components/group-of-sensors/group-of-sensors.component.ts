@@ -1,6 +1,6 @@
 import { Component, OnInit, Input } from '@angular/core';
 import { SensorModule } from "../../models/sensor-module"
-import {MatDialog} from '@angular/material/dialog';
+import {MatDialog, MatDialogRef} from '@angular/material/dialog';
 import {SensorAddWindowComponent} from '../../components/sensor-add-window/sensor-add-window.component'
 
 import { CommonModule } from '@angular/common';
@@ -12,6 +12,8 @@ import { SensorTypesEnum } from '../../enum/sensor-type';
 import { MatIconModule } from '@angular/material/icon';
 import { SensorInfoDialogComponent } from '../sensor_info_dialog/sensor_info_dialog.component';
 import { IoButtonComponent } from '../io-button/io-button.component';
+import { SpinnerComponent } from '../spinner/spinner.component';
+import { DialogHelper } from '../../services/dialog-helper.service';
 
 @Component({
     selector: 'group-of-sensors',
@@ -29,9 +31,14 @@ export class GroupOfSensorsComponent implements OnInit {
   @Input() sensorArray: Array<SensorModule> = [];
   @Input() width: string | undefined
 
-  constructor(public dialog: MatDialog, private serverConnector: ServerConectorService) { }
+  private spinnerDialogRef: MatDialogRef<SpinnerComponent> | null = null;
+
+  constructor(public dialog: MatDialog, private serverConnector: ServerConectorService, private uiPanelService: UiPanelService) { }
 
   ngOnInit(): void {
+    this.serverConnector.setUiUpdatedCallback(() => {
+      this.uiPanelService.closeSpinnerDialog();
+    });
   }
 
   getStyleOfCell() {
@@ -62,16 +69,19 @@ export class GroupOfSensorsComponent implements OnInit {
 
   addNewSensorCallback(sensorData: any): void {
     console.log('Sensor added:', sensorData);
+    this.uiPanelService.openSpinnerDialog("Adicionando sensor")
     this.serverConnector.sendCommand("addPanel", sensorData)
   }
 
   removeSensorCallback(sensorData: any): void {
     console.log('Sensor removed:', sensorData);
+    this.uiPanelService.openSpinnerDialog("Removendo sensor")
     this.serverConnector.sendCommand("removePanel", sensorData)
   }
 
   updatePanelInfo(updatePanelInfo: any)
   {
+    this.uiPanelService.openSpinnerDialog("Atualizando sensor")
     this.serverConnector.sendCommand("updatePanelInfo", updatePanelInfo)
   }
 

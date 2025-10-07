@@ -49,13 +49,14 @@ def on_connect(mqtt_client, userdata, flags, rc):
         mqtt_client.subscribe("iocloud/request/#")
 
         # Send initial gateway status message
-        send_gateway_status(mqtt_client)
+        send_gateway_status(
+            mqtt_client, "iocloud/response/1C69209DFC08/command")
     else:
         print(f"Connection failed with code {rc}")
 
 
 # Function to create and send gateway status message
-def send_gateway_status(mqtt_client):
+def send_gateway_status(mqtt_client, response_topic):
     panels = []
     counter = 0
     for sensor_data in base_sensors:
@@ -78,7 +79,7 @@ def send_gateway_status(mqtt_client):
         "sensors": panels
     }
 
-    status_topic = "iocloud/response/1C69209DFC08/system"
+    status_topic = response_topic
     mqtt_client.publish(status_topic, json.dumps(status_payload))
     print(f"Sent status message to {status_topic}")
 
@@ -89,11 +90,6 @@ def send_gateway_status(mqtt_client):
 def on_message(mqtt_client, userdata, msg):
     print(f"Received command on topic: {msg.topic}")
     print(f"Payload: {msg.payload}")
-
-    # Handle gateway status request
-    if msg.topic == "iocloud/request/sendsystemstatus":
-        send_gateway_status(mqtt_client)
-        return
 
     # Handle other command topics
     response_topic = msg.topic.replace("iocloud/", "iocloud/", 1)
@@ -106,9 +102,15 @@ def on_message(mqtt_client, userdata, msg):
 
     try:
         obj = json.loads(msg.payload)
+        print(f"Payload content: {msg.payload}")
     except json.JSONDecodeError as e:
         print(f"Invalid JSON payload on topic {msg.topic}: {e}")
         print(f"Payload content: {msg.payload}")
+        return
+
+    if obj["command"] == 2:
+        send_gateway_status(
+            mqtt_client, "iocloud/response/1C69209DFC08/command")
         return
 
     # Check if required fields exist
@@ -161,7 +163,7 @@ try:
         topic = "iocloud/response/1C69209DFC08/sensor/report"
         payload_json = json.dumps(payload)
         print(f"Sending MQTT message to {topic}")
-        client.publish(topic, payload_json)
+        # client.publish(topic, payload_json)
         print("Sent MQTT message")
         time.sleep(15)
 except KeyboardInterrupt:

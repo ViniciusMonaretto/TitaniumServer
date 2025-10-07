@@ -40,19 +40,13 @@ export class DialogHelper {
   }
 
 
-    public showSpinnerDialog(): void {
-        if (!this.dialogRef) {
-          this.dialogRef = this.dialog.open(SpinnerComponent, {
+    public showSpinnerDialog(message: string, addDots: boolean = false): MatDialogRef<SpinnerComponent> {
+          return this.dialog.open(SpinnerComponent, {
             disableClose: true,
+            data: { message: message, addDots: addDots },
             panelClass: 'transparent-dialog',
             backdropClass: 'dimmed-backdrop',
           });
-        }
-    
       }
-    
-      public hideSpinnerDialog(): void {
-        this.dialogRef?.close();
-        this.dialogRef = null;
-      }
+  
 }

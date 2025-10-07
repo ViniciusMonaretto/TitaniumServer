@@ -19,11 +19,10 @@ export class ServerConectorService {
 
   //private reconnectAttempts: number = 0;
   private reconnectDelay: number = 2000;
-  private alarmRequest: ((alarms: any) => void) | null = null;
-  private addAlarmRequest: ((alarms: any) => void) | null = null;
-  private removeAlarmRequest: ((alarms: any) => void) | null = null;
+  private uiUpdatedCallback: (() => void) | null = null;
   private receivedEventsCallback: ((events: EventAlarmModule[], replaceValue: boolean) => void) | null = null;
   private afterConnectRequests: Function[] = []
+  private spinnerDialogRef: MatDialogRef<SpinnerComponent> | null = null;
 
   constructor(
     private uiPanelService: UiPanelService,
@@ -50,25 +49,29 @@ export class ServerConectorService {
     }
   }
 
-
-  public setAlarmInfoCallback(callback: (alarms: any) => void): void {
-    this.alarmRequest = callback;
-  }
-
-  public setAddAlarmCallback(callback: (alarm: any) => void): void {
-    this.addAlarmRequest = callback;
-  }
-
-  public setRemoveAlarmCallback(callback: (alarm: any) => void): void {
-    this.removeAlarmRequest = callback;
-  }
-
   public setReceivedEventsCallback(callback: (data: any, replace: boolean) => void): void {
     this.receivedEventsCallback = callback;
   }
 
+  public setUiUpdatedCallback(callback: () => void): void {
+    ''
+    this.uiUpdatedCallback = callback;
+  }
+
+  private openSpinnerDialog(message: string) {
+    if (this.spinnerDialogRef) {
+      this.closeSpinnerDialog();
+    }
+    this.spinnerDialogRef = this.dialogHelper.showSpinnerDialog(message, true);
+  }
+
+  private closeSpinnerDialog() {
+    this.spinnerDialogRef?.close();
+    this.spinnerDialogRef = null;
+  }
+
   private connectToServer(): void {
-    this.dialogHelper.showSpinnerDialog();
+    this.openSpinnerDialog("Conectando ao servidor");
     this.socket = new WebSocket(this.wsUrl);
     this.isConnecting = true
 
@@ -130,6 +133,7 @@ export class ServerConectorService {
     }
 
     this.uiPanelService.AddGraphRequest(sensorInfos, requestId, group, callback)
+    this.openSpinnerDialog("Buscando dados");
     this.sendCommand("getStatusHistory", obj)
   }
 
@@ -184,6 +188,11 @@ export class ServerConectorService {
     console.log('Received message:', message);
     let data = JSON.parse(message["data"])
     if (data["status"] == "uiConfig") {
+
+      if (this.uiUpdatedCallback) {
+        this.uiUpdatedCallback();
+      }
+
       this.uiPanelService.SetNewUiConfig(data["message"]["PanelsInfo"])
 
       if (data["message"]["calibrateUpdate"]) {
@@ -192,7 +201,7 @@ export class ServerConectorService {
 
       if (this.isConnecting) {
         this.isConnecting = false
-        this.dialogHelper.hideSpinnerDialog();
+        this.closeSpinnerDialog();
         this.runOpenCommands();
       }
 
@@ -202,26 +211,9 @@ export class ServerConectorService {
       this.uiPanelService.OnSubscriptionUpdate(message["subStatusName"], message["data"])
     }
     else if (data["status"] == "statusInfo") {
+      this.closeSpinnerDialog();
       let message = data["message"]
       this.uiPanelService.OnStatusInfoUpdate(message["data"].requestId, message["data"].info)
-    }
-    else if (data["status"] == "alarmInfo") {
-      let message = data["message"]
-      if (this.alarmRequest) {
-        this.alarmRequest(message['data'])
-      }
-    }
-    else if (data["status"] == "alarmAdded") {
-      let message = data["message"]
-      if (this.addAlarmRequest) {
-        this.addAlarmRequest(message['data'])
-      }
-    }
-    else if (data["status"] == "alarmRemoved") {
-      let message = data["message"]
-      if (this.removeAlarmRequest) {
-        this.removeAlarmRequest(message)
-      }
     }
     else if (data["status"] == "gatewayStatus") {
       let message = data["message"]

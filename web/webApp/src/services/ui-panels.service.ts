@@ -3,6 +3,9 @@ import {GetTableName, SensorModule} from "../models/sensor-module"
 import { SensorTypesEnum } from '../enum/sensor-type';
 import { table } from 'console';
 import { GatewayModule } from '../models/gateway-model';
+import { DialogHelper } from './dialog-helper.service';
+import { MatDialogRef } from '@angular/material/dialog';
+import { SpinnerComponent } from '../components/spinner/spinner.component';
 
 export class GroupInfo {
   public id: number = -1
@@ -32,10 +35,23 @@ export class UiPanelService {
     sensorCachedCurrentInfo: {[id: string]: any[]} = {}
 
     private selectedSensor: SensorModule|null = null
+    private spinnerDialogRef: MatDialogRef<SpinnerComponent> | null = null;
     
-    constructor() 
+    constructor(private dialogHelper: DialogHelper  ) 
     { 
         
+    }
+
+    openSpinnerDialog(message: string): void {
+      if (this.spinnerDialogRef) {
+        this.closeSpinnerDialog();
+      } 
+      this.spinnerDialogRef = this.dialogHelper.showSpinnerDialog(message, true)
+    }
+  
+    closeSpinnerDialog(): void {
+      this.spinnerDialogRef?.close();
+      this.spinnerDialogRef = null;
     }
 
     SetNewUiConfig(uiConfig: any )
