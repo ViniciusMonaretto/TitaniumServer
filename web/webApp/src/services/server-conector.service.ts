@@ -151,6 +151,7 @@ export class ServerConectorService {
     }
 
     this.sendCommand("generaterReport", obj)
+    this.openSpinnerDialog("Gerando relatório")
   }
 
   public sendCommand(commandName: string, payload: any) {
@@ -244,6 +245,7 @@ export class ServerConectorService {
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
+      this.closeSpinnerDialog();
     }
     else if (data["status"] == "error") {
       this.dialogHelper.openErrorDialog(data["message"]["data"])

@@ -249,9 +249,9 @@ class ReportGenerator(ServiceInterface):
             cell.alignment = Alignment(horizontal="center")
 
         # Aplicar bordas para todas as linhas de dados
-        for row_num in range(3, len(sorted_timestamps) + 3):
-            for cell in ws[row_num]:
-                cell.border = thin_border
+        # for row_num in range(3, len(sorted_timestamps) + 3):
+        #     for cell in ws[row_num]:
+        #         cell.border = thin_border
 
         # 9. Ajustar largura das colunas
         for i, col in enumerate(header, 1):
