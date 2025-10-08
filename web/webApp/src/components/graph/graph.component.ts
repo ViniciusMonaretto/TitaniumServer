@@ -66,7 +66,7 @@ export class GraphComponent {
   private isDrawingMode: boolean = false;
   private _minMaxPoints: { min: { x: number, y: number } | null, max: { x: number, y: number } | null } = { min: null, max: null };
   private _selectedDataLineIndex: number = -1;
-  
+
   // Propriedades para linha temporária que segue o mouse
   private _tempMousePosition: { x: number | null, y: number | null } = { x: null, y: null };
   private _isMouseOverChart: boolean = false;
@@ -106,6 +106,7 @@ export class GraphComponent {
     responsive: true,
     animation: false,
     maintainAspectRatio: false,
+    parsing: false,
     elements: {
       line: {
         tension: 0 // Disable curve interpolation - straight lines between points
@@ -159,8 +160,8 @@ export class GraphComponent {
       decimation: {
         enabled: true,
         algorithm: 'lttb', // 'lttb' (Largest Triangle Three Buckets) is preferred for line charts
-        samples: 1000,     // You can tweak this (e.g., 1000–5000)
-        threshold: 1000   // Enable decimation only if points > threshold
+        samples: 500,     // You can tweak this (e.g., 1000–5000)
+        threshold: 500   // Enable decimation only if points > threshold
       },
       legend: {
         position: 'bottom',
@@ -363,7 +364,7 @@ export class GraphComponent {
           this.addVerticalLine(this._tempMousePosition.x);
         }
       }
-      
+
       // Limpar posição temporária após fixar
       this._tempMousePosition = { x: null, y: null };
       return;
@@ -428,7 +429,7 @@ export class GraphComponent {
       if (this._drawingMode === DrawingMode.Horizontal || this._drawingMode === DrawingMode.Both) {
         this._tempMousePosition.y = (yValue !== null && yValue !== undefined && !isNaN(yValue)) ? Number(yValue) : null;
       }
-      
+
       if (this._drawingMode === DrawingMode.Vertical || this._drawingMode === DrawingMode.Both) {
         this._tempMousePosition.x = (xValue !== null && xValue !== undefined && !isNaN(xValue)) ? Number(xValue) : null;
       }
@@ -634,13 +635,13 @@ export class GraphComponent {
     Object.assign(annotations, minMaxAnnotations);
 
     // Add temporary horizontal line if mouse is over chart and in drawing mode
-    if (this._tempMousePosition.y !== null && this._isMouseOverChart && 
-        (this._drawingMode === DrawingMode.Horizontal || this._drawingMode === DrawingMode.Both)) {
+    if (this._tempMousePosition.y !== null && this._isMouseOverChart &&
+      (this._drawingMode === DrawingMode.Horizontal || this._drawingMode === DrawingMode.Both)) {
       annotations['tempHorizontalLine'] = {
         type: 'line',
         yMin: this._tempMousePosition.y,
         yMax: this._tempMousePosition.y,
-        borderColor: 'rgba(200, 198, 194, 0.8)', 
+        borderColor: 'rgba(200, 198, 194, 0.8)',
         borderWidth: 2,
         borderDash: [3, 3],
         enter: {
@@ -721,8 +722,8 @@ export class GraphComponent {
     });
 
     // Add temporary vertical line if mouse is over chart and in drawing mode
-    if (this._tempMousePosition.x !== null && this._isMouseOverChart && 
-        (this._drawingMode === DrawingMode.Vertical || this._drawingMode === DrawingMode.Both)) {
+    if (this._tempMousePosition.x !== null && this._isMouseOverChart &&
+      (this._drawingMode === DrawingMode.Vertical || this._drawingMode === DrawingMode.Both)) {
       annotations['tempVerticalLine'] = {
         type: 'line',
         xMin: this._tempMousePosition.x,

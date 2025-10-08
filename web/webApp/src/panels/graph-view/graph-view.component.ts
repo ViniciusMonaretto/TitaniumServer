@@ -65,7 +65,7 @@ export class GraphViewComponent implements OnInit {
     }
 
     // Update chart data and trigger Angular change detection
-    this.lineChartData[chartId].data = newSeries;
+    this.lineChartData[chartId].data = newSeries.sort((a, b) => a.x - b.x);
 
     this.lineChartData = [...this.lineChartData ]
   };

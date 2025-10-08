@@ -163,7 +163,7 @@ try:
         topic = "iocloud/response/1C69209DFC08/sensor/report"
         payload_json = json.dumps(payload)
         print(f"Sending MQTT message to {topic}")
-        # client.publish(topic, payload_json)
+        client.publish(topic, payload_json)
         print("Sent MQTT message")
         time.sleep(15)
 except KeyboardInterrupt:
