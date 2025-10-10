@@ -20,9 +20,10 @@ import json
 
 class IoCloudApiTranslator(PayloadTranslator):
     logger = Logger()
+    _gateways_mapping: dict[str, dict[str, str]]
 
     def initialize(self):
-        pass
+        self._gateways_mapping = {}
 
     def _is_valid_action(self, value: str) -> bool:
         return value in (action.value for action in MqttActions)
@@ -81,7 +82,15 @@ class IoCloudApiTranslator(PayloadTranslator):
         index = index_obj["current_index"]
         index_obj["current_index"] += 1
 
-        type_of_sensor = self._get_type_of_sensor(reading_json)
+        index_str = str(index)
+
+        if index_str not in self._gateways_mapping[gateway]:
+            self.logger.error(
+                f"IoCloudApiTranslator::_create_reading: gateway {gateway} dont have config for sensor {index_str}"
+            )
+            return None
+
+        type_of_sensor = self._gateways_mapping[gateway][index_str]
         if (type_of_sensor == None):
             return None
 
@@ -106,6 +115,12 @@ class IoCloudApiTranslator(PayloadTranslator):
         data = []
         index_obj = {"current_index": 0}
 
+        if gateway not in self._gateways_mapping:
+            self.logger.error(
+                f"IoCloudApiTranslator::_read_sensor_report_message: gateway {gateway} not found in gateways mapping"
+            )
+            return []
+
         for raw_reading in message_json["sensors"]:
             reading = self._create_reading(
                 gateway, timestamp, raw_reading, index_obj)
@@ -129,12 +144,16 @@ class IoCloudApiTranslator(PayloadTranslator):
 
         panels = []
 
+        self._gateways_mapping[message_json["device_id"]] = {}
+
         for panel in message_json["sensors"]:
             system_panel: MqttSensorStatusModel = MqttSensorStatusModel()
             system_panel.status = panel["state"] == 0
             system_panel.gain = panel["gain"]
             system_panel.offset = panel["offset"]
             system_panel.topic = self._get_type_of_sensor(panel)
+            self._gateways_mapping[message_json["device_id"]][str(
+                panel["index"])] = system_panel.topic
             system_panel.indicator = panel["index"]
             system_panel.gateway = message_json["device_id"]
             panels.append(system_panel)
