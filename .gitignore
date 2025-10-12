@@ -41,6 +41,7 @@ Thumbs.db
 # Python virtual envirorment
 env/
 venv/
+pytestvenv/
 
 __pycache__/
 

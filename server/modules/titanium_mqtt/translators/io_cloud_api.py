@@ -111,7 +111,7 @@ class IoCloudApiTranslator(PayloadTranslator):
             )
             return []
 
-        timestamp = datetime.fromisoformat(message_json["timestamp"])
+        timestamp = datetime.fromtimestamp(message_json["timestamp"])
         data = []
         index_obj = {"current_index": 0}
 
