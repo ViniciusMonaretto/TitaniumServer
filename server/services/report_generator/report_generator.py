@@ -3,56 +3,33 @@ import tempfile
 from openpyxl.cell import WriteOnlyCell
 from services.sensor_data_storage.sensor_data_storage import SensorDataStorage
 from services.report_generator.report_generator_commands import ReportGeneratorCommands
+from services.config_handler.config_handler import ConfigHandler
 from support.logger import Logger
 from middleware.client_middleware import ClientMiddleware
 from ..service_interface import ServiceInterface
 from openpyxl import Workbook
-from openpyxl.styles import Font, Alignment, NamedStyle, PatternFill, Border, Side
+from openpyxl.styles import Font, Alignment, PatternFill, Border, Side
 from datetime import datetime
 import os
-from typing import Dict, Any, List, Tuple
-import json
-from openpyxl.utils import get_column_letter
+from typing import Dict, Tuple
 
 
 class ReportGenerator(ServiceInterface):
     _sensor_data_storage: SensorDataStorage
-    _ui_config_cache: Dict[str, Any] = None
-    _topic_mappings_cache: Tuple[Dict[str, str], Dict[str, str]] = None
+    _config_handler: ConfigHandler
 
-    def __init__(self, middleware: ClientMiddleware, sensor_data_storage: SensorDataStorage):
+    def __init__(self, middleware: ClientMiddleware, sensor_data_storage: SensorDataStorage, config_handler: ConfigHandler):
         self._logger = Logger()
         self._middleware = middleware
         self._sensor_data_storage = sensor_data_storage
-
+        self._config_handler = config_handler
         self.initialize_commands()
 
         self._logger .info("Report Generator initialized")
 
-    def _load_ui_config(self) -> Dict[str, Any]:
-        """Load UI configuration with caching."""
-        if self._ui_config_cache is None:
-            config_path = os.path.join(os.path.dirname(
-                __file__), '../../config/ui_config.json')
-            with open(config_path, 'r', encoding='utf-8') as f:
-                self._ui_config_cache = json.load(f)
-        return self._ui_config_cache
-
     def _get_topic_mappings(self) -> Tuple[Dict[str, str], Dict[str, str]]:
-        """Get topic to name and type mappings with caching."""
-        if self._topic_mappings_cache is None:
-            ui_config = self._load_ui_config()
-            topic_to_name = {}
-            topic_to_type = {}
-
-            for group in ui_config.values():
-                for sensor in group:
-                    full_topic = f"{sensor['gateway']}-{sensor['topic']}-{sensor['indicator']}"
-                    topic_to_name[full_topic] = sensor['name']
-                    topic_to_type[full_topic] = sensor['sensorType']
-
-            self._topic_mappings_cache = (topic_to_name, topic_to_type)
-        return self._topic_mappings_cache
+        """Get topic to name and type mappings from ConfigHandler."""
+        return self._config_handler.get_topic_mappings()
 
     def initialize_commands(self):
         commands = {
