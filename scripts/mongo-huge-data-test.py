@@ -40,6 +40,19 @@ one_week_seconds = 7 * 24 * 60 * 60
 # Data base (hoje)
 base_timestamp = int(time.time())
 
+# Gerar array de timestamps compartilhado para todos os sensores
+print("Gerando array de timestamps compartilhado...")
+shared_timestamps = []
+for _ in range(N):
+    # Timestamp aleatório dentro de uma semana
+    ts = base_timestamp - random.randint(0, one_week_seconds)
+    shared_timestamps.append(ts)
+
+# Ordenar timestamps para ter uma sequência temporal lógica
+shared_timestamps.sort()
+
+print(f"Array de {len(shared_timestamps)} timestamps gerado e ordenado.")
+
 # Geração e inserção dos dados
 for sensor in base_data:
     topic = sensor["SensorFullTopic"]
@@ -48,10 +61,7 @@ for sensor in base_data:
     print(f"Gerando dados para {topic}...")
 
     docs = []
-    for _ in range(N):
-        # Timestamp aleatório dentro de uma semana
-        ts = base_timestamp - random.randint(0, one_week_seconds)
-
+    for i, ts in enumerate(shared_timestamps):
         # Valor com pequena variação (+/- 10%)
         value = base_value * (1 + random.uniform(-0.1, 0.1))
 

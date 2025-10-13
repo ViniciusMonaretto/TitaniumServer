@@ -248,7 +248,9 @@ export class ServerConectorService {
       this.closeSpinnerDialog();
     }
     else if (data["status"] == "error") {
-      this.dialogHelper.openErrorDialog(data["message"]["data"])
+      this.dialogHelper.openErrorDialog(data["message"]["data"]["message"])
+      this.closeSpinnerDialog();
+      this.uiPanelService.closeSpinnerDialog();
     }
     else {
       console.log("Status " + data["status"] + " not found")

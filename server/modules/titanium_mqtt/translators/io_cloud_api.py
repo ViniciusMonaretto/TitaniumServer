@@ -37,14 +37,19 @@ class IoCloudApiTranslator(PayloadTranslator):
             )
             return None
 
-        type_of_sensor = self._get_type_of_sensor(calibration_json)
-        if not type_of_sensor:
+        index = calibration_json["sensor_id"]
+
+        index_str = str(index)
+
+        if index_str not in self._gateways_mapping[gateway]:
+            self.logger.error(
+                f"IoCloudApiTranslator::_create_reading: gateway {gateway} dont have config for sensor {index_str}"
+            )
             return None
 
-        index = calibration_json["sensor_id"]
         calibration_update.full_topic = (
             MqttHelper.get_topic_from_mosquitto_obj_calibration(
-                gateway, type_of_sensor, str(index)
+                gateway, self._gateways_mapping[gateway][index_str], str(index)
             )
         )
 
