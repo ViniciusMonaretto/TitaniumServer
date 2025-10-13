@@ -1,0 +1,4 @@
+# Dependências necessárias para o build
+pyinstaller>=5.0
+setuptools>=40.0.0
+wheel>=0.30.0

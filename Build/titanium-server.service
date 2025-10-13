@@ -1,0 +1,37 @@
+[Unit]
+Description=Titanium Server - IoCloud Datalogger System
+Documentation=https://github.com/your-repo/titanium-server
+After=network.target
+Wants=network.target
+
+[Service]
+Type=simple
+User=titanium
+Group=titanium
+WorkingDirectory=/opt/titanium-server
+ExecStart=/opt/titanium-server/titanium_server
+ExecReload=/bin/kill -HUP $MAINPID
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=titanium-server
+
+# Configurações de segurança (relaxadas para permitir logs)
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=false
+ProtectHome=true
+ReadWritePaths=/opt/titanium-server/logs /opt/titanium-server/data /opt/titanium-server
+ReadOnlyPaths=/opt/titanium-server/webApp
+
+# Configurações de recursos
+LimitNOFILE=65536
+LimitNPROC=4096
+
+# Variáveis de ambiente
+Environment=PYTHONUNBUFFERED=1
+Environment=LOG_LEVEL=INFO
+
+[Install]
+WantedBy=multi-user.target
