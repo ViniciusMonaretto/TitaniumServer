@@ -69,7 +69,7 @@ class TitaniumMqtt:
             "command": 1,
             "params": {
                 "sensor_id": int(command_data["indicator"]),
-                "offset": command_data["offset"],
+               # "offset": command_data["offset"],
                 "gain": command_data["gain"]
             },
         }
@@ -99,7 +99,7 @@ class TitaniumMqtt:
         client.subscribe(userdata["subscribe_topics"])
 
     def on_message(self, _c, _u, msg):
-        self._logger.info(f"Received message: {msg.topic} {msg.payload}")
+        self._logger.debug(f"Received message: {msg.topic} {msg.payload}")
         self._read_queue.put(msg)
 
     def run(self):

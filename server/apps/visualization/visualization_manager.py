@@ -53,6 +53,12 @@ class VisualizationWebSocketHandler(tornado.websocket.WebSocketHandler):
     def data_received(self, chunk: bytes):
         raise NotImplementedError()
 
+    def initialize_error_sub(self):
+        self._error_subscriber = StatuSubscribers(
+            lambda data: self.send_error_message(data["data"].message), "main-ui-error")
+        self._middleware.add_subscribe_to_status(
+            self._error_subscriber, "main-ui-error")
+
     def initialize_event_sub(self):
         self._alarm_event_subscriber = StatuSubscribers(
             self.send_event, "alarm-newevent-*")
@@ -76,6 +82,7 @@ class VisualizationWebSocketHandler(tornado.websocket.WebSocketHandler):
         self._status_subscribers = {}
         self.initialize_event_sub()
         self.initialize_ui_update_sub()
+        self.initialize_error_sub()
 
 ################# Websocket functions #############################
     def open(self, *args, **kwargs):
@@ -134,10 +141,13 @@ class VisualizationWebSocketHandler(tornado.websocket.WebSocketHandler):
             self._calibrate_subscriber, self._calibrate_subscriber.get_topic())
         self._middleware.remove_subscribe_from_status(
             self._gateway_status_subscriber, self._gateway_status_subscriber.get_topic())
+        self._middleware.remove_subscribe_from_status(
+            self._error_subscriber, self._error_subscriber.get_topic())
 
         self._calibrate_subscriber = None
         self._alarm_event_subscriber = None
         self._gateway_status_subscriber = None
+        self._error_subscriber = None
 
         for subscriber_topic in self._status_subscribers:
             self._middleware.remove_subscribe_from_status(

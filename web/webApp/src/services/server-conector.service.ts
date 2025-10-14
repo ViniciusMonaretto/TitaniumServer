@@ -248,7 +248,12 @@ export class ServerConectorService {
       this.closeSpinnerDialog();
     }
     else if (data["status"] == "error") {
-      this.dialogHelper.openErrorDialog(data["message"]["data"]["message"])
+      if (data["message"] instanceof Object) {
+        this.dialogHelper.openErrorDialog(data["message"]["data"]["message"])
+      }
+      else {
+        this.dialogHelper.openErrorDialog(data["message"])
+      }
       this.closeSpinnerDialog();
       this.uiPanelService.closeSpinnerDialog();
     }

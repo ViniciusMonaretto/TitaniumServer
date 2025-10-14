@@ -36,6 +36,18 @@ class MqttSensorStatusModel(MqttDataModel):
         }
 
 
+class MqttErrorModel(MqttDataModel):
+    full_topic: str
+    gateway: str
+    message: str
+
+    def to_dict(self):
+        return {
+            "full_topic": self.full_topic,
+            "gateway": self.gateway,
+            "message": self.message
+        }
+
 class MqttGatewayModel(MqttDataModel):
     full_topic: str = ""
     name: str

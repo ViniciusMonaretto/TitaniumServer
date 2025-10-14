@@ -4,6 +4,7 @@ from modules.titanium_mqtt.translators.translator_model import PayloadTranslator
 from modules.titanium_mqtt.translators.payload_model import (
     MqttActions,
     MqttCallibrationModel,
+    MqttErrorModel,
     MqttGatewayModel,
     MqttPayloadModel,
     MqttReadingModel,
@@ -88,6 +89,12 @@ class IoCloudApiTranslator(PayloadTranslator):
         index_obj["current_index"] += 1
 
         index_str = str(index)
+
+        if gateway not in self._gateways_mapping:
+            self.logger.error(
+                f"IoCloudApiTranslator::_create_reading: gateway {gateway} not found in mapping"
+            )
+            return None
 
         if index_str not in self._gateways_mapping[gateway]:
             self.logger.error(
@@ -202,9 +209,18 @@ class IoCloudApiTranslator(PayloadTranslator):
                 )
 
             if message_json["command_index"] == 1:
-                out_payload.data = self._read_calibration_update_message(
-                    msg_split[2], message_json
-                )
+                if message_json["command_status"] < 0:
+                    error_data = MqttErrorModel()
+                    error_data.full_topic = "main-ui-error"
+                    error_data.gateway = msg_split[2]
+                    error_data.message = f"Erro na calibração do sensor, status {message_json['command_status']}"
+                    out_payload.data = [error_data]
+                else:
+                    out_payload.data = self._read_calibration_update_message(
+                        msg_split[2], message_json
+                    )
+
+                
             elif message_json["command_index"] == 2:
                 if not len(msg_split) == 4:
                     self.logger.error(
