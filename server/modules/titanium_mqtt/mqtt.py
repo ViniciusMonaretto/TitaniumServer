@@ -69,7 +69,7 @@ class TitaniumMqtt:
             "command": 1,
             "params": {
                 "sensor_id": int(command_data["indicator"]),
-               # "offset": command_data["offset"],
+                "offset": command_data["offset"],
                 "gain": command_data["gain"]
             },
         }
