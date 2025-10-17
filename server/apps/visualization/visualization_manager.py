@@ -1,4 +1,7 @@
 import json
+import multiprocessing
+import threading
+import time
 import tornado.web
 import tornado.websocket
 
@@ -47,6 +50,9 @@ class VisualizationWebSocketHandler(tornado.websocket.WebSocketHandler):
     _gateway_status_subscriber: SubscriberInterface = None
     _calibrate_subscriber: SubscriberInterface = None
 
+    _reading_sender_queue: multiprocessing.Queue = None
+    _periodic_callback: tornado.ioloop.PeriodicCallback = None
+
     def check_origin(self, origin):
         return True
 
@@ -83,6 +89,10 @@ class VisualizationWebSocketHandler(tornado.websocket.WebSocketHandler):
         self.initialize_event_sub()
         self.initialize_ui_update_sub()
         self.initialize_error_sub()
+
+        self._reading_sender_queue = multiprocessing.Queue()
+        self._periodic_callback = tornado.ioloop.PeriodicCallback(self.send_readings_task, 1000)
+        self._periodic_callback.start()
 
 ################# Websocket functions #############################
     def open(self, *args, **kwargs):
@@ -152,6 +162,27 @@ class VisualizationWebSocketHandler(tornado.websocket.WebSocketHandler):
         for subscriber_topic in self._status_subscribers:
             self._middleware.remove_subscribe_from_status(
                 self._status_subscribers[subscriber_topic], subscriber_topic)
+
+        if self._periodic_callback:
+            self._periodic_callback.stop()
+            self._periodic_callback = None
+
+        self._reading_sender_queue.close()
+        self._reading_sender_queue = None
+
+    def send_readings_task(self):
+        if not self._is_init or not self._periodic_callback:
+            return
+            
+        sensor_info = []
+        while not self._reading_sender_queue.empty():
+            reading = self._reading_sender_queue.get()
+            sensor_info.append({
+                "subStatusName": reading["subStatusName"],
+                "data": reading["data"].to_dict()
+            })
+        if len(sensor_info) > 0:
+            self.send_message_to_ui("sensorUpdate", sensor_info)
 
     def send_error_message(self, message: str):
         self.send_message_to_ui("error", message)
@@ -296,10 +327,10 @@ class VisualizationWebSocketHandler(tornado.websocket.WebSocketHandler):
         self.send_message_to_ui("uiConfig", panels)
 
     def send_status(self, status_data):
-        self.send_message_to_ui("sensorUpdate", {
-            "subStatusName": status_data["subStatusName"],
-            "data": status_data["data"].to_dict()
-        })
+        try:
+            self._reading_sender_queue.put(status_data, timeout=5)
+        except Exception as e:
+            self._logger.error(f"Failed to send status to reading sender queue: {e}")
 
 ################# Alarms commands #############################
     def add_alarm(self, alarm_info):

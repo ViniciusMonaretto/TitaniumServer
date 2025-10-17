@@ -68,7 +68,7 @@ class ReportGenerator(ServiceInterface):
                 self._logger.error(f"Failed to create Excel report: {e}")
                 self._middleware.send_command_answear(
                     False,
-                    {"status": "error", "message": f"Failed to create Excel report: {e}"},
+                    {"status": "error", "message": f"Erro ao criar Relatório excel: {e}"},
                     data_out["commandId"]
                 )
         else:
@@ -90,9 +90,7 @@ class ReportGenerator(ServiceInterface):
         topic_to_name, topic_to_type = self._get_topic_mappings()
 
         if not sensor_data:
-            if self._logger:
-                self._logger.error("No data to generate report")
-            return ""
+            raise Exception("Não há dados para criar Relatório excel")
 
         # Use temporary directory if none provided
         if output_dir is None:
@@ -208,8 +206,6 @@ class ReportGenerator(ServiceInterface):
             avg_pf = sum(pf_values) / len(pf_values) if pf_values else 0
             max_current = max(current_values) if current_values else 0
 
-            # --- Power Summary Sheet ---
-            ws_power = wb.create_sheet("Power Summary")
             ws_power.append(styled_row(
                 ws_power, ["Grupo:", "", "", "", ""]))
             ws_power.append(styled_row(

@@ -23,6 +23,7 @@ export class ServerConectorService {
   private receivedEventsCallback: ((events: EventAlarmModule[], replaceValue: boolean) => void) | null = null;
   private afterConnectRequests: Function[] = []
   private spinnerDialogRef: MatDialogRef<SpinnerComponent> | null = null;
+  private lastSpinnerMessage: string = "";
 
   constructor(
     private uiPanelService: UiPanelService,
@@ -60,14 +61,19 @@ export class ServerConectorService {
 
   private openSpinnerDialog(message: string) {
     if (this.spinnerDialogRef) {
+      if (this.lastSpinnerMessage == message) {
+        return;
+      }
       this.closeSpinnerDialog();
     }
+    this.lastSpinnerMessage = message;
     this.spinnerDialogRef = this.dialogHelper.showSpinnerDialog(message, true);
   }
 
   private closeSpinnerDialog() {
     this.spinnerDialogRef?.close();
     this.spinnerDialogRef = null;
+    this.lastSpinnerMessage = "";
   }
 
   private connectToServer(): void {
@@ -208,8 +214,10 @@ export class ServerConectorService {
 
     }
     else if (data["status"] == "sensorUpdate") {
-      let message = data["message"]
-      this.uiPanelService.OnSubscriptionUpdate(message["subStatusName"], message["data"])
+      let sensorDataArray: Array<any> = data["message"]
+      for (let sensorData of sensorDataArray) {
+        this.uiPanelService.OnSubscriptionUpdate(sensorData["subStatusName"], sensorData["data"])
+      }
     }
     else if (data["status"] == "statusInfo") {
       this.closeSpinnerDialog();
