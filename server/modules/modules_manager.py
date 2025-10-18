@@ -8,7 +8,7 @@ class ModulesManager:
     _finish = False
     def __init__(self, middleware):
         self._logger = Logger()
-        self._client_middleware = ClientMiddleware(middleware)
+        self._client_middleware = ClientMiddleware(middleware, "modules_manager")
         self._titanium_mqtt = TitaniumMqtt(self._client_middleware)
         self._middleware = middleware
         self._command_handler_thread = Thread(target = self.threaded_function)

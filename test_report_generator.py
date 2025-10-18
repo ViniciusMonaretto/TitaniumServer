@@ -48,7 +48,7 @@ def test_excel_report_creation():
 
         # Create a mock middleware and sensor data storage
         middleware = Middleware()
-        client_middleware = ClientMiddleware(middleware)
+        client_middleware = ClientMiddleware(middleware, "test_report_generator")
         sensor_data_storage = SensorDataStorage(client_middleware)
 
         # Create report generator

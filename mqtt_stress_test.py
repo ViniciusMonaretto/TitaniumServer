@@ -1,60 +1,192 @@
-import paho.mqtt.client as mqtt
-import concurrent.futures
-import random
 import time
+import random
 import json
-import string
-
 from datetime import datetime
+import paho.mqtt.client as mqtt
 
-def generate_random_device_id():
+# Define the broker and port
+BROKER = 'broker.hivemq.com'  # 'broker.hivemq.com'  # "mqtt.eclipseprojects.io"
+PORT = 1883
+MESSAGES_TO_SEND = 1
 
-    hex_chars = string.hexdigits.upper() 
-    random_string = ''.join(random.choice(hex_chars) for _ in range(len("1C692031BE06")))
-    
-    return random_string
+# Base sensor values
+base_sensors = [
+    {"value": -41.5, "active": True, "unit": "°C"},
+    {"value": -29.08, "active": True, "unit": "°C"},
+    {"value": -18.41, "active": True, "unit": "°C"},
+    {"value": -10.97, "active": True, "unit": "°C"},
+    {"value": -0.67, "active": True, "unit": "°C"},
+    {"value": 7.33, "active": True, "unit": "°C"},
+    {"value": 20.88, "active": True, "unit": "°C"},
+    {"value": 25.1, "active": True, "unit": "°C"},
+    {"value": 28.18, "active": True, "unit": "°C"},
+    {"value": 39.2, "active": True, "unit": "°C"},
+    {"value": 48.3, "active": True, "unit": "°C"},
+    {"value": 62.77, "active": True, "unit": "°C"},
+    {"value": 68.89, "active": True, "unit": "°C"},
+    {"value": 80.62, "active": True, "unit": "°C"},
+    {"value": 92.21, "active": True, "unit": "°C"},
+    {"value": 98.12, "active": True, "unit": "°C"},
+    {"value": 111.21, "active": True, "unit": "°C"},
+    {"value": 124.4, "active": True, "unit": "°C"},
+    {"value": 132.87, "active": True, "unit": "°C"},
+    {"value": 140.7, "active": True, "unit": "°C"},
+    {"value": 20, "active": True, "unit": "kPa"},
+    {"value": 20, "active": True, "unit": "kPa"},
+    {"value": 221, "active": True, "unit": "V"},
+    {"value": 2, "active": True, "unit": "A"},
+    {"value": 1000, "active": True, "unit": "W"},
+    {"value": 0.96, "active": True, "unit": "%"}
+]
 
-def publish_message(client_id):
-    """
-    Connects to the MQTT broker and publishes a JSON message to the specified topic.
+# Callback for successful connection
 
-    Args:
-        client_id (str): The unique client identifier used for creating the MQTT client.
-    """
-    client = mqtt.Client()
-    client.connect(broker_address, port)
-    
-    message = {
-        "value": round(random.uniform(22.0, 23.5), 2),
-        "timestamp": datetime.now().isoformat(),
+
+def on_connect(mqtt_client, userdata, flags, rc):
+    if rc == 0:
+        print("Connected successfully")
+        # Subscribe to the command topic
+        mqtt_client.subscribe("iocloud/request/#")
+
+        # Send initial gateway status message
+        #send_gateway_status(
+        #    mqtt_client, "iocloud/response/1C69209DFC08/command")
+        #time.sleep(10)
+        send_gateway_status(
+            mqtt_client, "iocloud/response/1C69209DFC09/command", "1C69209DFC09")
+        time.sleep(1)
+        send_gateway_status(
+            mqtt_client, "iocloud/response/1C69209DFC10/command", "1C69209DFC10")
+        time.sleep(1)
+        send_gateway_status(
+            mqtt_client, "iocloud/response/1C69209DFC11/command", "1C69209DFC11")
+        time.sleep(1)
+        send_gateway_status(
+            mqtt_client, "iocloud/response/1C69209DFC012/command", "1C69209DFC12")
+        time.sleep(1)
+        send_gateway_status(
+            mqtt_client, "iocloud/response/1C69209DFC13/command", "1C69209DFC13")
+        time.sleep(1)
+    else:
+        print(f"Connection failed with code {rc}")
+
+
+# Function to create and send gateway status message
+def send_gateway_status(mqtt_client, response_topic, device_id):
+    panels = []
+    counter = 0
+    for sensor_data in base_sensors:
+        panel = {
+            "gain": 1,
+            "offset": 0,
+            "index": counter,
+            "state": 0,
+            "unit": sensor_data["unit"]
+        }
+        panels.append(panel)
+        counter += 1
+
+    status_payload = {
+        "command_index": 2,
+        "command_status": 0,
+        "device_id": device_id,
+        "ip_address": "192.168.3.79",
+        "uptime": 19510,
+        "sensors": panels
     }
-    
-    client.publish(topic.replace("device_id", generate_random_device_id()), json.dumps(message))  
-    client.disconnect()
 
-def stress_test_publish(num_messages):
-    """
-    Publishes a specified number of messages concurrently using threads.
+    status_topic = response_topic
+    mqtt_client.publish(status_topic, json.dumps(status_payload))
+    print(f"Sent status message to {status_topic}")
 
-    Args:
-        num_messages (int): The number of simultaneous messages to publish.
-    """
-    with concurrent.futures.ThreadPoolExecutor(max_workers=num_messages) as executor:
-        futures = [executor.submit(publish_message, f"client_{i}") for i in range(num_messages)]
-        concurrent.futures.wait(futures)
 
-if __name__ == "__main__":
-    broker_address = "mqtt.eclipseprojects.io"
-    port = 1883
-    topic = "/titanium/device_id/temperature/response"
-    num_messages = 120
-    for i in range(10):
-        start_time = time.time()
-        print(f"Starting to publish {num_messages} JSON messages concurrently...")
+def send_sensor_report(mqtt_client, payload_json, topic):   
+    mqtt_client.publish(topic, payload_json)
+    print(f"Sent sensor report to {topic}")
 
-        stress_test_publish(num_messages)
 
-        end_time = time.time()
-        print(f"Completed publishing {num_messages} messages in {end_time - start_time:.2f} seconds.")
-        print((i+1)*num_messages)
+def on_message(mqtt_client, userdata, msg):
+    print(f"Received command on topic: {msg.topic}")
+    print(f"Payload: {msg.payload}")
+
+    # Handle other command topics
+    response_topic = msg.topic.replace("iocloud/", "iocloud/", 1)
+    response_topic = response_topic.replace("request/", "response/", 1)
+
+    # Check if payload is empty or invalid
+    if not msg.payload:
+        print(f"Empty payload received on topic: {msg.topic}")
+        return
+
+    try:
+        obj = json.loads(msg.payload)
+        print(f"Payload content: {msg.payload}")
+    except json.JSONDecodeError as e:
+        print(f"Invalid JSON payload on topic {msg.topic}: {e}")
+        print(f"Payload content: {msg.payload}")
+        return
+
+    if obj["command"] == 2:
+        send_gateway_status(
+            mqtt_client, "iocloud/response/1C69209DFC08/command", "1C69209DFC08")
+        return
+
+    # Check if required fields exist
+    if "params" not in obj:
+        print(f"Missing 'params' field in payload on topic: {msg.topic}")
+        return
+
+    if not all(key in obj["params"] for key in ["sensor_id", "gain", "offset"]):
+        print(f"Missing required fields in params on topic: {msg.topic}")
+        return
+
+    obj["command_index"] = 1
+    obj["command_status"] = 0
+    obj["sensor_id"] = obj["params"]["sensor_id"]
+    obj["gain"] = obj["params"]["gain"]
+    obj["offset"] = obj["params"]["offset"]
+    obj["unit"] = "°C"
+
+    mqtt_client.publish(response_topic, json.dumps(obj))
+    print(f"Responded to topic: {response_topic}")
+
+
+# Create an MQTT client instance
+client = mqtt.Client()
+
+# Assign callbacks
+client.on_connect = on_connect
+client.on_message = on_message
+
+# Connect and start the loop
+client.connect(BROKER, PORT)
+client.loop_start()
+
+client.subscribe("iocloud/request/#")
+
+try:
+    while True:
+        sensors = []
+        for sensor in base_sensors:
+            if sensor["unit"] == "°C":
+                varied_value = round(
+                    sensor["value"] + random.uniform(-5, 5), 2)
+                sensors.append({**sensor, "value": varied_value})
+            else:
+                sensors.append(sensor.copy())
+        payload = {
+            "timestamp": datetime.now().timestamp(),
+            "sensors": sensors,
+        }
+        payload_json = json.dumps(payload)
+        #send_sensor_report(client, payload_json, "iocloud/response/1C69209DFC08/sensor/report")
+        send_sensor_report(client, payload_json, "iocloud/response/1C69209DFC09/sensor/report")
+        send_sensor_report(client, payload_json, "iocloud/response/1C69209DFC10/sensor/report")
+        send_sensor_report(client, payload_json, "iocloud/response/1C69209DFC11/sensor/report")
+        send_sensor_report(client, payload_json, "iocloud/response/1C69209DFC12/sensor/report")
+        send_sensor_report(client, payload_json, "iocloud/response/1C69209DFC13/sensor/report")
         time.sleep(10)
+except KeyboardInterrupt:
+    print("Stopping the client.")
+    client.loop_stop()
+    client.disconnect()

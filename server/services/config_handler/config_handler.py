@@ -69,7 +69,7 @@ class ConfigHandler(ServiceInterface):
             try:
                 data = json.load(json_file)  # Load the JSON data
                 # Process the JSON data (replace this with your logic)
-                self.add_panels(data)
+                self.initialize_panels_from_config(data)
 
                 self._logger.info(f"Processing file: {json_directory}")
             except json.JSONDecodeError as e:
@@ -144,14 +144,13 @@ class ConfigHandler(ServiceInterface):
 
         return None
 
-    def add_panels(self, panels_info):
-        with self._panel_groups_lock:
-            for group_id in panels_info:
-                if group_id not in self._panel_groups:
-                    self.add_panel_group(group_id)
+    def initialize_panels_from_config(self, panels_info):
+        for group_id in panels_info:
+            if group_id not in self._panel_groups:
+                self.add_panel_group(group_id)
 
-                for panel_info in panels_info[group_id]:
-                    self.add_panel(panel_info)
+            for panel_info in panels_info[group_id]:
+                self.add_panel(panel_info)
 
     def add_panel(self, panel_info) -> tuple[bool, str]:
         result = False

@@ -1,6 +1,7 @@
 from collections.abc import Callable
 import multiprocessing
 import threading
+from time import sleep
 from typing import Any
 from middleware.middleware import Middleware
 from middleware.data_converter.data_converter import DataConverter
@@ -10,7 +11,7 @@ from support.logger import Logger
 
 
 class ClientMiddleware:
-    def __init__(self, middleware: Middleware):
+    def __init__(self, middleware: Middleware, name: str):
         self._logger = Logger()
         self._lock = threading.Lock()
         self._data_converter = DataConverter()
@@ -19,7 +20,8 @@ class ClientMiddleware:
         self._request_queue: dict[str, tuple[Callable, Callable]] = {}
         self._global_middleware = middleware
         self._commands_available: dict[str, Callable] = {}
-
+        self._name = name
+        
     @staticmethod
     def get_calibrate_topic(gateway, topic, indicator):
         return gateway + '-' + topic + "-" + indicator + "calibrate"
@@ -89,6 +91,7 @@ class ClientMiddleware:
                 self._command_update(new_info)
             else:
                 self._status_update(new_info)
+            # sleep(0.1)
 
     def _command_update(self, new_command):
         if new_command["requestId"] in self._request_queue and new_command["name"] == "":

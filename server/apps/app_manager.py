@@ -10,7 +10,7 @@ from middleware.client_middleware import ClientMiddleware
 
 class AppManager:
     def __init__(self, middleware):
-        self._middleware = ClientMiddleware(middleware)
+        self._middleware = ClientMiddleware(middleware, "app_manager")
         self._server = AppServer(self._middleware)
         self._thread = Thread(target=self.threaded_function)
 

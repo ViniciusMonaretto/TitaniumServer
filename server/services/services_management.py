@@ -18,7 +18,7 @@ from .config_storage.config_storage import ConfigStorage
 class ServiceManager:
     def __init__(self, middleware):
         self._logger = Logger()
-        self._middleware = ClientMiddleware(middleware)
+        self._middleware = ClientMiddleware(middleware, "service_manager")
 
         self._config_storage = ConfigStorage(self._middleware)
         self._sensor_data_storage = SensorDataStorage(self._middleware)
