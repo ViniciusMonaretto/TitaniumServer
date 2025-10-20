@@ -6,27 +6,28 @@ import sys
 # Adiciona o diretório do projeto ao path
 # No contexto do PyInstaller, usamos o diretório atual de trabalho
 project_root = os.path.abspath('..')
+server_root = os.path.abspath('../server')
 sys.path.insert(0, project_root)
+sys.path.insert(0, server_root)
 
 block_cipher = None
 
 a = Analysis(
     ['../server/main.py'],
-    pathex=[project_root],
+    pathex=[project_root, server_root],
     binaries=[],
     datas=[
         # Inclui arquivos de configuração em múltiplos locais
         ('../server/config/ui_config.json', 'services/config_handler/../../config'),
         ('../server/config/ui_config.json', 'config'),
         ('../server/config/ui_config.json', '.'),
-        # Inclui banco de dados se necessário
-        ('../titanium_server_db.db', '.'),
         # Inclui arquivos web completos
         ('../server/webApp/browser', 'webApp/browser'),
         ('../server/webApp/prerendered-routes.json', 'webApp'),
         ('../server/webApp/3rdpartylicenses.txt', 'webApp'),
     ],
     hiddenimports=[
+        # Apenas as dependências externas que o PyInstaller pode não detectar automaticamente
         'tornado',
         'paho.mqtt',
         'pytz',
@@ -34,14 +35,8 @@ a = Analysis(
         'motor',
         'openpyxl',
         'psutil',
-        'apps.app_manager',
-        'modules.modules_manager',
-        'middleware.middleware',
-        'services.services_management',
-        'support.logger',
-        'support.thread_monitor',
     ],
-    hookspath=[],
+    hookspath=['.'],
     hooksconfig={},
     runtime_hooks=[],
     excludes=[],
