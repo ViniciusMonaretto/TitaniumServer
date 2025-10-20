@@ -50,6 +50,6 @@ __pycache__/
 *.db
 *.db-journal
 
-*.xlsx
+report_*.xlsx
 
 .env
