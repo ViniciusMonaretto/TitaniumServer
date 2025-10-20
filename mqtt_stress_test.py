@@ -185,7 +185,7 @@ try:
         send_sensor_report(client, payload_json, "iocloud/response/1C69209DFC11/sensor/report")
         send_sensor_report(client, payload_json, "iocloud/response/1C69209DFC12/sensor/report")
         send_sensor_report(client, payload_json, "iocloud/response/1C69209DFC13/sensor/report")
-        time.sleep(10)
+        time.sleep(5)
 except KeyboardInterrupt:
     print("Stopping the client.")
     client.loop_stop()

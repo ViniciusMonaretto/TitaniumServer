@@ -14,6 +14,7 @@ from ..service_interface import ServiceInterface
 
 class AlarmManager(ServiceInterface):
     _alarms_info: dict[str, list[Alarm]] = {}
+    _alarm_check_topics: dict[str, list[Alarm]] = {}
     _status_subscribers: dict[str, StatuSubscribers] = {}
 
     def __init__(self, middleware: ClientMiddleware, config_storage: ConfigStorage):
@@ -71,7 +72,7 @@ class AlarmManager(ServiceInterface):
 
                     topic = sensor_info.sensor_full_topic
 
-                    for alarm in self._alarms_info[topic]:
+                    for alarm in self._alarm_check_topics[topic]:
                         if self.check_if_alarm_should_trigger(alarm, data["value"]):
                             evt = EventModel(alarm.id, 
                                              alarm.panel_id, 
@@ -82,13 +83,14 @@ class AlarmManager(ServiceInterface):
                 except KeyboardInterrupt:
                     break
                 except Exception as e:
-                    self._logger.error(f"SensorDataStorage::write_sensor_data_loop: Error getting data from write queue {e}")
+                    self._logger.error(f"AlarmManager::alarm_check_thread: Error getting data from write queue {e}")
                     break
             if len(events_to_add) > 0:
                 if self._config_storage.add_event_array(events_to_add):
                     self._send_event_status(events_to_add)
+                events_to_add = []
         
-            threading.Event().wait(1)
+            threading.Event().wait(0.2)
     
     def _send_event_status(self, event_list: list[EventModel]):
         for event_model in event_list:
@@ -96,9 +98,11 @@ class AlarmManager(ServiceInterface):
 
     def add_check_status(self, status_info):
         try:
-            self._check_queue.put(SensorInfo(status_info["subStatusName"],
-                                             status_info["data"].timestamp,
-                                             status_info["data"].value))
+            for reading in status_info["data"].readings:
+                if reading.full_topic in self._alarm_check_topics:
+                    self._check_queue.put(SensorInfo(reading.full_topic,
+                                                    reading.timestamp,
+                                                    reading.value))
         except Exception as e:
             self._logger.error(f"AlarmManager::add_check_status: Error adding data to queue {e}")
 
@@ -141,17 +145,21 @@ class AlarmManager(ServiceInterface):
             self._middleware.send_command_answear( result, 
                                                   "Erro ao remover os eventos", 
                                                   command["requestId"])
-
+    
     def setup_alarm(self, alarm: Alarm):
-        topic = alarm.topic
-        if topic not in self._status_subscribers:
-            self._status_subscribers[topic] = StatuSubscribers(self.add_check_status, topic)
-            self._middleware.add_subscribe_to_status(self._status_subscribers[topic], topic)
+        gateway_topic = ClientMiddleware.from_status_topic_get_gateway_topic(alarm.topic)
+        if gateway_topic not in self._status_subscribers:
+            self._status_subscribers[gateway_topic] = StatuSubscribers(self.add_check_status, gateway_topic)
+            self._middleware.add_subscribe_to_status(self._status_subscribers[gateway_topic], gateway_topic)
             self._subscriptions_add+=1
 
-            self._alarms_info[topic] = []
+            self._alarms_info[gateway_topic] = []
+            self._alarm_check_topics[alarm.topic] = []
 
-        self._alarms_info[topic].append(alarm)
+        if alarm.topic not in self._alarm_check_topics:
+            self._alarm_check_topics[alarm.topic] = []
+        self._alarm_check_topics[alarm.topic].append(alarm)
+        self._alarms_info[gateway_topic].append(alarm)
 
     def remove_alarm_command(self, command):
         result = self.remove_alarm(command['data']["id"])
@@ -165,12 +173,12 @@ class AlarmManager(ServiceInterface):
         try:
             alarm_info, result = self._config_storage.get_alarm_info(alarm_id)
             if len(alarm_info) > 0:
-                topic = alarm_info[0]["topic"]
-                if topic in self._alarms_info:
+                gateway_topic =  ClientMiddleware.from_status_topic_get_gateway_topic(alarm_info[0]["topic"])
+                if gateway_topic in self._alarms_info:
 
                     result = self._config_storage.remove_alarm(alarm_id)
                     if result:
-                        self.remove_alarm_internal_info(topic, alarm_id)
+                        self.remove_alarm_internal_info(gateway_topic, alarm_id)
         except Exception as e:
             self._logger.error(f"AlarmManager::add_alarm error: {e}")
         
@@ -190,6 +198,9 @@ class AlarmManager(ServiceInterface):
             alarm = next((obj for obj in self._alarms_info[topic] if obj.id == alarm_id), None)
             if alarm:
                 self._alarms_info[topic].remove(alarm)
+                self._alarm_check_topics[topic].remove(alarm)
+                if len(self._alarm_check_topics[topic]) == 0:
+                    del self._alarm_check_topics[topic]
                 if len(self._alarms_info[topic]) == 0:
                     self._middleware.remove_subscribe_from_status(self._status_subscribers[topic], topic)
                     del self._alarms_info[topic]

@@ -132,11 +132,7 @@ class TitaniumMqtt:
                 )
 
                 if mqtt_message:
-                    status_list = [
-                        {"statusName": status.full_topic, "data": status}
-                        for status in mqtt_message.data
-                    ]
-                    self._middleware.send_status_array(status_list)
+                    self._middleware.send_status(mqtt_message.data.full_topic, mqtt_message.data)
             except queue.Empty:
                 pass
             except Exception as e:

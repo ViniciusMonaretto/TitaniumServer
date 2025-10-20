@@ -214,9 +214,9 @@ export class ServerConectorService {
 
     }
     else if (data["status"] == "sensorUpdate") {
-      let sensorDataArray: Array<any> = data["message"]
+      let sensorDataArray: Array<any> = data["message"]["readings"]
       for (let sensorData of sensorDataArray) {
-        this.uiPanelService.OnSubscriptionUpdate(sensorData["subStatusName"], sensorData["data"])
+        this.uiPanelService.OnSubscriptionUpdate(sensorData["subStatusName"], sensorData)
       }
     }
     else if (data["status"] == "statusInfo") {

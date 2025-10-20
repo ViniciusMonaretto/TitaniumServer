@@ -100,6 +100,19 @@ class MqttReadingModel(MqttDataModel):
             "isActive": self.is_active,
         }
 
+class MqttGatewayReadingModel(MqttDataModel):
+    full_topic: str = ""
+    readings: list[MqttReadingModel] = []
+
+    def __init__(self):
+        self.readings = []
+        self.full_topic = ""
+
+    def to_dict(self):
+        return {
+            "readings": [reading.to_dict() for reading in self.readings]
+        }
+
 
 class MqttPayloadModel:
     gateway: str = ""

@@ -27,8 +27,16 @@ class ClientMiddleware:
         return gateway + '-' + topic + "-" + indicator + "calibrate"
 
     @staticmethod
+    def from_status_topic_get_gateway_topic(topic):
+        return ClientMiddleware.get_gateway_status_topic(topic.split('-')[0])
+
+    @staticmethod
     def get_status_topic(gateway, topic, indicator):
         return gateway + '-' + topic + "-" + indicator
+    
+    @staticmethod
+    def get_gateway_status_topic(gateway):
+        return f"{gateway}-status-*"
 
     def add_commands(self, commands_available: dict[str, Callable[[dict], None]]):
         self._commands_available = self._commands_available | commands_available

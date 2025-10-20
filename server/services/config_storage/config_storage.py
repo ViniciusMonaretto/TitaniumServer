@@ -151,7 +151,7 @@ class ConfigStorage(ServiceInterface):
                     topic = ?,
                     threshold = ?,
                     type = ?,
-                    panelId = ?,
+                    panelId = ?
                 WHERE id = ?;
                 """
 
@@ -160,7 +160,8 @@ class ConfigStorage(ServiceInterface):
                 alarm.topic,
                 alarm.threshold,
                 alarm.type,
-                alarm.panel_id
+                alarm.panel_id,
+                alarm.id
             )
 
             cursor.execute(update_query, new_values)

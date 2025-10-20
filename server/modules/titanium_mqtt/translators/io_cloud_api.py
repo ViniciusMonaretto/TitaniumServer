@@ -6,6 +6,7 @@ from modules.titanium_mqtt.translators.payload_model import (
     MqttCallibrationModel,
     MqttErrorModel,
     MqttGatewayModel,
+    MqttGatewayReadingModel,
     MqttPayloadModel,
     MqttReadingModel,
     MqttSensorStatusModel,
@@ -124,7 +125,6 @@ class IoCloudApiTranslator(PayloadTranslator):
             return []
 
         timestamp = datetime.fromtimestamp(message_json["timestamp"])
-        data = []
         index_obj = {"current_index": 0}
 
         if gateway not in self._gateways_mapping:
@@ -133,19 +133,23 @@ class IoCloudApiTranslator(PayloadTranslator):
             )
             return []
 
+        gateway_reading = MqttGatewayReadingModel()
+        gateway_reading.full_topic = MqttHelper.get_topic_from_mosquitto_obj_report(
+            gateway, "status", "*"
+        )
         for raw_reading in message_json["sensors"]:
             reading = self._create_reading(
                 gateway, timestamp, raw_reading, index_obj)
             if reading:
-                data.append(reading)
+                gateway_reading.readings.append(reading)
 
-        return data
+        return gateway_reading
 
     def _read_calibration_update_message(self, gateway: str, message_json: Any):
-        return [self._create_calibration_update(gateway, message_json)]
+        return self._create_calibration_update(gateway, message_json)
 
     def _read_system_message(self, message_json: Any):
-        return [self._create_system_update(message_json)]
+        return self._create_system_update(message_json)
 
     def _create_system_update(self, message_json: Any):
         system: MqttGatewayModel = MqttGatewayModel()
