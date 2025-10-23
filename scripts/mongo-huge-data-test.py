@@ -3,75 +3,94 @@ from datetime import datetime, timedelta
 import random
 import time
 
-# Conexão com o MongoDB
+# ==== CONFIGURAÇÃO DE CONEXÃO ====
 client = MongoClient(
     "mongodb://root:example@localhost:27017/?authSource=admin")
 db = client["IoCloud"]
 collection = db["SensorData"]
 
-# Dados base (podes pegar direto do banco também)
+# ==== LIMPAR BASE ====
+print("🗑️ Limpando dados existentes...")
+collection.delete_many({})
+print("✅ Dados existentes removidos.\n")
+
+# ==== CONFIGURAÇÃO DE DADOS BASE ====
 base_data = [
-    {"SensorFullTopic": "1C69209DFC08-temperature-0", "Value": -42.78},
-    {"SensorFullTopic": "1C69209DFC08-temperature-1", "Value": -25.56},
-    {"SensorFullTopic": "1C69209DFC08-temperature-2", "Value": -20.21},
-    {"SensorFullTopic": "1C69209DFC08-temperature-3", "Value": -15.67},
-    {"SensorFullTopic": "1C69209DFC08-temperature-4", "Value": -1.92},
-    {"SensorFullTopic": "1C69209DFC08-temperature-5", "Value": 6.6},
-    {"SensorFullTopic": "1C69209DFC08-temperature-6", "Value": 18.14},
-    {"SensorFullTopic": "1C69209DFC08-temperature-7", "Value": 24.84},
-    {"SensorFullTopic": "1C69209DFC08-temperature-8", "Value": 27.24},
-    {"SensorFullTopic": "1C69209DFC08-temperature-9", "Value": 37.56},
-    {"SensorFullTopic": "1C69209DFC08-temperature-10", "Value": 50.55},
-    {"SensorFullTopic": "1C69209DFC08-temperature-11", "Value": 60.09},
-    {"SensorFullTopic": "1C69209DFC08-temperature-12", "Value": 72.29},
-    {"SensorFullTopic": "1C69209DFC08-temperature-13", "Value": 85.1},
-    {"SensorFullTopic": "1C69209DFC08-temperature-14", "Value": 91.35},
-    {"SensorFullTopic": "1C69209DFC08-temperature-15", "Value": 102.47},
-    {"SensorFullTopic": "1C69209DFC08-temperature-16", "Value": 106.62},
-    {"SensorFullTopic": "1C69209DFC08-temperature-17", "Value": 124.55},
-    {"SensorFullTopic": "1C69209DFC08-temperature-18", "Value": 129.33},
-    {"SensorFullTopic": "1C69209DFC08-temperature-19", "Value": 143.88},
+    {"SensorFullTopic": f"1C69209DFC08-temperature-{i}", "Value": v}
+    for i, v in enumerate([
+        -42.78, -25.56, -20.21, -15.67, -1.92, 6.6, 18.14, 24.84, 27.24, 37.56,
+        50.55, 60.09, 72.29, 85.1, 91.35, 102.47, 106.62, 124.55, 129.33, 143.88
+    ])
 ]
 
-# Quantidade de leituras por sensor
-N = 20000
-# Intervalo de 7 dias
-one_week_seconds = 7 * 24 * 60 * 60
-# Data base (hoje)
+# ==== CONFIGURAÇÃO DE TEMPO ====
+N = 200_000  # Leituras por sensor
 base_timestamp = int(time.time())
 
-# Gerar array de timestamps compartilhado para todos os sensores
-print("Gerando array de timestamps compartilhado...")
-shared_timestamps = []
-for _ in range(N):
-    # Timestamp aleatório dentro de uma semana
-    ts = base_timestamp - random.randint(0, one_week_seconds)
-    shared_timestamps.append(ts)
+# Gera dados antigos (para testar TTL)
+start_days_ago = 60
+end_days_ago = 0
+start_timestamp = base_timestamp - start_days_ago * 24 * 60 * 60
+end_timestamp = base_timestamp - end_days_ago * 24 * 60 * 60
 
-# Ordenar timestamps para ter uma sequência temporal lógica
-shared_timestamps.sort()
+print("Gerando dados antigos para testar TTL:")
+print(f"  ⏱️  Período: {start_days_ago} a {end_days_ago} dias atrás")
+print(f"  📆  Início: {datetime.fromtimestamp(start_timestamp)}")
+print(f"  📆  Fim:    {datetime.fromtimestamp(end_timestamp)}")
+print("  🧹  Todos os dados estarão mais antigos que 60 dias.\n")
 
-print(f"Array de {len(shared_timestamps)} timestamps gerado e ordenado.")
+# ==== GERAR TIMESTAMPS COMPARTILHADOS ====
+print("⏳ Gerando timestamps compartilhados...")
+shared_timestamps = sorted([
+    random.randint(start_timestamp, end_timestamp) for _ in range(N)
+])
+print(f"✅ {len(shared_timestamps)} timestamps gerados e ordenados.\n")
 
-# Geração e inserção dos dados
+# ==== GERAR E INSERIR DADOS ====
+batch_size = 5000  # inserir em lotes para não travar
+total_inserted = 0
+
 for sensor in base_data:
     topic = sensor["SensorFullTopic"]
     base_value = sensor["Value"]
 
-    print(f"Gerando dados para {topic}...")
+    print(f"🌡️ Gerando dados para {topic}...")
 
     docs = []
     for i, ts in enumerate(shared_timestamps):
-        # Valor com pequena variação (+/- 10%)
+        # Cria valor com variação de ±10%
         value = base_value * (1 + random.uniform(-0.1, 0.1))
+        # O campo Timestamp deve ser um datetime, não int
+        ts_dt = datetime.fromtimestamp(ts)
 
         docs.append({
             "SensorFullTopic": topic,
-            "Timestamp": ts,
-            "Value": round(value, 2)
+            "Timestamp": ts_dt,
+            "Value": round(value, 2),
         })
 
-    # Inserção em lote (melhor performance)
-    collection.insert_many(docs)
+        # Inserir em lotes
+        if len(docs) >= batch_size:
+            collection.insert_many(docs)
+            total_inserted += len(docs)
+            docs.clear()
 
-print("✅ Inserção concluída com sucesso!")
+    # Inserir o resto
+    if docs:
+        collection.insert_many(docs)
+        total_inserted += len(docs)
+
+    print(f"✅ Inseridos {total_inserted:,} registros até agora.\n")
+
+print("🎉 Inserção concluída com sucesso!")
+print(
+    f"📦 Total final de documentos: {collection.estimated_document_count():,}")
+
+# ==== INFORMAÇÕES SOBRE TTL ====
+print("\n=== INFORMAÇÕES SOBRE TTL ===")
+print("📅 Todos os dados são mais antigos que 60 dias.")
+print("⏰ O MongoDB TTL deve remover esses dados automaticamente.")
+print("🔄 O processo TTL roda a cada 60 segundos em background.")
+print("🕐 Aguarde 1–2 minutos e rode:")
+print("   db.SensorData.countDocuments({})")
+print("✅ O número deve começar a diminuir automaticamente.")

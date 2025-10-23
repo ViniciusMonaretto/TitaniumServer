@@ -8,7 +8,6 @@ from typing import Any, Callable, Dict, List, Optional
 import sys
 import os
 
-import psutil
 from support.logger import Logger
 from services.service_interface import ServiceInterface
 from services.sensor_data_storage.sensor_data_storage_commands import SensorDataStorageCommands
@@ -46,7 +45,8 @@ class SensorDataStorage(ServiceInterface):
         self._async_loop = AsyncioLoopThread()
         self._indexes_created = False
         self._status_subscribers_last_time: Dict[str, datetime] = {}
-        self._gateway_status_subscribers: Dict[str, {'subscriber': StatuSubscribers, 'topics': []}] = {}
+        self._gateway_status_subscribers: Dict[str, {
+            'subscriber': StatuSubscribers, 'topics': []}] = {}
         self._last_status_by_sub_status_name: Dict[str, Dict[str, Any]] = {}
         self._last_status_lock = threading.Lock()
 
@@ -81,7 +81,7 @@ class SensorDataStorage(ServiceInterface):
             # Create TTL index to expire documents after 60 days
             await self._collection.create_index(
                 "Timestamp",
-                expireAfterSeconds=60 * 24 * 60 * 60,  # 60 days in seconds
+                expireAfterSeconds=90 * 24 * 60 * 60,  # 60 days in seconds
                 background=True
             )
 
@@ -163,7 +163,8 @@ class SensorDataStorage(ServiceInterface):
             for reading in status_info["data"].readings:
                 self.add_sensor_data_to_queue(reading)
         except Exception as e:
-            self._logger.error(f"SensorDataStorage::add_sensors_to_data_queue: Error adding data to queue {e}")
+            self._logger.error(
+                f"SensorDataStorage::add_sensors_to_data_queue: Error adding data to queue {e}")
 
     def add_sensor_data_to_queue(self, status_info: Dict[str, Any]) -> None:
         """Add sensor data to the write queue."""
@@ -210,12 +211,13 @@ class SensorDataStorage(ServiceInterface):
                 self.add_sensors_to_data_queue, gateway_topic)
             self._middleware.add_subscribe_to_status(
                 self._gateway_status_subscribers[gateway_topic]['subscriber'], gateway_topic)
-        
+
         topic = ClientMiddleware.get_status_topic(
             gateway, status_name, indicator)
         if topic not in self._status_subscribers_last_time:
             self._status_subscribers_last_time[topic] = None
-            self._gateway_status_subscribers[gateway_topic]['topics'].append(topic)
+            self._gateway_status_subscribers[gateway_topic]['topics'].append(
+                topic)
 
     def remove_subscription_from_status(self, gateway: str, status_name: str, indicator: str) -> None:
         """Remove subscription from status updates."""
@@ -223,12 +225,15 @@ class SensorDataStorage(ServiceInterface):
             gateway, status_name, indicator)
         if topic in self._status_subscribers_last_time:
             del self._status_subscribers_last_time[topic]
-            gateway_topic = ClientMiddleware.from_status_topic_get_gateway_topic(topic)
+            gateway_topic = ClientMiddleware.from_status_topic_get_gateway_topic(
+                topic)
             if gateway_topic not in self._gateway_status_subscribers:
-                self._logger.error(f"SensorDataStorage::remove_subscription_from_status: Gateway topic {gateway_topic} not subscribed")
+                self._logger.error(
+                    f"SensorDataStorage::remove_subscription_from_status: Gateway topic {gateway_topic} not subscribed")
                 return
-            
-            self._gateway_status_subscribers[gateway_topic]['topics'].remove(topic)
+
+            self._gateway_status_subscribers[gateway_topic]['topics'].remove(
+                topic)
             if len(self._gateway_status_subscribers[gateway_topic]['topics']) == 0:
                 self._middleware.remove_subscribe_from_status(
                     self._gateway_status_subscribers[gateway_topic]['subscriber'], gateway_topic)
@@ -295,12 +300,12 @@ class SensorDataStorage(ServiceInterface):
             dt = datetime.strptime(
                 data["beginDate"][:26], '%Y-%m-%dT%H:%M:%S.%f')
             query["Timestamp"] = {}
-            query["Timestamp"]["$gt"] = dt.timestamp()
+            query["Timestamp"]["$gt"] = dt
 
             if "endDate" in data:
                 dt_end = datetime.strptime(
                     data["endDate"][:26], '%Y-%m-%dT%H:%M:%S.%f')
-                query["Timestamp"]["$lt"] = dt_end.timestamp()
+                query["Timestamp"]["$lt"] = dt_end
 
         data_out = {'info': {}}
         result = True
@@ -313,7 +318,7 @@ class SensorDataStorage(ServiceInterface):
                 sensor_name = doc["SensorFullTopic"]
                 if sensor_name not in data_out['info']:
                     data_out['info'][sensor_name] = []
-                tm = datetime.fromtimestamp(doc["Timestamp"])
+                tm = doc["Timestamp"]
                 data_out["info"][sensor_name].append(
                     {'timestamp': tm.isoformat(), 'value': doc["Value"]})
             data_out['requestId'] = data['websocketId']

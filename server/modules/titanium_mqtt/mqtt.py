@@ -132,7 +132,8 @@ class TitaniumMqtt:
                 )
 
                 if mqtt_message:
-                    self._middleware.send_status(mqtt_message.data.full_topic, mqtt_message.data)
+                    self._middleware.send_status(
+                        mqtt_message.data.full_topic, mqtt_message.data)
             except queue.Empty:
                 pass
             except Exception as e:
