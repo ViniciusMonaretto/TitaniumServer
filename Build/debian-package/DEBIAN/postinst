@@ -27,6 +27,12 @@ if [ -d "/opt/titanium-server/webApp" ]; then
     chown -R titanium:titanium /opt/titanium-server/webApp
 fi
 
+# Define permissões para docker-compose.yml se existir
+if [ -f "/opt/titanium-server/docker-compose.yml" ]; then
+    chmod 644 /opt/titanium-server/docker-compose.yml
+    chown titanium:titanium /opt/titanium-server/docker-compose.yml
+fi
+
 echo ""
 echo "=========================================="
 echo "  Instalação do Titanium Server concluída!"

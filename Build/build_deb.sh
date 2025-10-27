@@ -76,6 +76,15 @@ else
     print_warning "Diretório webApp não encontrado"
 fi
 
+# Copia arquivo docker-compose.yml
+print_header "Copiando arquivo docker-compose.yml..."
+if [ -f "../server/docker-compose.yml" ]; then
+    cp ../server/docker-compose.yml debian-package/opt/titanium-server/
+    print_status "Arquivo docker-compose.yml copiado"
+else
+    print_warning "Arquivo docker-compose.yml não encontrado"
+fi
+
 # Copia o arquivo de serviço
 print_status "Copiando arquivo de serviço..."
 cp titanium-server.service debian-package/etc/systemd/system/

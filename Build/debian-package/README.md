@@ -52,6 +52,7 @@ O pacote `.deb` replica exatamente o comportamento do `install_service.sh`:
 ### Arquivos Instalados:
 - `/opt/titanium-server/titanium_server` - Executável principal
 - `/opt/titanium-server/webApp/` - Interface web
+- `/opt/titanium-server/docker-compose.yml` - Configuração Docker para MongoDB e Mosquitto
 - `/opt/titanium-server/data/` - Dados e configurações
 - `/opt/titanium-server/logs/` - Logs do aplicativo
 - `/var/log/titanium-server/` - Logs do sistema
@@ -73,6 +74,27 @@ sudo journalctl -u titanium-server -f
 
 # Desabilitar inicialização automática
 sudo systemctl disable titanium-server
+```
+
+## Usando Docker Compose
+
+O pacote inclui um arquivo `docker-compose.yml` para executar os serviços de dependência (MongoDB e Mosquitto MQTT):
+
+```bash
+# Navegar para o diretório de instalação
+cd /opt/titanium-server
+
+# Iniciar os serviços Docker
+sudo docker-compose up -d
+
+# Verificar status dos containers
+sudo docker-compose ps
+
+# Parar os serviços
+sudo docker-compose down
+
+# Ver logs dos serviços
+sudo docker-compose logs -f
 ```
 
 ## Verificação do Pacote
