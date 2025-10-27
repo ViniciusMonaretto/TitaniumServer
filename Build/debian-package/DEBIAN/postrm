@@ -1,0 +1,39 @@
+#!/bin/bash
+
+# Script postrm para Titanium Server
+# Executado após a remoção dos arquivos
+
+set -e
+
+# Verifica se é uma remoção completa (não upgrade)
+if [ "$1" = "remove" ]; then
+    echo "Executando limpeza após remoção do Titanium Server..."
+    
+    # Recarrega o daemon do systemd
+    echo "Recarregando configurações do systemd..."
+    systemctl daemon-reload
+    
+    # Remove o arquivo de serviço se ainda existir
+    if [ -f "/etc/systemd/system/titanium-server.service" ]; then
+        echo "Removendo arquivo de serviço..."
+        rm -f /etc/systemd/system/titanium-server.service
+        systemctl daemon-reload
+    fi
+    
+    # Pergunta se deve remover os dados do usuário
+    echo ""
+    echo "=========================================="
+    echo "  Remoção do Titanium Server concluída!"
+    echo "=========================================="
+    echo ""
+    echo "Os seguintes diretórios foram mantidos:"
+    echo "  - /opt/titanium-server/ (dados e configurações)"
+    echo "  - /var/log/titanium-server/ (logs)"
+    echo "  - Usuário 'titanium' (pode ser removido manualmente)"
+    echo ""
+    echo "Para remover completamente todos os dados:"
+    echo "  sudo rm -rf /opt/titanium-server"
+    echo "  sudo rm -rf /var/log/titanium-server"
+    echo "  sudo userdel titanium"
+    echo ""
+fi

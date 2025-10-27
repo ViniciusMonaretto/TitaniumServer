@@ -1,0 +1,22 @@
+Package: titanium-server
+Version: 1.0.0
+Section: utils
+Priority: optional
+Architecture: amd64
+Depends: systemd
+Maintainer: IoCloud Team <team@iocloud.com>
+Description: Titanium Server - IoCloud Datalogger System
+ Titanium Server é um sistema de datalogger desenvolvido pela IoCloud
+ para coleta e processamento de dados de sensores IoT.
+ .
+ Este pacote instala o Titanium Server como um serviço systemd,
+ incluindo:
+  - Executável principal do servidor
+  - Interface web integrada
+  - Configuração automática de usuário e permissões
+  - Integração com systemd para inicialização automática
+  - Logs centralizados via journald
+ .
+ Após a instalação, o serviço será habilitado automaticamente
+ e pode ser gerenciado através dos comandos systemctl padrão.
+Installed-Size: 15888

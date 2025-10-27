@@ -1,0 +1,45 @@
+#!/bin/bash
+
+# Script postinst para Titanium Server
+# Executado após a instalação dos arquivos
+
+set -e
+
+echo "Configurando Titanium Server..."
+
+# Recarrega o daemon do systemd
+echo "Recarregando configurações do systemd..."
+systemctl daemon-reload
+
+# Habilita o serviço para iniciar automaticamente
+echo "Habilitando serviço para inicialização automática..."
+systemctl enable titanium-server.service
+
+# Define permissões finais
+echo "Configurando permissões finais..."
+chown -R titanium:titanium /opt/titanium-server
+chown -R titanium:titanium /var/log/titanium-server
+chmod +x /opt/titanium-server/titanium_server
+
+# Se o diretório webApp existe, define permissões
+if [ -d "/opt/titanium-server/webApp" ]; then
+    chmod -R 755 /opt/titanium-server/webApp
+    chown -R titanium:titanium /opt/titanium-server/webApp
+fi
+
+echo ""
+echo "=========================================="
+echo "  Instalação do Titanium Server concluída!"
+echo "=========================================="
+echo ""
+echo "Comandos úteis:"
+echo "  Iniciar serviço:     sudo systemctl start titanium-server"
+echo "  Parar serviço:       sudo systemctl stop titanium-server"
+echo "  Status do serviço:   sudo systemctl status titanium-server"
+echo "  Ver logs:            sudo journalctl -u titanium-server -f"
+echo "  Reiniciar serviço:   sudo systemctl restart titanium-server"
+echo "  Desabilitar serviço: sudo systemctl disable titanium-server"
+echo ""
+echo "Para iniciar o serviço agora, execute:"
+echo "  sudo systemctl start titanium-server"
+echo ""

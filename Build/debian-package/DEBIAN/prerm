@@ -1,0 +1,28 @@
+#!/bin/bash
+
+# Script prerm para Titanium Server
+# Executado antes da remoção dos arquivos
+
+set -e
+
+echo "Parando Titanium Server antes da remoção..."
+
+# Para o serviço se estiver rodando
+if systemctl is-active --quiet titanium-server.service; then
+    echo "Parando serviço titanium-server..."
+    systemctl stop titanium-server.service
+    echo "Serviço parado com sucesso"
+else
+    echo "Serviço titanium-server não está rodando"
+fi
+
+# Desabilita o serviço
+if systemctl is-enabled --quiet titanium-server.service; then
+    echo "Desabilitando serviço titanium-server..."
+    systemctl disable titanium-server.service
+    echo "Serviço desabilitado com sucesso"
+else
+    echo "Serviço titanium-server não estava habilitado"
+fi
+
+echo "Preparação para remoção concluída!"

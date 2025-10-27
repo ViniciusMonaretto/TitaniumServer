@@ -1,0 +1,33 @@
+#!/bin/bash
+
+# Script preinst para Titanium Server
+# Executado antes da instalação dos arquivos
+
+set -e
+
+echo "Preparando instalação do Titanium Server..."
+
+# Cria usuário e grupo do sistema se não existirem
+if ! id "titanium" &>/dev/null; then
+    echo "Criando usuário 'titanium'..."
+    useradd --system --shell /bin/false --home-dir /opt/titanium-server --create-home titanium
+    echo "Usuário 'titanium' criado com sucesso"
+else
+    echo "Usuário 'titanium' já existe"
+fi
+
+# Cria diretórios necessários
+echo "Criando estrutura de diretórios..."
+mkdir -p /opt/titanium-server/{logs,data,config}
+mkdir -p /var/log/titanium-server
+
+# Define permissões básicas
+chown -R titanium:titanium /opt/titanium-server
+chown -R titanium:titanium /var/log/titanium-server
+chmod 755 /opt/titanium-server
+chmod 755 /opt/titanium-server/logs
+chmod 755 /opt/titanium-server/data
+chmod 755 /opt/titanium-server/config
+chmod 755 /var/log/titanium-server
+
+echo "Preparação concluída com sucesso!"
