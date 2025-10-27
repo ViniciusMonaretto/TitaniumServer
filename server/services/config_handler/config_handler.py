@@ -1,4 +1,5 @@
 import json
+import sys
 import os
 import threading
 from datetime import datetime, timedelta
@@ -61,10 +62,33 @@ class ConfigHandler(ServiceInterface):
         self._middleware.add_commands(commands)
 
     def read_default_config(self):
-        script_directory = os.path.dirname(os.path.abspath(__file__))
-        json_directory = os.path.join(
-            script_directory, "..", "..", "config", "ui_config.json"
-        )
+        # Função para obter caminho correto tanto em desenvolvimento quanto no executável
+        def get_resource_path(relative_path):
+            try:
+                # PyInstaller creates a temp folder and stores path in _MEIPASS
+                base_path = sys._MEIPASS
+            except Exception:
+                base_path = os.path.abspath(".")
+            return os.path.join(base_path, relative_path)
+        
+        # Tenta múltiplos caminhos possíveis
+        possible_paths = [
+            "config/ui_config.json",
+            "services/config_handler/../../config/ui_config.json",
+            "ui_config.json"
+        ]
+        
+        json_directory = None
+        for path in possible_paths:
+            full_path = get_resource_path(path)
+            if os.path.exists(full_path):
+                json_directory = full_path
+                break
+        
+        if json_directory is None:
+            self._logger.error("Arquivo ui_config.json não encontrado em nenhum dos caminhos possíveis")
+            return
+            
         with open(json_directory, "r", encoding="utf-8") as json_file:
             try:
                 data = json.load(json_file)  # Load the JSON data

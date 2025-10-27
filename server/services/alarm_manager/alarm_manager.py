@@ -12,6 +12,7 @@ from services.alarm_manager.alarm_manager_commands import AlarmManagerCommands
 from services.config_storage.config_storage import ConfigStorage
 from ..service_interface import ServiceInterface
 
+
 class AlarmManager(ServiceInterface):
     _alarms_info: dict[str, list[Alarm]] = {}
     _alarm_check_topics: dict[str, list[Alarm]] = {}
@@ -36,8 +37,9 @@ class AlarmManager(ServiceInterface):
         if result:
             for alarm_info in alarms:
                 self.setup_alarm(Alarm(alarm_info))
-        
-        self._alarm_check_thread = threading.Thread(target=self.alarm_check_thread, daemon=True)
+
+        self._alarm_check_thread = threading.Thread(
+            target=self.alarm_check_thread, daemon=True)
         self._alarm_check_thread.start()
 
     def initialize_commands(self):
@@ -46,7 +48,7 @@ class AlarmManager(ServiceInterface):
             AlarmManagerCommands.ADD_ALARM: self.add_alarm_command,
             AlarmManagerCommands.GET_ALARMS: self.get_alarm_command,
             AlarmManagerCommands.REMOVE_ALL_EVENTS: self.remove_all_events_command
-            }
+        }
         self._middleware.add_commands(commands)
 
     def check_if_alarm_should_trigger(self, alarm: Alarm, value):
@@ -68,14 +70,15 @@ class AlarmManager(ServiceInterface):
                         "timestamp": sensor_info.timestamp,
                         "value": sensor_info.value
                     }
-                    data["timestamp"] = datetime.fromisoformat(data["timestamp"])
+                    data["timestamp"] = datetime.fromisoformat(
+                        data["timestamp"])
 
                     topic = sensor_info.sensor_full_topic
 
                     for alarm in self._alarm_check_topics[topic]:
                         if self.check_if_alarm_should_trigger(alarm, data["value"]):
-                            evt = EventModel(alarm.id, 
-                                             alarm.panel_id, 
+                            evt = EventModel(alarm.id,
+                                             alarm.panel_id,
                                              data["timestamp"],
                                              data["value"])
                             evt.name = alarm.name
@@ -83,46 +86,51 @@ class AlarmManager(ServiceInterface):
                 except KeyboardInterrupt:
                     break
                 except Exception as e:
-                    self._logger.error(f"AlarmManager::alarm_check_thread: Error getting data from write queue {e}")
+                    self._logger.error(
+                        f"AlarmManager::alarm_check_thread: Error getting data from write queue {e}")
                     break
             if len(events_to_add) > 0:
                 if self._config_storage.add_event_array(events_to_add):
                     self._send_event_status(events_to_add)
                 events_to_add = []
-        
+
             threading.Event().wait(0.2)
-    
+
     def _send_event_status(self, event_list: list[EventModel]):
         for event_model in event_list:
-            self._middleware.send_status("alarm-newevent-*", event_model.to_json())
+            self._middleware.send_status(
+                "alarm-newevent-*", event_model.to_json())
 
     def add_check_status(self, status_info):
         try:
             for reading in status_info["data"].readings:
                 if reading.full_topic in self._alarm_check_topics:
                     self._check_queue.put(SensorInfo(reading.full_topic,
-                                                    reading.timestamp,
-                                                    reading.value))
+                                                     reading.timestamp,
+                                                     reading.value))
         except Exception as e:
-            self._logger.error(f"AlarmManager::add_check_status: Error adding data to queue {e}")
+            self._logger.error(
+                f"AlarmManager::add_check_status: Error adding data to queue {e}")
 
     def get_alarm_command(self, command):
         alarms, result = self._config_storage.get_alarm_info()
         if result:
-            self._middleware.send_command_answear( result, alarms, command["requestId"])
+            self._middleware.send_command_answear(
+                result, alarms, command["requestId"])
         else:
-            self._middleware.send_command_answear( result, 
-                                                  "Unable to get alarms", 
+            self._middleware.send_command_answear(result,
+                                                  "Unable to get alarms",
                                                   command["requestId"])
 
     def add_alarm_command(self, command):
         result = self.add_alarm(command['data'])
-        
+
         if result.id != '':
-            self._middleware.send_command_answear( True, result.to_json(), command["requestId"])
+            self._middleware.send_command_answear(
+                True, result.to_json(), command["requestId"])
         else:
-            self._middleware.send_command_answear( result, 
-                                                  "Unable to add alarm", 
+            self._middleware.send_command_answear(result,
+                                                  "Unable to add alarm",
                                                   command["requestId"])
 
     def add_alarm(self, alarm_info):
@@ -134,24 +142,28 @@ class AlarmManager(ServiceInterface):
                 self.setup_alarm(alarm)
         except Exception as e:
             self._logger.error(f"AlarmManager::add_alarm error: {e}")
-        
+
         return alarm
-    
+
     def remove_all_events_command(self, command):
         result = self._config_storage.remove_events(command)
         if result:
-            self._middleware.send_command_answear( result, {"events": []}, command["requestId"])
+            self._middleware.send_command_answear(
+                result, {"events": []}, command["requestId"])
         else:
-            self._middleware.send_command_answear( result, 
-                                                  "Erro ao remover os eventos", 
+            self._middleware.send_command_answear(result,
+                                                  "Erro ao remover os eventos",
                                                   command["requestId"])
-    
+
     def setup_alarm(self, alarm: Alarm):
-        gateway_topic = ClientMiddleware.from_status_topic_get_gateway_topic(alarm.topic)
+        gateway_topic = ClientMiddleware.from_status_topic_get_gateway_topic(
+            alarm.topic)
         if gateway_topic not in self._status_subscribers:
-            self._status_subscribers[gateway_topic] = StatuSubscribers(self.add_check_status, gateway_topic)
-            self._middleware.add_subscribe_to_status(self._status_subscribers[gateway_topic], gateway_topic)
-            self._subscriptions_add+=1
+            self._status_subscribers[gateway_topic] = StatuSubscribers(
+                self.add_check_status, gateway_topic)
+            self._middleware.add_subscribe_to_status(
+                self._status_subscribers[gateway_topic], gateway_topic)
+            self._subscriptions_add += 1
 
             self._alarms_info[gateway_topic] = []
             self._alarm_check_topics[alarm.topic] = []
@@ -164,47 +176,48 @@ class AlarmManager(ServiceInterface):
     def remove_alarm_command(self, command):
         result = self.remove_alarm(command['data']["id"])
         if result:
-            self._middleware.send_command_answear( result, command['data']["id"], command["requestId"])
+            self._middleware.send_command_answear(
+                result, command['data']["id"], command["requestId"])
         else:
-            self._middleware.send_command_answear( result, f"Unable to remove alarm {command['sensorId']}", 
+            self._middleware.send_command_answear(result, f"Unable to remove alarm {command['sensorId']}",
                                                   command["requestId"])
 
     def remove_alarm(self, alarm_id):
         try:
             alarm_info, result = self._config_storage.get_alarm_info(alarm_id)
             if len(alarm_info) > 0:
-                gateway_topic =  ClientMiddleware.from_status_topic_get_gateway_topic(alarm_info[0]["topic"])
+                gateway_topic = ClientMiddleware.from_status_topic_get_gateway_topic(
+                    alarm_info[0]["topic"])
                 if gateway_topic in self._alarms_info:
 
                     result = self._config_storage.remove_alarm(alarm_id)
                     if result:
-                        self.remove_alarm_internal_info(gateway_topic, alarm_id)
+                        self.remove_alarm_internal_info(
+                            gateway_topic, alarm_id)
         except Exception as e:
-            self._logger.error(f"AlarmManager::add_alarm error: {e}")
-        
+            self._logger.error(f"AlarmManager::remove_alarm error: {e}")
+
         return True
-    
+
     def change_alarm_threshold(self, alarm_id, new_threshold, topic):
         for item in self._alarms_info[topic]:
             if item.id == alarm_id:
                 item.threshold = new_threshold
                 self._config_storage.update_alarm(item)
                 return item
-        
+
         return None
 
     def remove_alarm_internal_info(self, topic: str, alarm_id):
-        if( topic in self._alarms_info ):
-            alarm = next((obj for obj in self._alarms_info[topic] if obj.id == alarm_id), None)
+        if (topic in self._alarms_info):
+            alarm = next(
+                (obj for obj in self._alarms_info[topic] if obj.id == alarm_id), None)
             if alarm:
                 self._alarms_info[topic].remove(alarm)
                 self._alarm_check_topics[topic].remove(alarm)
                 if len(self._alarm_check_topics[topic]) == 0:
                     del self._alarm_check_topics[topic]
                 if len(self._alarms_info[topic]) == 0:
-                    self._middleware.remove_subscribe_from_status(self._status_subscribers[topic], topic)
+                    self._middleware.remove_subscribe_from_status(
+                        self._status_subscribers[topic], topic)
                     del self._alarms_info[topic]
-    
-    
-
-                
