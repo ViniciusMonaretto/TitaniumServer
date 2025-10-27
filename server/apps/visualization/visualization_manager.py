@@ -22,7 +22,6 @@ from services.sensor_data_storage.sensor_data_storage_commands import SensorData
 from services.config_handler.config_handler_command import ConfigHandlerCommands
 
 import os
-import sys
 import base64
 import mimetypes
 import copy
@@ -31,35 +30,8 @@ import gc
 
 class Visualization(tornado.web.RequestHandler):
     def get(self, path=None):
-        # Função para obter caminho correto tanto em desenvolvimento quanto no executável
-        def get_resource_path(relative_path):
-            try:
-                # PyInstaller creates a temp folder and stores path in _MEIPASS
-                base_path = sys._MEIPASS
-            except Exception:
-                base_path = os.path.abspath(".")
-            return os.path.join(base_path, relative_path)
-        
-        # Tenta múltiplos caminhos possíveis para o template
-        possible_paths = [
-            "webApp/browser/index.html",
-            "apps/visualization/../../webApp/browser/index.html",
-            "index.html"
-        ]
-        
-        template_path = None
-        for path in possible_paths:
-            full_path = get_resource_path(path)
-            if os.path.exists(full_path):
-                template_path = full_path
-                break
-        
-        if template_path is None:
-            self.write("Template não encontrado")
-            return
-            
         # Serve the main Angular app for all routes
-        self.render(template_path)
+        self.render("../../webApp/browser/index.html")
 
     def data_received(self, chunk: bytes):
         raise NotImplementedError()
