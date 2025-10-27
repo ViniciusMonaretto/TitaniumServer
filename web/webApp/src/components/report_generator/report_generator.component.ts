@@ -14,6 +14,7 @@ import { MY_DATE_FORMATS } from '../graph-request-window/graph-request-window.co
 import { SensorTreeComponent } from '../sensor-tree/sensor-tree.component';
 import { MatRadioModule } from '@angular/material/radio';
 import { IoButtonComponent } from '../io-button/io-button.component';
+import { DialogHelper } from '../../services/dialog-helper.service';
 
 @Component({
   selector: 'sensor-info-dialog',
@@ -52,7 +53,7 @@ export class ReportGeneratorComponent {
 
   timeRangeChoice: string = 'lastHour';
 
-  constructor(public dialogRef: MatDialogRef<ReportGeneratorComponent>,
+  constructor(public dialogRef: MatDialogRef<ReportGeneratorComponent>, public dialogHelper: DialogHelper,
     @Inject(MAT_DIALOG_DATA) public data: {uiConfig: any[], callback: ((obj: any) => void), canEdit: boolean}
   ) {
     this.uiConfig = {};
@@ -109,6 +110,19 @@ export class ReportGeneratorComponent {
 
   onApply(): void {
     let selectedPanels = []
+
+    // Check if date range is greater than 2 weeks
+    if (this.startDate != null) {
+      const twoWeeksInMs = 14 * 24 * 60 * 60 * 1000; // 14 days in milliseconds
+      const endDateToUse = this.endDate || new Date(); // Use current date if endDate is null
+      const dateDifference = endDateToUse.getTime() - this.startDate.getTime();
+      
+      if (dateDifference > twoWeeksInMs) {
+        this.dialogHelper.openErrorDialog("O período selecionado não pode ser maior que 2 semanas");
+        return;
+      }
+    }
+
 
     for (let sensor of Object.values(this.selectedSensors)) {
       selectedPanels.push({

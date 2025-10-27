@@ -12,6 +12,7 @@ import { FormsModule } from '@angular/forms';
 import { SensorModule } from '../../models/sensor-module';
 import { GroupInfo } from '../../services/ui-panels.service';
 import { IoButtonComponent } from '../io-button/io-button.component';
+import { DialogHelper } from '../../services/dialog-helper.service';
 
 export const MY_DATE_FORMATS = {
   parse: {
@@ -59,7 +60,7 @@ export class GraphRequestWindowComponent implements OnInit {
 
   option: string = ""
 
-  constructor(public dialogRef: MatDialogRef<SensorAddWindowComponent>,
+  constructor(public dialogRef: MatDialogRef<SensorAddWindowComponent>, private dialogHelper: DialogHelper,
     @Inject(MAT_DIALOG_DATA) public data: any
   ) {
     this.uiConfig = data.uiConfig
@@ -143,8 +144,7 @@ export class GraphRequestWindowComponent implements OnInit {
 
   validForm() {
     return this.selectedGroup != null && this.option != "" &&
-      ((this.startDate == null && this.endDate == null) ||
-        (this.startDate != null && this.endDate == null) ||
+      ((this.startDate != null && this.endDate == null) ||
         (this.startDate != null && this.endDate != null && this.startDate?.getTime() < this.endDate.getTime()))
   }
 
@@ -154,6 +154,19 @@ export class GraphRequestWindowComponent implements OnInit {
 
   onAddCLick() {
     let selectedPanels = []
+
+    // Check if date range is greater than 2 weeks
+    if (this.startDate != null) {
+      const twoWeeksInMs = 14 * 24 * 60 * 60 * 1000; // 14 days in milliseconds
+      const endDateToUse = this.endDate || new Date(); // Use current date if endDate is null
+      const dateDifference = endDateToUse.getTime() - this.startDate.getTime();
+      
+      if (dateDifference > twoWeeksInMs) {
+        this.dialogHelper.openErrorDialog("O período selecionado não pode ser maior que 2 semanas");
+        return;
+      }
+    }
+
     if (this.selectedSensors.length == 0) {
       this.selectedSensors = this.getAvailableSensors()
     }
