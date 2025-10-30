@@ -2,6 +2,7 @@ import json
 import threading
 import queue
 import os
+import time
 from typing import Any
 import paho.mqtt.client as mqtt
 
@@ -34,6 +35,7 @@ class TitaniumMqtt:
         self._subscribe_topic_list = SUBSCRIBE_TOPIC_LIST
         self._publish_topics_list = PUBLISH_TOPIC_LIST
 
+        self._reconnect_delay = 1
         self._end_thread = False
 
         self._gateways = {}
@@ -98,9 +100,32 @@ class TitaniumMqtt:
             f"MqqtServer: Connected on {MQTT_SERVER} with result code {rc}")
         client.subscribe(userdata["subscribe_topics"])
 
+    def on_disconnect(self, client, userdata, rc):
+        if rc != 0:
+            self._logger.warning(
+                "MqttServer: Unexpected disconnection. Trying to reconnect...")
+            self.try_reconnect()
+
     def on_message(self, _c, _u, msg):
         self._logger.debug(f"Received message: {msg.topic} {msg.payload}")
         self._read_queue.put(msg)
+
+    def try_reconnect(self):
+        """Attempt to reconnect with exponential backoff"""
+        while not self._end_thread and not self._client.is_connected():
+            try:
+                self._logger.info(
+                    f"Reconnecting to MQTT in {self._reconnect_delay}s...")
+                time.sleep(self._reconnect_delay)
+                self._client.reconnect()
+                self._logger.info("MqttServer: Reconnected successfully.")
+                self._reconnect_delay = 1  # reset delay on success
+                break
+            except Exception as e:
+                self._logger.error(f"Reconnect failed: {e}")
+                self._reconnect_delay = min(
+                    self._reconnect_delay * 2, 60)  # max 1 min
+                continue
 
     def run(self):
         self._client = mqtt.Client()
@@ -111,6 +136,7 @@ class TitaniumMqtt:
         self._client.user_data_set(user_data)
 
         self._client.on_connect = self.on_connect
+        self._client.on_disconnect = self.on_disconnect
         self._client.on_message = self.on_message
         try:
             self._client.connect(MQTT_SERVER, MQTT_PORT, 60)
@@ -118,6 +144,8 @@ class TitaniumMqtt:
             self._client.loop_start()
         except Exception as e:
             self._logger.error(f"Error Connecting to Mqtt: {e}")
+            # Start background reconnection attempts
+            threading.Thread(target=self.try_reconnect, daemon=True).start()
 
     def execute(self, command: Any):
         topic = self.get_topic_from_command(command.name)
