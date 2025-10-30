@@ -133,13 +133,13 @@ def test_create_excel_report_fast_power(report_generator: ReportGenerator):
     output_dir = os.path.join(os.path.dirname(__file__), "reports")
 
     file_path = report_generator.create_excel_report_fast({"topic1": [
-        {"timestamp": "2024-01-01T10:00:00", "value": 100},
-        {"timestamp": "2024-01-01T10:01:00", "value": 101},
-        {"timestamp": "2024-01-01T10:02:00", "value": 102},
+        {"timestamp": "2023-01-01T10:00:00", "value": 100},
+        {"timestamp": "2023-01-01T10:01:00", "value": 101},
+        {"timestamp": "2023-01-01T10:02:00", "value": 102},
     ], "topic2": [
-        {"timestamp": "2024-01-01T10:00:00", "value": 100},
-        {"timestamp": "2024-01-01T10:01:00", "value": 101},
-        {"timestamp": "2024-01-01T10:02:00", "value": 102},
+        {"timestamp": "2023-01-01T10:00:00", "value": 100},
+        {"timestamp": "2023-01-01T10:01:00", "value": 101},
+        {"timestamp": "2023-01-01T10:02:00", "value": 102},
     ], "topic3": [
         {"timestamp": "2024-01-01T10:00:00", "value": 100},
         {"timestamp": "2024-01-01T10:01:00", "value": 101},
@@ -157,7 +157,6 @@ def test_create_excel_report_fast_power(report_generator: ReportGenerator):
         {"timestamp": "2024-01-01T10:01:00", "value": 101},
         {"timestamp": "2024-01-01T10:02:00", "value": 102},
     ]}, output_dir=output_dir)
-
     try:
         assert os.path.exists(file_path)
         assert os.path.getsize(file_path) > 0

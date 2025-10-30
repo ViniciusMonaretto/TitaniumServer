@@ -97,30 +97,38 @@ class ReportGenerator(ServiceInterface):
             output_dir = tempfile.mkdtemp()
 
         # -------------------------------
-        # 1. Collect unique timestamps as strings and sort
+        # 1. Collect unique timestamps as strings and sort (excluding electrical-only timestamps)
         # -------------------------------
+        electrical_types = ["Power", "Current", "Tension", "PowerFactor"]
+
         timestamps = sorted({
             entry["timestamp"]
-            for entries in sensor_data.values()
+            for topic, entries in sensor_data.items()
             for entry in entries
+            if topic_to_type.get(topic) not in electrical_types
         })
 
         # -------------------------------
-        # 2. Determine topics in order
+        # 2. Determine topics in order (excluding electrical types)
         # -------------------------------
-        topics_in_order = [t for t in sensor_data.keys() if t in topic_to_name]
+        topics_in_order = [
+            t for t in sensor_data.keys()
+            if t in topic_to_name and topic_to_type.get(t) not in electrical_types
+        ]
 
         # -------------------------------
         # 3. Pre-format timestamps (ISO 8601 -> readable)
         # -------------------------------
-        formatted_ts_map = {}
-        for ts in timestamps:
+        def format_timestamp(ts):
             try:
                 ts_str = ts.replace('Z', '+00:00')
                 dt = datetime.fromisoformat(ts_str)
-                formatted_ts_map[ts] = dt.strftime("%d/%m/%Y %H:%M:%S")
+                return dt.strftime("%d/%m/%Y %H:%M:%S")
             except Exception:
-                formatted_ts_map[ts] = ts
+                return ts
+
+        # Format timestamps for main sheet (non-electrical)
+        formatted_ts_map = {ts: format_timestamp(ts) for ts in timestamps}
 
         # -------------------------------
         # 4. Build lookup dict for fast access
@@ -177,16 +185,25 @@ class ReportGenerator(ServiceInterface):
         # --- Power Summary Sheet ---
         ws_power = wb.create_sheet("Resumo de Energia")
 
-        # Identify electrical sensors
-        electrical_types = ["Power", "Current", "Tension", "PowerFactor"]
+        # Identify electrical sensors (from all available topics, not just topics_in_order)
         electrical_topics = [
-            t for t in topics_in_order if topic_to_type.get(t) in electrical_types]
+            t for t in sensor_data.keys()
+            if t in topic_to_name and topic_to_type.get(t) in electrical_types
+        ]
         electrical_names = [topic_to_name.get(t, t) for t in electrical_topics]
 
         # Only create Power Summary sheet if there is at least one electrical sensor
         if electrical_topics:
-            electrical_names = [topic_to_name.get(
-                t, t) for t in electrical_topics]
+            # Filter timestamps to only include those with electrical sensor data
+            electrical_timestamps = sorted({
+                entry["timestamp"]
+                for topic in electrical_topics
+                for entry in sensor_data[topic]
+            })
+
+            # Format timestamps for electrical sheet
+            electrical_formatted_ts_map = {
+                ts: format_timestamp(ts) for ts in electrical_timestamps}
 
             # Compute statistics
             total_power = 0.0
@@ -221,8 +238,8 @@ class ReportGenerator(ServiceInterface):
                 ws_power, ["Timestamp"] + electrical_names, center=True))
 
             # Write electrical data (no style)
-            for ts in timestamps:
-                row = [formatted_ts_map[ts]]
+            for ts in electrical_timestamps:
+                row = [electrical_formatted_ts_map[ts]]
                 for topic in electrical_topics:
                     row.append(sensor_lookup[topic].get(ts, 0))
                 ws_power.append(row)
