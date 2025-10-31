@@ -214,9 +214,12 @@ class AlarmManager(ServiceInterface):
                 (obj for obj in self._alarms_info[topic] if obj.id == alarm_id), None)
             if alarm:
                 self._alarms_info[topic].remove(alarm)
-                self._alarm_check_topics[topic].remove(alarm)
-                if len(self._alarm_check_topics[topic]) == 0:
-                    del self._alarm_check_topics[topic]
+                # Use alarm.topic (not gateway topic) for _alarm_check_topics
+                alarm_topic = alarm.topic
+                if alarm_topic in self._alarm_check_topics:
+                    self._alarm_check_topics[alarm_topic].remove(alarm)
+                    if len(self._alarm_check_topics[alarm_topic]) == 0:
+                        del self._alarm_check_topics[alarm_topic]
                 if len(self._alarms_info[topic]) == 0:
                     self._middleware.remove_subscribe_from_status(
                         self._status_subscribers[topic], topic)
