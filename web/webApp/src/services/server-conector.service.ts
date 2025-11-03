@@ -30,7 +30,7 @@ export class ServerConectorService {
     private dialogHelper: DialogHelper,
     @Inject(WS_URL_TOKEN) wsUrl: string = 'ws://localhost:8888/websocket'
   ) {
-    this.wsUrl = wsUrl;
+    this.wsUrl = 'ws://localhost:8888/websocket';
     this.socket = null
     setTimeout(() => {
       this.connectToServer();

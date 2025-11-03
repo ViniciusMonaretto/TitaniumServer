@@ -7,9 +7,126 @@ import zoomPlugin from 'chartjs-plugin-zoom';
 import annotationPlugin from 'chartjs-plugin-annotation';
 import { BaseChartDirective } from 'ng2-charts';
 import 'chartjs-adapter-date-fns';
+import { format } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
 
 // Register the annotation plugin
 Chart.register(annotationPlugin);
+
+const multilineLabelsPlugin = {
+  id: 'multilineLabels',
+  afterDraw(chart: Chart) {
+    const ctx = chart.ctx;
+    const xScale = (chart as any).scales?.['x'] as any;
+
+    if (!xScale) {
+      console.warn('xScale não encontrado');
+      return;
+    }
+
+    const ticks = xScale.ticks || (xScale as any)._ticksToDraw || [];
+
+    if (!ticks || ticks.length === 0) {
+      console.warn('Nenhum tick encontrado no eixo X');
+      return;
+    }
+
+    ctx.save();
+
+    const ticksOptions = (xScale.options as any)?.ticks || {};
+    const fontConfig = ticksOptions?.font || {};
+    const fontSize = (typeof fontConfig === 'object' && fontConfig?.size ? fontConfig.size : 12) || 12;
+    const fontFamily = (typeof fontConfig === 'object' && fontConfig?.family ? fontConfig.family : 'sans-serif') || 'sans-serif';
+    const fontStyle = (typeof fontConfig === 'object' && fontConfig?.style ? fontConfig.style : 'normal') || 'normal';
+    const fontWeight = (typeof fontConfig === 'object' && fontConfig?.weight ? fontConfig.weight : 'normal') || 'normal';
+
+    ctx.font = `${fontStyle} ${fontWeight} ${fontSize}px ${fontFamily}`;
+    ctx.fillStyle = '#666';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'top';
+
+    const tickData: Array<{ value: number, pixel: number, timeStr: string, dateStr: string }> = [];
+
+    ticks.forEach((tick: any) => {
+      const tickValue = tick.value !== undefined ? tick.value : tick;
+
+      let numericValue: number;
+      if (typeof tickValue === 'number') {
+        numericValue = tickValue;
+      } else if (tickValue && typeof tickValue === 'object' && typeof tickValue.value === 'number') {
+        numericValue = tickValue.value;
+      } else {
+        return;
+      }
+
+      if (!isNaN(numericValue)) {
+        try {
+          const date = new Date(numericValue);
+          if (!isNaN(date.getTime())) {
+            const timeStr = format(date, 'HH:mm:ss', { locale: ptBR });
+            const dateStr = format(date, 'dd/MM/yyyy', { locale: ptBR });
+            const pixel = xScale.getPixelForValue(numericValue);
+
+            tickData.push({ value: numericValue, pixel, timeStr, dateStr });
+          }
+        } catch (e) {
+          console.warn('Erro ao formatar data do tick:', e, tickValue);
+        }
+      }
+    });
+
+    const minLabelWidth = 90;
+    const minDistance = minLabelWidth + 10;
+
+    const filteredTicks: Array<{ value: number, pixel: number, timeStr: string, dateStr: string }> = [];
+    let lastPixel = -Infinity;
+
+    for (const tick of tickData) {
+      // Se há espaço suficiente desde o último label desenhado, adicionar este
+      if (tick.pixel - lastPixel >= minDistance || filteredTicks.length === 0) {
+        filteredTicks.push(tick);
+        lastPixel = tick.pixel;
+      }
+    }
+
+    if (tickData.length > 0) {
+      const firstTick = tickData[0];
+      const lastTick = tickData[tickData.length - 1];
+
+      if (filteredTicks.length === 0 || filteredTicks[0].value !== firstTick.value) {
+        filteredTicks.unshift(firstTick);
+      }
+
+      if (filteredTicks[filteredTicks.length - 1].value !== lastTick.value) {
+        filteredTicks.push(lastTick);
+      }
+
+      const uniqueTicks = [];
+      const seen = new Set();
+      for (const tick of filteredTicks) {
+        if (!seen.has(tick.value)) {
+          seen.add(tick.value);
+          uniqueTicks.push(tick);
+        }
+      }
+      filteredTicks.length = 0;
+      filteredTicks.push(...uniqueTicks);
+    }
+
+    const padding = (typeof ticksOptions?.padding === 'number' ? ticksOptions.padding : 25) || 25;
+    const yPos = chart.chartArea.bottom + padding;
+    const lineHeight = fontSize + 2;
+
+    filteredTicks.forEach((tick) => {
+      ctx.fillText(tick.timeStr, tick.pixel, yPos);
+      ctx.fillText(tick.dateStr, tick.pixel, yPos + lineHeight);
+    });
+
+    ctx.restore();
+  }
+};
+
+Chart.register(multilineLabelsPlugin);
 
 export enum DrawingMode {
   None = 0,
@@ -131,6 +248,12 @@ export class GraphComponent {
         },
         ticks: {
           source: 'auto',
+          color: 'transparent', // Esconder labels padrão (tornar transparentes)
+          // O plugin customizado vai desenhar os labels em duas linhas
+          maxRotation: 0,
+          minRotation: 0,
+          padding: 25, // Aumentar padding para acomodar duas linhas
+          maxTicksLimit: 15, // Limitar número máximo de ticks para evitar sobreposição
         },
         title: {
           display: true,

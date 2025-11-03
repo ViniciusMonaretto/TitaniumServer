@@ -177,7 +177,7 @@ class SensorDataStorage(ServiceInterface):
                 return
 
             if (self._status_subscribers_last_time[sub_status_name] is not None and
-                    current_time - self._status_subscribers_last_time[sub_status_name] < timedelta(minutes=1)):
+                    current_time - self._status_subscribers_last_time[sub_status_name] < timedelta(seconds=56)):
                 return
             self._status_subscribers_last_time[sub_status_name] = status_info.timestamp
 
