@@ -226,7 +226,7 @@ class ReportGenerator(ServiceInterface):
             ws_power.append(styled_row(
                 ws_power, ["Grupo:", "", "", "", ""]))
             ws_power.append(styled_row(
-                ws_power, ["Consumo Total de Energia:", f"{total_power:.2f} W", "", "", ""]))
+                ws_power, ["Consumo Total de Energia:", f"{total_power/1000:.2f} kW", "", "", ""]))
             ws_power.append(styled_row(
                 ws_power, ["Fator de Potência Médio:", f"{avg_pf:.3f}", "", "", ""]))
             ws_power.append(styled_row(
@@ -241,7 +241,14 @@ class ReportGenerator(ServiceInterface):
             for ts in electrical_timestamps:
                 row = [electrical_formatted_ts_map[ts]]
                 for topic in electrical_topics:
-                    row.append(sensor_lookup[topic].get(ts, 0))
+                    value = sensor_lookup[topic].get(ts, 0)
+                    # Convert Power values from W to kW
+                    if topic_to_type.get(topic) == "Power" and value:
+                        try:
+                            value = float(value) / 1000
+                        except (ValueError, TypeError):
+                            pass
+                    row.append(value)
                 ws_power.append(row)
 
         # --- Save file ---
