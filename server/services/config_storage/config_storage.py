@@ -75,6 +75,21 @@ class ConfigStorage(ServiceInterface):
             );
             """)
 
+            # Create trigger to enforce 300 row limit on Alarms table
+            cursor.execute("""
+            CREATE TRIGGER IF NOT EXISTS limit_alarms_rows
+            AFTER INSERT ON Alarms
+            WHEN (SELECT COUNT(*) FROM Alarms) > 100
+            BEGIN
+                DELETE FROM Alarms
+                WHERE id IN (
+                    SELECT id FROM Alarms
+                    ORDER BY id ASC
+                    LIMIT (SELECT COUNT(*) - 100 FROM Alarms)
+                );
+            END;
+            """)
+
             cursor.execute("""
             CREATE TABLE IF NOT EXISTS Events (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,

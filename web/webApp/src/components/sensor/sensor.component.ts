@@ -119,11 +119,11 @@ export class SensorComponent implements OnInit {
       return 'none';
     }
 
-    if (maxValue === 0 && value > maxValue) {
+    if (maxValue !== null && maxValue !== undefined && value > maxValue) {
       return 'rgb(242 156 156)'
     }
 
-    if (minValue === 0 && value < minValue) {
+    if (minValue !== null && minValue !== undefined && value < minValue) {
       return 'rgb(196 214 243)'
     }
 

@@ -29,14 +29,19 @@ export class EventAlarmManagerService {
     {
         if (replaceInfo)
         {
-            this.events = events
+            this.events = events.slice(0, 100)
         }
         else
         {
             for(var evt of events)
             {
                 this.events.push(evt)
-            }  
+            }
+            // Keep only the most recent 100 events
+            if (this.events.length > 100)
+            {
+                this.events = this.events.slice(-100)
+            }
         }
     }
 }
