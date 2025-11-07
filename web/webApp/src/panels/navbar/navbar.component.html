@@ -13,10 +13,10 @@
         <side-nav-option *ngFor="let group of getGroupSensorUi()" [isSuboption]="true"
             [icon]="'assets/icon/homeIcon.svg'" [iconSelected]="'assets/icon/homeSelectedIcon.svg'"
             [componentText]="group.name" (buttonCallback)="setSensor(group.id.toString())"
-            [canEdit]="CanEdit()" (deleteCallback)="deleteGroup(group.id)"
+            [canEdit]="false" (deleteCallback)="deleteGroup(group.id)"
             [isSelected]="isPanelSelected(panelOptions.SENSORS) && checkIfGroupIsSelected(group.id.toString())">
         </side-nav-option>
-        <side-nav-option *ngIf="CanEdit()" [isSuboption]="true"
+        <side-nav-option *ngIf="false" [isSuboption]="true"
             [icon]="'assets/icon/plusIcon.svg'" [componentText]="'Novo'" (buttonCallback)="addNewGroup()">
         </side-nav-option>
     </side-nav-option>

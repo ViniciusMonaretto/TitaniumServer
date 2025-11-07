@@ -75,21 +75,6 @@ class ConfigStorage(ServiceInterface):
             );
             """)
 
-            # Create trigger to enforce 300 row limit on Alarms table
-            cursor.execute("""
-            CREATE TRIGGER IF NOT EXISTS limit_alarms_rows
-            AFTER INSERT ON Alarms
-            WHEN (SELECT COUNT(*) FROM Alarms) > 100
-            BEGIN
-                DELETE FROM Alarms
-                WHERE id IN (
-                    SELECT id FROM Alarms
-                    ORDER BY id ASC
-                    LIMIT (SELECT COUNT(*) - 100 FROM Alarms)
-                );
-            END;
-            """)
-
             cursor.execute("""
             CREATE TABLE IF NOT EXISTS Events (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -99,6 +84,24 @@ class ConfigStorage(ServiceInterface):
                 timestamp REAL NOT NULL,
                 FOREIGN KEY (alarmId) REFERENCES Alarms (id) ON DELETE CASCADE
             );
+            """)
+
+            # Drop trigger if it exists (to allow updates)
+            cursor.execute("DROP TRIGGER IF EXISTS limit_events_rows;")
+
+            # Create trigger to enforce 100 row limit on Events table
+            # This keeps only the 100 newest rows (highest IDs) and deletes the rest
+            cursor.execute("""
+            CREATE TRIGGER limit_events_rows
+            AFTER INSERT ON Events
+            BEGIN
+                DELETE FROM Events
+                WHERE id NOT IN (
+                    SELECT id FROM Events
+                    ORDER BY id DESC
+                    LIMIT 100
+                );
+            END;
             """)
 
             conn.commit()
