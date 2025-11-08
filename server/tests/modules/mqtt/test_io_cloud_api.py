@@ -126,7 +126,10 @@ def test_read_sensor_report_message_reads_valid_data(translator):
     message_json = {"timestamp": 1000000000,
                     "sensors": [{"value": 10, "active": True}]}
 
-    with patch.object(translator, "_create_reading", return_value="mockReading"), \
+    mock_reading = MagicMock()
+    mock_reading.full_topic = "topic/temperature/0"
+
+    with patch.object(translator, "_create_reading", return_value=mock_reading), \
         patch("modules.titanium_mqtt.translators.io_cloud_api.MqttHelper.get_topic_from_mosquitto_obj_report",
               return_value="topic/test"):
         result = translator._read_sensor_report_message("gw1", message_json)
@@ -136,7 +139,7 @@ def test_read_sensor_report_message_reads_valid_data(translator):
         assert hasattr(result, 'full_topic')
         assert result.full_topic == "topic/test"
         assert len(result.readings) == 1
-        assert result.readings[0] == "mockReading"
+        assert result.readings[0] == mock_reading
 
 
 def test_translate_incoming_message_report(monkeypatch, translator):

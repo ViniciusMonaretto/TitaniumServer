@@ -112,6 +112,7 @@ class IoCloudApiTranslator(PayloadTranslator):
         )
 
         reading.value = reading_json["value"]
+        reading.value = reading_json["value"]
         reading.timestamp = timestamp
         reading.is_active = reading_json["active"]
         return reading
@@ -137,12 +138,23 @@ class IoCloudApiTranslator(PayloadTranslator):
         gateway_reading.full_topic = MqttHelper.get_topic_from_mosquitto_obj_report(
             gateway, "status", "*"
         )
+        power_factor_reading = None
+        current_reading = None
         for raw_reading in message_json["sensors"]:
             reading = self._create_reading(
                 gateway, timestamp, raw_reading, index_obj)
-            if reading:
-                gateway_reading.readings.append(reading)
+            if reading is None:
+                continue
 
+            if ("powerFactor" in reading.full_topic):
+                power_factor_reading = reading
+            elif ("current" in reading.full_topic):
+                current_reading = reading
+
+            gateway_reading.readings.append(reading)
+
+        if (power_factor_reading is not None and current_reading is not None and current_reading.value < 0.1):
+            power_factor_reading.value = 1
         return gateway_reading
 
     def _read_calibration_update_message(self, gateway: str, message_json: Any):
@@ -224,7 +236,6 @@ class IoCloudApiTranslator(PayloadTranslator):
                         msg_split[2], message_json
                     )
 
-                
             elif message_json["command_index"] == 2:
                 if not len(msg_split) == 4:
                     self.logger.error(
