@@ -33,7 +33,30 @@ debian-package/
 
 ## Como Instalar o Pacote
 
+### Instalação Normal
+
 ```bash
+sudo dpkg -i titanium-server_1.0.0_amd64.deb
+```
+
+### Problema: PATH não contém diretórios do sistema
+
+Se você receber erros como:
+```
+dpkg: aviso: 'ldconfig' não encontrado no PATH ou não é executável
+dpkg: aviso: 'start-stop-daemon' não encontrado no PATH ou não é executável
+```
+
+**Solução:** Execute o dpkg com PATH completo:
+
+```bash
+sudo env PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin" dpkg -i titanium-server_1.0.0_amd64.deb
+```
+
+Ou configure o PATH antes de instalar:
+
+```bash
+export PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:$PATH"
 sudo dpkg -i titanium-server_1.0.0_amd64.deb
 ```
 
