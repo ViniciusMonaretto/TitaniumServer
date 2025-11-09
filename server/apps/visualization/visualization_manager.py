@@ -89,6 +89,7 @@ class VisualizationWebSocketHandler(tornado.websocket.WebSocketHandler):
 
 
 ################# Websocket functions #############################
+
     def open(self, *args, **kwargs):
         self._logger.debug("WebSocket opened")
         self._is_init = True
@@ -157,7 +158,6 @@ class VisualizationWebSocketHandler(tornado.websocket.WebSocketHandler):
             self._middleware.remove_subscribe_from_status(
                 self._status_subscribers[subscriber_topic], subscriber_topic)
 
-
     def send_error_message(self, message: str):
         self.send_message_to_ui("error", message)
 
@@ -222,7 +222,10 @@ class VisualizationWebSocketHandler(tornado.websocket.WebSocketHandler):
             data['endDate'] = request["endDate"]
 
         self._middleware.send_command(
-            SensorDataStorageCommands.READ_SENSOR_INFO, data, self.send_status_history)
+            SensorDataStorageCommands.READ_SENSOR_INFO,
+            data,
+            self.send_status_history,
+            self.send_error_message)
 
     def send_status_history(self, data):
         self._logger.info("Visualization.send_status_history: graph send")
@@ -239,6 +242,7 @@ class VisualizationWebSocketHandler(tornado.websocket.WebSocketHandler):
 
 
 ################# Panel commands #############################
+
 
     def add_panel_request(self, panel_info):
         self._middleware.send_command(ConfigHandlerCommands.ADD_PANEL, panel_info,
@@ -410,7 +414,6 @@ class VisualizationWebSocketHandler(tornado.websocket.WebSocketHandler):
 
 
 ################# Gateway status commands #############################
-
 
     def send_gateway_status(self, gateway_status: list[GatewayStatus]):
         self.send_message_to_ui("gatewayStatus", gateway_status)

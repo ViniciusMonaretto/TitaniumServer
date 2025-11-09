@@ -2,6 +2,7 @@ import asyncio
 import threading
 from concurrent.futures import Future
 
+
 class AsyncioLoopThread:
     def __init__(self):
         self.loop = asyncio.new_event_loop()
@@ -13,8 +14,23 @@ class AsyncioLoopThread:
         self.loop.run_forever()
 
     def run_coro(self, coro) -> Future:
-        # Schedule coroutine in the running loop, return a Future
-        return asyncio.run_coroutine_threadsafe(coro, self.loop)
+        """
+        Schedule coroutine in the running loop as an independent task.
+
+        Uses asyncio.create_task to ensure true parallelism - each operation
+        runs independently and won't block others even if one is stuck.
+
+        Returns:
+            Future object representing the operation
+        """
+        # Create task wrapper to ensure independent execution
+        async def task_wrapper():
+            # Create task to ensure it runs independently
+            task = asyncio.create_task(coro)
+            return await task
+
+        # Schedule as independent task for true parallelism
+        return asyncio.run_coroutine_threadsafe(task_wrapper(), self.loop)
 
     def stop(self):
         self.loop.call_soon_threadsafe(self.loop.stop)

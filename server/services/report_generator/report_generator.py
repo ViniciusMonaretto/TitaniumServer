@@ -1,4 +1,5 @@
 import tempfile
+import threading
 
 from openpyxl.cell import WriteOnlyCell
 from services.sensor_data_storage.sensor_data_storage import SensorDataStorage
@@ -51,26 +52,20 @@ class ReportGenerator(ServiceInterface):
     def _handle_sensor_data_for_excel(self, result, data_out):
         """
         Callback to handle sensor data and create Excel report.
+
+        This callback is executed in the async event loop, so we offload
+        the heavy Excel processing to a separate thread to avoid blocking
+        other MongoDB operations.
         """
         if result and data_out and 'info' in data_out:
-            try:
-                excel_file_path = self.create_excel_report_fast(
-                    data_out['info'])
-                self._logger.info(
-                    f"Excel report created successfully: {excel_file_path}")
-                self._middleware.send_command_answear(
-                    True,
-                    {"status": "success", "file_path": excel_file_path,
-                        "report": data_out['info']},
-                    data_out["commandId"]
-                )
-            except Exception as e:
-                self._logger.error(f"Failed to create Excel report: {e}")
-                self._middleware.send_command_answear(
-                    False,
-                    {"status": "error", "message": f"Erro ao criar Relatório excel: {e}"},
-                    data_out["commandId"]
-                )
+            # Execute Excel generation in a separate thread to avoid blocking
+            # the async event loop and other read_sensor_info operations
+            thread = threading.Thread(
+                target=self._create_excel_in_thread,
+                args=(data_out['info'], data_out["commandId"]),
+                daemon=True
+            )
+            thread.start()
         else:
             self._logger.error("Failed to generate report - no data received")
             self._middleware.send_command_answear(
@@ -78,6 +73,31 @@ class ReportGenerator(ServiceInterface):
                 {"status": "error",
                     "message": "Failed to generate report - no data received"},
                 data_out["commandId"]
+            )
+
+    def _create_excel_in_thread(self, sensor_data: Dict, command_id: str):
+        """
+        Execute Excel report creation in a separate thread.
+
+        This method runs in a background thread, so it won't block
+        the async event loop or other MongoDB operations.
+        """
+        try:
+            excel_file_path = self.create_excel_report_fast(sensor_data)
+            self._logger.info(
+                f"Excel report created successfully: {excel_file_path}")
+            self._middleware.send_command_answear(
+                True,
+                {"status": "success", "file_path": excel_file_path,
+                    "report": sensor_data},
+                command_id
+            )
+        except Exception as e:
+            self._logger.error(f"Failed to create Excel report: {e}")
+            self._middleware.send_command_answear(
+                False,
+                {"status": "error", "message": f"Erro ao criar Relatório excel: {e}"},
+                command_id
             )
 
     def create_excel_report_fast(self, sensor_data, output_dir: str = None):
@@ -91,6 +111,12 @@ class ReportGenerator(ServiceInterface):
 
         if not sensor_data:
             raise Exception("Não há dados para criar Relatório excel")
+
+        full_lines = sum(len(data) for data in sensor_data.values())
+
+        if full_lines > 1600000:
+            raise Exception(
+                "Número de dados é muito grande para criar Relatório excel")
 
         # Use temporary directory if none provided
         if output_dir is None:

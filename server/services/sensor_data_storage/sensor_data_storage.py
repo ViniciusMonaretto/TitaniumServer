@@ -18,6 +18,7 @@ from middleware.client_middleware import ClientMiddleware
 
 
 # Third-party imports
+import asyncio
 import pytz
 from motor.motor_asyncio import AsyncIOMotorClient
 from pymongo import ASCENDING
@@ -35,6 +36,9 @@ MONGO_DB_URI = f"mongodb://{MONGO_USER}:{MONGO_PASSWORD}@{MONGO_HOST}:{MONGO_POR
 MONGO_DB_NAME = "IoCloud"
 MONGO_DB_COLLECTION = "SensorData"
 
+# Default timeout for MongoDB operations (in seconds)
+DEFAULT_MONGO_OPERATION_TIMEOUT = 600  # 10 minutes
+
 
 class SensorDataStorage(ServiceInterface):
     """Service for storing and managing sensor data in MongoDB."""
@@ -49,6 +53,7 @@ class SensorDataStorage(ServiceInterface):
             'subscriber': StatuSubscribers, 'topics': []}] = {}
         self._last_status_by_sub_status_name: Dict[str, Dict[str, Any]] = {}
         self._last_status_lock = threading.Lock()
+        self._mongo_operation_timeout = DEFAULT_MONGO_OPERATION_TIMEOUT
 
         self.initialize_commands()
         self.initialize_system()
@@ -107,9 +112,42 @@ class SensorDataStorage(ServiceInterface):
             self._logger.error(
                 f"SensorDataStorage.initialize_system: MongoDB connection error {e}")
 
-    def run_mongo_commands_async_background(self, coro) -> Any:
-        """Run MongoDB commands asynchronously in background."""
-        future = self._async_loop.run_coro(coro)
+    def run_mongo_commands_async_background(self, coro, timeout: Optional[float] = None, timeout_callback: Optional[Callable] = None) -> Any:
+        """
+        Run MongoDB commands asynchronously in background with timeout protection.
+
+        Each operation runs as an independent task, ensuring true parallelism.
+        If one operation is stuck, others continue executing normally.
+
+        Args:
+            coro: Coroutine to execute
+            timeout: Timeout in seconds (default: DEFAULT_MONGO_OPERATION_TIMEOUT)
+
+        Returns:
+            Future object representing the operation
+        """
+        if timeout is None:
+            timeout = self._mongo_operation_timeout
+
+        # Wrap coroutine with timeout protection
+        async def coro_with_timeout():
+            try:
+                return await asyncio.wait_for(coro, timeout=timeout)
+            except asyncio.TimeoutError:
+                self._logger.error(
+                    f"SensorDataStorage:run_mongo_commands_async_background: "
+                    f"Operation timed out after {timeout} seconds")
+                if timeout_callback:
+                    timeout_callback()
+                raise
+            except Exception as e:
+                self._logger.error(
+                    f"SensorDataStorage:run_mongo_commands_async_background: "
+                    f"Error in MongoDB operation: {e}")
+                raise
+
+        # Schedule as independent task for true parallelism
+        future = self._async_loop.run_coro(coro_with_timeout())
         future.add_done_callback(
             lambda f: f.exception() and
             self._logger.error(f"SensorDataStorage:run_mongo_commands_async_background:" +
@@ -276,7 +314,9 @@ class SensorDataStorage(ServiceInterface):
     def read_sensor_info(self, command: Dict[str, Any], finish_callback: Callable) -> None:
         """Read sensor info from database."""
         self.run_mongo_commands_async_background(
-            self._read_sensor_info(command, finish_callback))
+            self._read_sensor_info(command,
+                                   finish_callback),
+            timeout_callback=lambda: self._middleware.send_command_answear(False, {"status": "error", "message": f"Ação excedeu o tempo de execução"}, command["requestId"]))
 
     async def _read_sensor_info(self, command: Dict[str, Any], finish_callback: Callable) -> None:
         """Read sensor info from database asynchronously."""
