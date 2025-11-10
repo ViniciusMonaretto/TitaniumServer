@@ -140,6 +140,7 @@ class IoCloudApiTranslator(PayloadTranslator):
         )
         power_factor_reading = None
         current_reading = None
+        tension_reading = None
         for raw_reading in message_json["sensors"]:
             reading = self._create_reading(
                 gateway, timestamp, raw_reading, index_obj)
@@ -150,11 +151,16 @@ class IoCloudApiTranslator(PayloadTranslator):
                 power_factor_reading = reading
             elif ("current" in reading.full_topic):
                 current_reading = reading
+            elif ("tension" in reading.full_topic):
+                tension_reading = reading
 
             gateway_reading.readings.append(reading)
 
-        if (power_factor_reading is not None and current_reading is not None and current_reading.value < 0.1):
-            power_factor_reading.value = 1
+        if (power_factor_reading is not None and
+            current_reading is not None and
+            current_reading.value < 0.1 and
+                tension_reading.value != 0):
+            power_factor_reading.value = 100
         return gateway_reading
 
     def _read_calibration_update_message(self, gateway: str, message_json: Any):
