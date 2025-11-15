@@ -28,18 +28,10 @@ def mock_middleware():
 
 
 @pytest.fixture
-def mock_config_handler():
-    """Create a mock config handler for testing."""
-    config_handler = MagicMock()
-    config_handler.update_calibration_from_gateway_status = MagicMock()
-    return config_handler
-
-
-@pytest.fixture
-def gateway_manager(mock_middleware, mock_config_handler):
+def gateway_manager(mock_middleware):
     """Create a GatewayManager instance for testing."""
     with patch('services.gateway_manager.gateway_manager.Logger'):
-        return GatewayManager(mock_middleware, mock_config_handler)
+        return GatewayManager(mock_middleware)
 
 
 @pytest.fixture
@@ -67,32 +59,21 @@ def sample_mqtt_system_model():
 class TestGatewayManagerInitialization:
     """Test GatewayManager initialization and setup."""
 
-    def test_initialization(self, mock_middleware, mock_config_handler):
+    def test_initialization(self, mock_middleware):
         """Test that GatewayManager initializes correctly."""
         with patch('services.gateway_manager.gateway_manager.Logger'):
-            manager = GatewayManager(mock_middleware, mock_config_handler)
+            manager = GatewayManager(mock_middleware)
 
             assert manager._middleware == mock_middleware
-            assert manager._config_handler == mock_config_handler
             assert isinstance(manager._gateways, dict)
             assert len(manager._gateways) == 0
             assert isinstance(manager._shutdown_event, threading.Event)
             assert not manager._shutdown_event.is_set()
 
-    def test_weakref_setup(self, mock_middleware, mock_config_handler):
-        """Test that weak references are set up correctly."""
-        with patch('services.gateway_manager.gateway_manager.Logger'):
-            manager = GatewayManager(mock_middleware, mock_config_handler)
-
-            assert isinstance(manager._middleware_ref, weakref.ref)
-            assert isinstance(manager._config_handler_ref, weakref.ref)
-            assert manager._middleware_ref() == mock_middleware
-            assert manager._config_handler_ref() == mock_config_handler
-
-    def test_commands_initialization(self, mock_middleware, mock_config_handler):
+    def test_commands_initialization(self, mock_middleware):
         """Test that commands are registered with middleware."""
         with patch('services.gateway_manager.gateway_manager.Logger'):
-            manager = GatewayManager(mock_middleware, mock_config_handler)
+            manager = GatewayManager(mock_middleware)
 
             expected_commands = {
                 GatewayManagerCommands.REQUEST_UPDATE_GATEWAYS: manager.request_update_gateways_command,
@@ -101,26 +82,16 @@ class TestGatewayManagerInitialization:
             mock_middleware.add_commands.assert_called_once_with(
                 expected_commands)
 
-    def test_status_subscriber_setup(self, mock_middleware, mock_config_handler):
+    def test_status_subscriber_setup(self, mock_middleware):
         """Test that status subscriber is set up correctly."""
         with patch('services.gateway_manager.gateway_manager.Logger'):
-            manager = GatewayManager(mock_middleware, mock_config_handler)
+            manager = GatewayManager(mock_middleware)
 
             mock_middleware.add_subscribe_to_status.assert_called_once()
             call_args = mock_middleware.add_subscribe_to_status.call_args
             subscriber, topic_pattern = call_args[0]
             assert isinstance(subscriber, StatuSubscribers)
             assert topic_pattern == "gateway-status-*"
-
-    def test_delayed_thread_start(self, mock_middleware, mock_config_handler):
-        """Test that delayed thread starts correctly."""
-        with patch('services.gateway_manager.gateway_manager.Logger'):
-            manager = GatewayManager(mock_middleware, mock_config_handler)
-
-            assert hasattr(manager, '_delayed_thread')
-            assert isinstance(manager._delayed_thread, threading.Thread)
-            assert manager._delayed_thread.daemon is True
-            assert manager._delayed_thread.name == "GatewayManager-delayed-request"
 
 
 class TestGatewayManagerCommands:
@@ -191,7 +162,7 @@ class TestGatewayManagerCommands:
 class TestGatewayStatusHandling:
     """Test gateway status update handling."""
 
-    def test_update_gateway_status_callback_success(self, gateway_manager, sample_mqtt_system_model, mock_config_handler):
+    def test_update_gateway_status_callback_success(self, gateway_manager, sample_mqtt_system_model):
         """Test successful gateway status update."""
         status_info = {"data": sample_mqtt_system_model}
 
@@ -203,10 +174,6 @@ class TestGatewayStatusHandling:
         assert gateway_status.name == "test-gateway"
         assert gateway_status.ip == "192.168.1.100"
         assert gateway_status.uptime == 3600
-
-        # Should update calibration
-        mock_config_handler.update_calibration_from_gateway_status.assert_called_once_with([
-        ])
 
     def test_update_gateway_status_callback_during_shutdown(self, gateway_manager, sample_mqtt_system_model):
         """Test gateway status update during shutdown."""
@@ -367,10 +334,10 @@ class TestCleanupAndShutdown:
         # Should handle error gracefully and continue
         assert gateway_manager._shutdown_event.is_set()
 
-    def test_destructor(self, mock_middleware, mock_config_handler):
+    def test_destructor(self, mock_middleware):
         """Test destructor calls cleanup."""
         with patch('services.gateway_manager.gateway_manager.Logger'):
-            manager = GatewayManager(mock_middleware, mock_config_handler)
+            manager = GatewayManager(mock_middleware)
 
             # Mock cleanup to verify it's called
             with patch.object(manager, 'cleanup') as mock_cleanup:
@@ -423,37 +390,6 @@ class TestMemoryManagement:
         assert len(gateway_manager._gateways) == 10
 
 
-class TestThreading:
-    """Test threading functionality."""
-
-    def test_delayed_thread_functionality(self, mock_middleware, mock_config_handler):
-        """Test that delayed thread sends system status request."""
-        with patch('services.gateway_manager.gateway_manager.Logger'):
-            manager = GatewayManager(mock_middleware, mock_config_handler)
-
-            # Wait for delayed thread to complete (5 seconds + some buffer)
-            time.sleep(6)
-
-            # Should have sent system status request
-            mock_middleware.send_command.assert_called_with(
-                MqttCommands.SYSTEM_STATUS_REQUEST, {}
-            )
-
-    def test_delayed_thread_shutdown(self, mock_middleware, mock_config_handler):
-        """Test that delayed thread respects shutdown signal."""
-        with patch('services.gateway_manager.gateway_manager.Logger'):
-            manager = GatewayManager(mock_middleware, mock_config_handler)
-
-            # Set shutdown immediately
-            manager._shutdown_event.set()
-
-            # Wait a bit
-            time.sleep(1)
-
-            # Should not send system status request due to shutdown
-            mock_middleware.send_command.assert_not_called()
-
-
 class TestGatewayStatusDataModel:
     """Test GatewayStatus data model."""
 
@@ -488,10 +424,10 @@ class TestGatewayStatusDataModel:
 class TestIntegration:
     """Integration tests for GatewayManager."""
 
-    def test_full_workflow(self, mock_middleware, mock_config_handler, sample_mqtt_system_model):
+    def test_full_workflow(self, mock_middleware, sample_mqtt_system_model):
         """Test complete workflow from status update to status sending."""
         with patch('services.gateway_manager.gateway_manager.Logger'):
-            manager = GatewayManager(mock_middleware, mock_config_handler)
+            manager = GatewayManager(mock_middleware)
 
             # Simulate gateway status update
             status_info = {"data": sample_mqtt_system_model}
@@ -512,10 +448,10 @@ class TestIntegration:
             assert len(data) == 1
             assert data[0]["name"] == "test-gateway"
 
-    def test_error_recovery(self, mock_middleware, mock_config_handler):
+    def test_error_recovery(self, mock_middleware):
         """Test that the manager recovers from errors gracefully."""
         with patch('services.gateway_manager.gateway_manager.Logger'):
-            manager = GatewayManager(mock_middleware, mock_config_handler)
+            manager = GatewayManager(mock_middleware)
 
             # Make middleware methods raise exceptions
             mock_middleware.send_command.side_effect = Exception(

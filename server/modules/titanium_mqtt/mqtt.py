@@ -7,7 +7,7 @@ from typing import Any
 import paho.mqtt.client as mqtt
 
 from modules.titanium_mqtt.translators.io_cloud_api import IoCloudApiTranslator
-from modules.titanium_mqtt.translators.payload_model import MqttPayloadModel
+from modules.titanium_mqtt.translators.payload_model import MqttErrorModel, MqttPayloadModel
 from middleware.client_middleware import ClientMiddleware
 from modules.titanium_mqtt.mqtt_commands import MqttCommands
 from support.logger import Logger
@@ -34,6 +34,7 @@ class TitaniumMqtt:
         self._logger = Logger()
         self._subscribe_topic_list = SUBSCRIBE_TOPIC_LIST
         self._publish_topics_list = PUBLISH_TOPIC_LIST
+        self._last_system_request_time = 0
 
         self._reconnect_delay = 1
         self._end_thread = False
@@ -60,29 +61,28 @@ class TitaniumMqtt:
 
     def calibrate_command(self, command):
         command_data = command["data"]
-        if not self._client or not self._client.is_connected():
-            self._middleware.send_command_answear(
-                False,
-                "calibrate_command: Mqtt not connected",
-                command["requestId"],
-            )
-        topic = f"iocloud/request/{command_data['gateway']}/command"
-        payload = {
-            "command": 1,
-            "params": {
-                "sensor_id": int(command_data["indicator"]),
-                "offset": command_data["offset"],
-                "gain": command_data["gain"]
-            },
-        }
-        self._client.publish(topic, json.dumps(payload))
-        self._middleware.send_command_answear(
-            True, "sucess", command["requestId"])
+        self._translator.update_calibration(command_data)
 
-    def status_request_command(self, command):
-        if not self._client or not self._client.is_connected():
-            self._middleware.send_command_answear(
-                False, "status_request_command: Mqtt not connected", command["requestId"])
+        # if not self._client or not self._client.is_connected():
+        #     self._middleware.send_command_answear(
+        #         False,
+        #         "calibrate_command: Mqtt not connected",
+        #         command["requestId"],
+        #     )
+        # topic = f"iocloud/request/{command_data['gateway']}/command"
+        # payload = {
+        #     "command": 1,
+        #     "params": {
+        #         "sensor_id": int(command_data["indicator"]),
+        #         "offset": command_data["offset"],
+        #         "gain": command_data["gain"]
+        #     },
+        # }
+        # self._client.publish(topic, json.dumps(payload))
+        # self._middleware.send_command_answear(
+        #     True, "sucess", command["requestId"])
+
+    def send_system_request(self):
         topic = "iocloud/request/all/command"
         payload = {
             "command": 2,
@@ -92,6 +92,12 @@ class TitaniumMqtt:
             }
         }
         self._client.publish(topic, json.dumps(payload))
+
+    def status_request_command(self, command):
+        if not self._client or not self._client.is_connected():
+            self._middleware.send_command_answear(
+                False, "status_request_command: Mqtt not connected", command["requestId"])
+        self.send_system_request()
         self._middleware.send_command_answear(
             True, "sucess", command["requestId"])
 
@@ -159,7 +165,11 @@ class TitaniumMqtt:
                     msg.topic, msg.payload
                 )
 
-                if mqtt_message:
+                if isinstance(mqtt_message.data, MqttErrorModel) and mqtt_message.data.full_topic == "gateway-unknown-error":
+                    if time.time() - self._last_system_request_time > 30:  # 1 minute
+                        self.send_system_request()
+                        self._last_system_request_time = time.time()
+                elif mqtt_message:
                     self._middleware.send_status(
                         mqtt_message.data.full_topic, mqtt_message.data)
             except queue.Empty:

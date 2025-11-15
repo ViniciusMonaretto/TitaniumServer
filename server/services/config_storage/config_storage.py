@@ -119,9 +119,9 @@ class ConfigStorage(ServiceInterface):
             cursor = conn.cursor()
 
             cursor.execute('''
-                INSERT INTO Panels (name, gateway, topic, color, panelGroupId, indicator, sensorType, multiplier)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-            ''', (panel.name, panel.gateway, panel.topic, panel.color, panel.group_id, panel.indicator, panel.sensor_type, panel.multiplier))
+                INSERT INTO Panels (name, gateway, topic, color, panelGroupId, indicator, sensorType, multiplier, gain, offset)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ''', (panel.name, panel.gateway, panel.topic, panel.color, panel.group_id, panel.indicator, panel.sensor_type, panel.multiplier, panel.gain, panel.offset))
 
             conn.commit()
             new_id = cursor.lastrowid

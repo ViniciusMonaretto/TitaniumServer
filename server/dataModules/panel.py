@@ -62,8 +62,13 @@ class Panel:
 
         if "offset" in obj:
             self.offset = obj["offset"]
+        else:
+            self.offset = 0
+
         if "gain" in obj:
             self.gain = obj["gain"]
+        else:
+            self.gain = 1
 
         if "minAlarm" in obj and "id" in obj["minAlarm"]:
             self.min_alarm = Alarm(obj["minAlarm"])

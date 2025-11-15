@@ -17,47 +17,20 @@ class GatewayManager(ServiceInterface):
 
     _gateway_status_subscriber: StatuSubscribers
     _gateways: dict[str, GatewayStatus]
-    _delayed_thread: threading.Thread
     _shutdown_event: threading.Event
 
     def __init__(self,
-                 middleware: ClientMiddleware,
-                 config_handler: ConfigHandler):
+                 middleware: ClientMiddleware):
         self._logger = Logger()
         self._middleware = middleware
-        self._config_handler = config_handler
         self._gateways = {}
         self._shutdown_event = threading.Event()
-        
+
         # Use weakref para evitar referências circulares
         self._middleware_ref = weakref.ref(middleware)
-        self._config_handler_ref = weakref.ref(config_handler)
 
         self.initialize_commands()
         self.initialize_system_callbacks()
-
-        # Start a thread to send system status request after 5 seconds
-        def delayed_system_status_request():
-            try:
-                # Aguarda 5 segundos ou sinal de shutdown
-                if self._shutdown_event.wait(5):
-                    return  # Shutdown solicitado
-                
-                # Envia request apenas se não foi solicitado shutdown
-                if not self._shutdown_event.is_set():
-                    self.send_system_status_request()
-            except Exception as e:
-                self._logger.error(f"Erro no delayed_system_status_request: {e}")
-            finally:
-                # Força garbage collection após o thread
-                gc.collect()
-
-        self._delayed_thread = threading.Thread(
-            target=delayed_system_status_request,
-            daemon=True,
-            name="GatewayManager-delayed-request"
-        )
-        self._delayed_thread.start()
 
         self._logger.info("GatewayManager initialized")
 
@@ -73,27 +46,24 @@ class GatewayManager(ServiceInterface):
         try:
             # Sinaliza shutdown
             self._shutdown_event.set()
-            
-            # Aguarda thread terminar (com timeout)
-            if hasattr(self, '_delayed_thread') and self._delayed_thread.is_alive():
-                self._delayed_thread.join(timeout=2)
-            
+
             # Limpa callbacks
             if hasattr(self, '_gateway_status_subscriber'):
                 try:
                     middleware = self._middleware_ref()
                     if middleware:
-                        middleware.remove_subscribe_to_status(self._gateway_status_subscriber)
+                        middleware.remove_subscribe_to_status(
+                            self._gateway_status_subscriber)
                 except:
                     pass
-            
+
             # Limpa dicionário de gateways
             if hasattr(self, '_gateways'):
                 self._gateways.clear()
-            
+
             # Força garbage collection
             gc.collect()
-            
+
             self._logger.info("GatewayManager cleanup completed")
         except Exception as e:
             self._logger.error(f"Erro durante cleanup: {e}")
@@ -149,10 +119,10 @@ class GatewayManager(ServiceInterface):
         try:
             if not self._gateways:
                 return
-                
+
             gateways_array = [self._gateways[gateway_name].to_json()
                               for gateway_name in self._gateways.keys()]
-            
+
             middleware = self._middleware_ref()
             if middleware and not self._shutdown_event.is_set():
                 middleware.send_status(
@@ -164,7 +134,7 @@ class GatewayManager(ServiceInterface):
         try:
             if self._shutdown_event.is_set():
                 return
-                
+
             system_status: MqttSystemModel = status_info["data"]
 
             gateway_status: GatewayStatus = GatewayStatus()
@@ -173,25 +143,20 @@ class GatewayManager(ServiceInterface):
             gateway_status.uptime = system_status.gateway.uptime
 
             self._gateways[system_status.gateway.name] = gateway_status
-            
+
             # Limita o tamanho do dicionário para evitar crescimento indefinido
             if len(self._gateways) > 100:  # Limite arbitrário
                 # Remove entradas mais antigas (simples implementação)
                 oldest_key = next(iter(self._gateways))
                 del self._gateways[oldest_key]
                 self._logger.warning(f"Removido gateway antigo: {oldest_key}")
-            
-            config_handler = self._config_handler_ref()
-            if config_handler:
-                config_handler.update_calibration_from_gateway_status(
-                    system_status.panels)
-            
+
             self.send_gateways_status()
-            
+
             # Força garbage collection periodicamente
             if len(self._gateways) % 10 == 0:
                 gc.collect()
-                
+
         except Exception as e:
             self._logger.error(f"Erro no update_gateway_status_callback: {e}")
 
@@ -199,10 +164,10 @@ class GatewayManager(ServiceInterface):
         """Retorna estatísticas de memória para debugging"""
         import psutil
         import os
-        
+
         process = psutil.Process(os.getpid())
         memory_info = process.memory_info()
-        
+
         return {
             'rss_mb': memory_info.rss / 1024 / 1024,
             'vms_mb': memory_info.vms / 1024 / 1024,

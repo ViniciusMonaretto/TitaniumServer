@@ -23,6 +23,7 @@ import json
 class IoCloudApiTranslator(PayloadTranslator):
     logger = Logger()
     _gateways_mapping: dict[str, dict[str, str]]
+    _calibration_mapping: dict[str, {"gain": float, "offset": float}] = {}
 
     def initialize(self):
         self._gateways_mapping = {}
@@ -111,8 +112,14 @@ class IoCloudApiTranslator(PayloadTranslator):
             gateway, type_of_sensor, str(index)
         )
 
-        reading.value = reading_json["value"]
-        reading.value = reading_json["value"]
+        offset = 0
+        gain = 1
+        calibration_key = f"{gateway}_{index_str}"
+        if calibration_key in self._calibration_mapping:
+            offset = self._calibration_mapping[calibration_key]["offset"]
+            gain = self._calibration_mapping[calibration_key]["gain"]
+
+        reading.value = reading_json["value"] * gain + offset
         reading.timestamp = timestamp
         reading.is_active = reading_json["active"]
         return reading
@@ -132,7 +139,11 @@ class IoCloudApiTranslator(PayloadTranslator):
             self.logger.error(
                 f"IoCloudApiTranslator::_read_sensor_report_message: gateway {gateway} not found in gateways mapping"
             )
-            return []
+            error = MqttErrorModel()
+            error.full_topic = "gateway-unknown-error"
+            error.gateway = gateway
+            error.message = f"Gateway {gateway} not found in gateways mapping"
+            return error
 
         gateway_reading = MqttGatewayReadingModel()
         gateway_reading.full_topic = MqttHelper.get_topic_from_mosquitto_obj_report(
@@ -198,6 +209,14 @@ class IoCloudApiTranslator(PayloadTranslator):
         system_module.full_topic = "gateway-status-*"
 
         return system_module
+
+    def update_calibration(self, calibration_info: list[Any]):
+        for calibration in calibration_info:
+            key = f"{calibration['gateway']}_{calibration['indicator']}"
+            self._calibration_mapping[key] = {
+                "gain": calibration['gain'],
+                "offset": calibration['offset']
+            }
 
     def translate_incoming_message(self, topic: str, payload):
         out_payload = MqttPayloadModel()

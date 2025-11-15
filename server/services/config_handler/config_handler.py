@@ -91,6 +91,18 @@ class ConfigHandler(ServiceInterface):
         else:
             self.initialize_panels_from_db(panels_infos, groups_infos)
 
+        calibration_info = []
+        for group in self._panel_groups.values():
+            for panel in group.panels:
+                calibration_info.append({
+                    "gateway": panel.gateway,
+                    "indicator": panel.indicator,
+                    "offset": panel.offset,
+                    "gain": panel.gain
+                })
+        self._middleware.send_command(
+            MqttCommands.CALIBRATION, calibration_info)
+
     def update_calibration_from_gateway_status(self, panels: list[{
         "status": str,
         "gain": float,
@@ -235,15 +247,18 @@ class ConfigHandler(ServiceInterface):
             panel.color = update_panel_info["color"]
             panel.name = update_panel_info["name"]
             panel.multiplier = update_panel_info["multiplier"]
+
+            calibration_update = gain != panel.gain or offset != panel.offset
+            if calibration_update:
+                panel.gain = gain
+                panel.offset = offset
+                self._middleware.send_command(
+                    MqttCommands.CALIBRATION, [update_panel_info]
+                )
             if not self._config_storage.update_panel(panel):
                 self._logger.error(
                     f"ConfigHandler::update_panel_functions: Error saving panel update {panel.id}")
-            if gain != panel.gain or offset != panel.offset:
-                self._middleware.send_command(
-                    MqttCommands.CALIBRATION, update_panel_info
-                )
-            else:
-                self.send_ui_update_action()
+            self.send_ui_update_action(calibration_update)
 
     def handle_change_panel_alarm(
         self, panel: Panel, alarm: Alarm, new_alarm_value: float, is_max_alarm: bool
@@ -264,7 +279,8 @@ class ConfigHandler(ServiceInterface):
             return None
         elif alarm != None and alarm.threshold != new_alarm_value:
             return self._alarm_manager.change_alarm_threshold(
-                alarm.id, new_alarm_value, ClientMiddleware.get_gateway_status_topic(panel.gateway)
+                alarm.id, new_alarm_value, ClientMiddleware.get_gateway_status_topic(
+                    panel.gateway)
             )
 
         # If alarm exists and new value is the same, return existing alarm unchanged

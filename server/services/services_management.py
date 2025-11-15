@@ -28,8 +28,7 @@ class ServiceManager:
             self._middleware, self._config_storage, self._sensor_data_storage, self._alarm_manager)
         self._report_generator = ReportGenerator(
             self._middleware, self._sensor_data_storage, self._config_handler)
-        self._gateway_manager = GatewayManager(
-            self._middleware, self._config_handler)
+        self._gateway_manager = GatewayManager(self._middleware)
 
         self._status_saver_thread = Thread(
             target=self.threaded_function, args=(10, ))
