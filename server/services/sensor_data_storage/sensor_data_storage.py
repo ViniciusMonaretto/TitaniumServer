@@ -48,10 +48,9 @@ class SensorDataStorage(ServiceInterface):
         self._middleware = middleware
         self._async_loop = AsyncioLoopThread()
         self._indexes_created = False
-        self._status_subscribers_last_time: Dict[str, datetime] = {}
         self._gateway_status_subscribers: Dict[str, {
             'subscriber': StatuSubscribers, 'topics': []}] = {}
-        self._last_status_by_sub_status_name: Dict[str, Dict[str, Any]] = {}
+        self._last_status_by_sub_status_name: Dict[str, SensorInfo] = {}
         self._last_status_lock = threading.Lock()
         self._mongo_operation_timeout = DEFAULT_MONGO_OPERATION_TIMEOUT
 
@@ -156,33 +155,48 @@ class SensorDataStorage(ServiceInterface):
 
     def write_sensor_data_loop(self) -> None:
         """Main loop for writing sensor data to database."""
+        # Calculate next minute boundary (e.g., if now is 10:00:30, next is 10:01:00)
+        def get_next_minute_boundary():
+            now = datetime.now()
+            # Round up to next minute
+            next_minute = (now.replace(
+                second=0, microsecond=0) + timedelta(minutes=1))
+            return next_minute
+
+        # Wait until the next minute boundary
+        next_minute = get_next_minute_boundary()
+        wait_seconds = (next_minute - datetime.now()).total_seconds()
+        if wait_seconds > 0:
+            time.sleep(wait_seconds)
+
         while True:
             sensor_infos = []
             try:
-                # bloqueia até 1s aguardando item (evita busy spin)
-                sensor_info: SensorInfo = self._write_queue.get(timeout=1)
 
-                # tenta esgotar a fila rapidamente, mas sem bloquear
-                while True:
-                    try:
-                        if isinstance(sensor_info.timestamp, str):
-                            sensor_info.timestamp = datetime.fromisoformat(
-                                sensor_info.timestamp)
-                        sensor_infos.append(sensor_info.to_json())
-                        sensor_info = self._write_queue.get_nowait()
-                    except queue.Empty:
-                        break
+                date_time_now = datetime.now().replace(
+                    second=0, microsecond=0)
+                with self._last_status_lock:
+
+                    for sensor_topic in self._last_status_by_sub_status_name:
+                        sensor_infos.append(
+                            {
+                                "SensorFullTopic": sensor_topic,
+                                "Timestamp": date_time_now,
+                                "Value": self._last_status_by_sub_status_name[sensor_topic].value
+                            }
+                        )
 
                 if sensor_infos:
                     self.add_info(sensor_infos)
             except KeyboardInterrupt:
                 break
-            except queue.Empty:
-                # sem dados, dormir um pouco (não criar Event repetido)
-                time.sleep(0.2)
             except Exception as e:
                 self._logger.error(f"write_sensor_data_loop: {e}")
-                time.sleep(1)
+
+            next_minute = get_next_minute_boundary()
+            wait_seconds = (next_minute - datetime.now()).total_seconds()
+            if wait_seconds > 0:
+                time.sleep(wait_seconds)
 
     def add_new_subscription(self, topic: str, gateway: str, indicator: str) -> tuple[bool, str]:
         """Add a new subscription for sensor data."""
@@ -209,22 +223,9 @@ class SensorDataStorage(ServiceInterface):
         try:
             # Store the last status sent for each subStatusName
             sub_status_name = status_info.full_topic
-            current_time = datetime.now()
-
-            if sub_status_name not in self._status_subscribers_last_time:
-                return
-
-            if (self._status_subscribers_last_time[sub_status_name] is not None and
-                    current_time - self._status_subscribers_last_time[sub_status_name] < timedelta(seconds=56)):
-                return
-            self._status_subscribers_last_time[sub_status_name] = status_info.timestamp
 
             with self._last_status_lock:
                 self._last_status_by_sub_status_name[sub_status_name] = status_info
-
-            self._write_queue.put(SensorInfo(sub_status_name,
-                                             status_info.timestamp,
-                                             status_info.value))
         except Exception as e:
             self._logger.error(
                 f"SensorDataStorage::add_sensor_data_to_queue: Error adding data to queue {e}")
@@ -252,30 +253,26 @@ class SensorDataStorage(ServiceInterface):
 
         topic = ClientMiddleware.get_status_topic(
             gateway, status_name, indicator)
-        if topic not in self._status_subscribers_last_time:
-            self._status_subscribers_last_time[topic] = None
-            self._gateway_status_subscribers[gateway_topic]['topics'].append(
-                topic)
+        self._gateway_status_subscribers[gateway_topic]['topics'].append(
+            topic)
 
     def remove_subscription_from_status(self, gateway: str, status_name: str, indicator: str) -> None:
         """Remove subscription from status updates."""
         topic = ClientMiddleware.get_status_topic(
             gateway, status_name, indicator)
-        if topic in self._status_subscribers_last_time:
-            del self._status_subscribers_last_time[topic]
-            gateway_topic = ClientMiddleware.from_status_topic_get_gateway_topic(
-                topic)
-            if gateway_topic not in self._gateway_status_subscribers:
-                self._logger.error(
-                    f"SensorDataStorage::remove_subscription_from_status: Gateway topic {gateway_topic} not subscribed")
-                return
+        gateway_topic = ClientMiddleware.from_status_topic_get_gateway_topic(
+            topic)
+        if gateway_topic not in self._gateway_status_subscribers:
+            self._logger.error(
+                f"SensorDataStorage::remove_subscription_from_status: Gateway topic {gateway_topic} not subscribed")
+            return
 
-            self._gateway_status_subscribers[gateway_topic]['topics'].remove(
-                topic)
-            if len(self._gateway_status_subscribers[gateway_topic]['topics']) == 0:
-                self._middleware.remove_subscribe_from_status(
-                    self._gateway_status_subscribers[gateway_topic]['subscriber'], gateway_topic)
-                del self._gateway_status_subscribers[gateway_topic]
+        self._gateway_status_subscribers[gateway_topic]['topics'].remove(
+            topic)
+        if len(self._gateway_status_subscribers[gateway_topic]['topics']) == 0:
+            self._middleware.remove_subscribe_from_status(
+                self._gateway_status_subscribers[gateway_topic]['subscriber'], gateway_topic)
+            del self._gateway_status_subscribers[gateway_topic]
 
     def add_sensor_info_command(self, command: Dict[str, Any]) -> None:
         """Handle add sensor info command."""
