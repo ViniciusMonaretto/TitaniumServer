@@ -231,16 +231,27 @@ class ReportGenerator(ServiceInterface):
             electrical_formatted_ts_map = {
                 ts: format_timestamp(ts) for ts in electrical_timestamps}
 
-            # Compute statistics
-            total_power = 0.0
+            # Calculate total energy in kWh by integrating power over time
+            total_energy_kwh = 0.0
             pf_values, current_values = [], []
+
+            previous_power_timestamp = None
+            previous_power_value = None
 
             for topic in electrical_topics:
                 ttype = topic_to_type.get(topic)
                 for entry in sensor_data[topic]:
                     value = float(entry["value"])
+                    ts_str = entry["timestamp"]
                     if ttype == "Power":
-                        total_power += value
+                        dt_ts = datetime.fromisoformat(ts_str)
+                        if previous_power_timestamp is not None:
+                            time_diff_hours = (
+                                previous_power_timestamp - dt_ts).total_seconds() / 3600.0
+                            total_energy_kwh += previous_power_value * time_diff_hours
+                            previous_power_timestamp = ts_str
+                        previous_power_timestamp = dt_ts
+                        previous_power_value = value
                     elif ttype == "PowerFactor":
                         pf_values.append(value)
                     elif ttype == "Current":
@@ -248,11 +259,12 @@ class ReportGenerator(ServiceInterface):
 
             avg_pf = sum(pf_values) / len(pf_values) if pf_values else 0
             max_current = max(current_values) if current_values else 0
+            total_energy_kwh = total_energy_kwh / 1000
 
             ws_power.append(styled_row(
                 ws_power, ["Grupo:", "", "", "", ""]))
             ws_power.append(styled_row(
-                ws_power, ["Consumo Total de Energia:", f"{total_power/1000:.2f} kW", "", "", ""]))
+                ws_power, ["Consumo Total de Energia:", f"{total_energy_kwh:.2f} kWh", "", "", ""]))
             ws_power.append(styled_row(
                 ws_power, ["Fator de Potência Médio:", f"{avg_pf:.3f}", "", "", ""]))
             ws_power.append(styled_row(
