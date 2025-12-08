@@ -178,6 +178,8 @@ class SensorDataStorage(ServiceInterface):
                 with self._last_status_lock:
 
                     for sensor_topic in self._last_status_by_sub_status_name:
+                        if date_time_now - self._last_status_by_sub_status_name[sensor_topic].timestamp > timedelta(minutes=1, seconds=30):
+                            continue
                         sensor_infos.append(
                             {
                                 "SensorFullTopic": sensor_topic,
