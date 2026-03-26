@@ -24,11 +24,11 @@ base_data = [
 ]
 
 # ==== CONFIGURAÇÃO DE TEMPO ====
-N = 200_000  # Leituras por sensor
+N = 500_000  # Leituras por sensor
 base_timestamp = int(time.time())
 
 # Gera dados antigos (para testar TTL)
-start_days_ago = 60
+start_days_ago = 30
 end_days_ago = 0
 start_timestamp = base_timestamp - start_days_ago * 24 * 60 * 60
 end_timestamp = base_timestamp - end_days_ago * 24 * 60 * 60

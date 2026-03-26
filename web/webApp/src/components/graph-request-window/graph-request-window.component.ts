@@ -64,9 +64,21 @@ export class GraphRequestWindowComponent implements OnInit {
     @Inject(MAT_DIALOG_DATA) public data: any
   ) {
     this.uiConfig = data.uiConfig
+    this.startDate = data.startDate
+    this.endDate = data.endDate
   }
 
   ngOnInit(): void {
+  }
+
+  /** Formats a Date as HH:mm for native <input type="time"> */
+  timeInputValue(date: Date | null): string {
+    if (!date) {
+      return '';
+    }
+    const h = date.getHours().toString().padStart(2, '0');
+    const m = date.getMinutes().toString().padStart(2, '0');
+    return `${h}:${m}`;
   }
 
   getGroups(): GroupInfo[] {
@@ -160,7 +172,7 @@ export class GraphRequestWindowComponent implements OnInit {
       const twoWeeksInMs = 14 * 24 * 60 * 60 * 1000; // 14 days in milliseconds
       const endDateToUse = this.endDate || new Date(); // Use current date if endDate is null
       const dateDifference = endDateToUse.getTime() - this.startDate.getTime();
-      
+
       if (dateDifference > twoWeeksInMs) {
         this.dialogHelper.openErrorDialog("O período selecionado não pode ser maior que 2 semanas");
         return;

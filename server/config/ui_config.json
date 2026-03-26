@@ -1,5 +1,5 @@
 {
-    "camera 1": [
+    "camera 1 - A": [
         {
             "name": "Temp",
             "gateway": "1C69209DFC08",
@@ -233,6 +233,1074 @@
             "sensorType": "PowerFactor",
             "indicator": "25",
             "panelGroupId": 1
+        },
+        {
+            "name": "Temp21",
+            "gateway": "C0CDD6CD7850",
+            "topic": "temperature",
+            "color": "#1542d6",
+            "sensorType": "Temperature",
+            "indicator": "0",
+            "panelGroupId": 1
+        },
+        {
+            "name": "Temp22",
+            "gateway": "C0CDD6CD7850",
+            "topic": "temperature",
+            "color": "#1542d6",
+            "sensorType": "Temperature",
+            "indicator": "1",
+            "panelGroupId": 1
+        },
+        {
+            "name": "Temp23",
+            "gateway": "C0CDD6CD7850",
+            "topic": "temperature",
+            "color": "#1542d6",
+            "sensorType": "Temperature",
+            "indicator": "2",
+            "panelGroupId": 1
+        },
+        {
+            "name": "Temp24",
+            "gateway": "C0CDD6CD7850",
+            "topic": "temperature",
+            "color": "#1542d6",
+            "sensorType": "Temperature",
+            "indicator": "3",
+            "panelGroupId": 1
+        },
+        {
+            "name": "Temp25",
+            "gateway": "C0CDD6CD7850",
+            "topic": "temperature",
+            "color": "#1542d6",
+            "sensorType": "Temperature",
+            "indicator": "4",
+            "panelGroupId": 1
+        },
+        {
+            "name": "Temp26",
+            "gateway": "C0CDD6CD7850",
+            "topic": "temperature",
+            "color": "#1542d6",
+            "sensorType": "Temperature",
+            "indicator": "5",
+            "panelGroupId": 1
+        },
+        {
+            "name": "Temp27",
+            "gateway": "C0CDD6CD7850",
+            "topic": "temperature",
+            "color": "#1542d6",
+            "sensorType": "Temperature",
+            "indicator": "6",
+            "panelGroupId": 1
+        },
+        {
+            "name": "Temp28",
+            "gateway": "C0CDD6CD7850",
+            "topic": "temperature",
+            "color": "#1542d6",
+            "sensorType": "Temperature",
+            "indicator": "7",
+            "panelGroupId": 1
+        },
+        {
+            "name": "Temp29",
+            "gateway": "C0CDD6CD7850",
+            "topic": "temperature",
+            "color": "#1542d6",
+            "sensorType": "Temperature",
+            "indicator": "8",
+            "panelGroupId": 1
+        },
+        {
+            "name": "Temp30",
+            "gateway": "C0CDD6CD7850",
+            "topic": "temperature",
+            "color": "#1542d6",
+            "sensorType": "Temperature",
+            "indicator": "9",
+            "panelGroupId": 1
+        }
+    ],
+    "camera 1 - B": [
+        {
+            "name": "Temp",
+            "gateway": "C0CDD6CD7814",
+            "topic": "temperature",
+            "color": "#32a852",
+            "sensorType": "Temperature",
+            "indicator": "0",
+            "panelGroupId": 2
+        },
+        {
+            "name": "Temp2",
+            "gateway": "C0CDD6CD7814",
+            "topic": "temperature",
+            "color": "#a83244",
+            "sensorType": "Temperature",
+            "indicator": "1",
+            "panelGroupId": 2
+        },
+        {
+            "name": "Temp3",
+            "gateway": "C0CDD6CD7814",
+            "topic": "temperature",
+            "color": "#a83295",
+            "sensorType": "Temperature",
+            "indicator": "2",
+            "panelGroupId": 2
+        },
+        {
+            "name": "Temp4",
+            "gateway": "C0CDD6CD7814",
+            "topic": "temperature",
+            "color": "#32a88b",
+            "sensorType": "Temperature",
+            "indicator": "3",
+            "panelGroupId": 2
+        },
+        {
+            "name": "Temp5",
+            "gateway": "C0CDD6CD7814",
+            "topic": "temperature",
+            "color": "#d61515",
+            "sensorType": "Temperature",
+            "indicator": "4",
+            "panelGroupId": 2
+        },
+        {
+            "name": "Temp6",
+            "gateway": "C0CDD6CD7814",
+            "topic": "temperature",
+            "color": "#15d6bc",
+            "sensorType": "Temperature",
+            "indicator": "5",
+            "panelGroupId": 2
+        },
+        {
+            "name": "Temp7",
+            "gateway": "C0CDD6CD7814",
+            "topic": "temperature",
+            "color": "#123fd2",
+            "sensorType": "Temperature",
+            "indicator": "6",
+            "panelGroupId": 2
+        },
+        {
+            "name": "Temp8",
+            "gateway": "C0CDD6CD7814",
+            "topic": "temperature",
+            "color": "#151fd6",
+            "sensorType": "Temperature",
+            "indicator": "7",
+            "panelGroupId": 2
+        },
+        {
+            "name": "Temp9",
+            "gateway": "C0CDD6CD7814",
+            "topic": "temperature",
+            "color": "#7f15d6",
+            "sensorType": "Temperature",
+            "indicator": "8",
+            "panelGroupId": 2
+        },
+        {
+            "name": "Temp10",
+            "gateway": "C0CDD6CD7814",
+            "topic": "temperature",
+            "color": "#d615d0",
+            "sensorType": "Temperature",
+            "indicator": "9",
+            "panelGroupId": 2
+        },
+        {
+            "name": "Temp11",
+            "gateway": "C0CDD6CD7814",
+            "topic": "temperature",
+            "color": "#d6d015",
+            "sensorType": "Temperature",
+            "indicator": "10",
+            "panelGroupId": 2
+        },
+        {
+            "name": "Temp12",
+            "gateway": "C0CDD6CD7814",
+            "topic": "temperature",
+            "color": "#1fd615",
+            "sensorType": "Temperature",
+            "indicator": "11",
+            "panelGroupId": 2
+        },
+        {
+            "name": "Temp13",
+            "gateway": "C0CDD6CD7814",
+            "topic": "temperature",
+            "color": "#15d68c",
+            "sensorType": "Temperature",
+            "indicator": "12",
+            "panelGroupId": 2
+        },
+        {
+            "name": "Temp14",
+            "gateway": "C0CDD6CD7814",
+            "topic": "temperature",
+            "color": "#156cd6",
+            "sensorType": "Temperature",
+            "indicator": "13",
+            "panelGroupId": 2
+        },
+        {
+            "name": "Temp15",
+            "gateway": "C0CDD6CD7814",
+            "topic": "temperature",
+            "color": "#d61599",
+            "sensorType": "Temperature",
+            "indicator": "14",
+            "panelGroupId": 2
+        },
+        {
+            "name": "Temp16",
+            "gateway": "C0CDD6CD7814",
+            "topic": "temperature",
+            "color": "#b6d615",
+            "sensorType": "Temperature",
+            "indicator": "15",
+            "panelGroupId": 2
+        },
+        {
+            "name": "Temp17",
+            "gateway": "C0CDD6CD7814",
+            "topic": "temperature",
+            "color": "#15d659",
+            "sensorType": "Temperature",
+            "indicator": "16",
+            "panelGroupId": 2
+        },
+        {
+            "name": "Temp18",
+            "gateway": "C0CDD6CD7814",
+            "topic": "temperature",
+            "color": "#d64f15",
+            "sensorType": "Temperature",
+            "indicator": "17",
+            "panelGroupId": 2
+        },
+        {
+            "name": "Temp19",
+            "gateway": "C0CDD6CD7814",
+            "topic": "temperature",
+            "color": "#1599d6",
+            "sensorType": "Temperature",
+            "indicator": "18",
+            "panelGroupId": 2
+        },
+        {
+            "name": "Temp20",
+            "gateway": "C0CDD6CD7814",
+            "topic": "temperature",
+            "color": "#1542d6",
+            "sensorType": "Temperature",
+            "indicator": "19",
+            "panelGroupId": 2
+        },
+        {
+            "name": "P1",
+            "gateway": "C0CDD6CD7814",
+            "topic": "pressure",
+            "color": "#000000",
+            "sensorType": "Pressure",
+            "indicator": "20",
+            "panelGroupId": 2
+        },
+        {
+            "name": "P2",
+            "gateway": "C0CDD6CD7814",
+            "topic": "pressure",
+            "color": "#000000",
+            "sensorType": "Pressure",
+            "indicator": "21",
+            "panelGroupId": 2
+        },
+        {
+            "name": "Tensão",
+            "gateway": "C0CDD6CD7814",
+            "topic": "tension",
+            "color": "#000000",
+            "sensorType": "Tension",
+            "indicator": "22",
+            "panelGroupId": 2
+        },
+        {
+            "name": "Corrente",
+            "gateway": "C0CDD6CD7814",
+            "topic": "current",
+            "color": "#000000",
+            "sensorType": "Current",
+            "indicator": "23",
+            "panelGroupId": 2
+        },
+        {
+            "name": "Potencia",
+            "gateway": "C0CDD6CD7814",
+            "topic": "power",
+            "color": "#000000",
+            "sensorType": "Power",
+            "indicator": "24",
+            "panelGroupId": 2
+        },
+        {
+            "name": "Fator de Potencia",
+            "gateway": "C0CDD6CD7814",
+            "topic": "powerFactor",
+            "color": "#000000",
+            "sensorType": "PowerFactor",
+            "indicator": "25",
+            "panelGroupId": 2
+        },
+        {
+            "name": "Temp21",
+            "gateway": "C0CDD6CD7850",
+            "topic": "temperature",
+            "color": "#1542d6",
+            "sensorType": "Temperature",
+            "indicator": "10",
+            "panelGroupId": 2
+        },
+        {
+            "name": "Temp22",
+            "gateway": "C0CDD6CD7850",
+            "topic": "temperature",
+            "color": "#1542d6",
+            "sensorType": "Temperature",
+            "indicator": "11",
+            "panelGroupId": 2
+        },
+        {
+            "name": "Temp23",
+            "gateway": "C0CDD6CD7850",
+            "topic": "temperature",
+            "color": "#1542d6",
+            "sensorType": "Temperature",
+            "indicator": "12",
+            "panelGroupId": 2
+        },
+        {
+            "name": "Temp24",
+            "gateway": "C0CDD6CD7850",
+            "topic": "temperature",
+            "color": "#1542d6",
+            "sensorType": "Temperature",
+            "indicator": "13",
+            "panelGroupId": 2
+        },
+        {
+            "name": "Temp25",
+            "gateway": "C0CDD6CD7850",
+            "topic": "temperature",
+            "color": "#1542d6",
+            "sensorType": "Temperature",
+            "indicator": "14",
+            "panelGroupId": 2
+        },
+        {
+            "name": "Temp26",
+            "gateway": "C0CDD6CD7850",
+            "topic": "temperature",
+            "color": "#1542d6",
+            "sensorType": "Temperature",
+            "indicator": "15",
+            "panelGroupId": 2
+        },
+        {
+            "name": "Temp27",
+            "gateway": "C0CDD6CD7850",
+            "topic": "temperature",
+            "color": "#1542d6",
+            "sensorType": "Temperature",
+            "indicator": "16",
+            "panelGroupId": 2
+        },
+        {
+            "name": "Temp28",
+            "gateway": "C0CDD6CD7850",
+            "topic": "temperature",
+            "color": "#1542d6",
+            "sensorType": "Temperature",
+            "indicator": "17",
+            "panelGroupId": 2
+        },
+        {
+            "name": "Temp29",
+            "gateway": "C0CDD6CD7850",
+            "topic": "temperature",
+            "color": "#1542d6",
+            "sensorType": "Temperature",
+            "indicator": "18",
+            "panelGroupId": 2
+        },
+        {
+            "name": "Temp30",
+            "gateway": "C0CDD6CD7850",
+            "topic": "temperature",
+            "color": "#1542d6",
+            "sensorType": "Temperature",
+            "indicator": "19",
+            "panelGroupId": 2
+        }
+    ],
+    "camera 2 - A": [
+        {
+            "name": "Temp",
+            "gateway": "C0CDD6CD7838",
+            "topic": "temperature",
+            "color": "#32a852",
+            "sensorType": "Temperature",
+            "indicator": "0",
+            "panelGroupId": 3
+        },
+        {
+            "name": "Temp2",
+            "gateway": "C0CDD6CD7838",
+            "topic": "temperature",
+            "color": "#a83244",
+            "sensorType": "Temperature",
+            "indicator": "1",
+            "panelGroupId": 3
+        },
+        {
+            "name": "Temp3",
+            "gateway": "C0CDD6CD7838",
+            "topic": "temperature",
+            "color": "#a83295",
+            "sensorType": "Temperature",
+            "indicator": "2",
+            "panelGroupId": 3
+        },
+        {
+            "name": "Temp4",
+            "gateway": "C0CDD6CD7838",
+            "topic": "temperature",
+            "color": "#32a88b",
+            "sensorType": "Temperature",
+            "indicator": "3",
+            "panelGroupId": 3
+        },
+        {
+            "name": "Temp5",
+            "gateway": "C0CDD6CD7838",
+            "topic": "temperature",
+            "color": "#d61515",
+            "sensorType": "Temperature",
+            "indicator": "4",
+            "panelGroupId": 3
+        },
+        {
+            "name": "Temp6",
+            "gateway": "C0CDD6CD7838",
+            "topic": "temperature",
+            "color": "#15d6bc",
+            "sensorType": "Temperature",
+            "indicator": "5",
+            "panelGroupId": 3
+        },
+        {
+            "name": "Temp7",
+            "gateway": "C0CDD6CD7838",
+            "topic": "temperature",
+            "color": "#123fd2",
+            "sensorType": "Temperature",
+            "indicator": "6",
+            "panelGroupId": 3
+        },
+        {
+            "name": "Temp8",
+            "gateway": "C0CDD6CD7838",
+            "topic": "temperature",
+            "color": "#151fd6",
+            "sensorType": "Temperature",
+            "indicator": "7",
+            "panelGroupId": 3
+        },
+        {
+            "name": "Temp9",
+            "gateway": "C0CDD6CD7838",
+            "topic": "temperature",
+            "color": "#7f15d6",
+            "sensorType": "Temperature",
+            "indicator": "8",
+            "panelGroupId": 3
+        },
+        {
+            "name": "Temp10",
+            "gateway": "C0CDD6CD7838",
+            "topic": "temperature",
+            "color": "#d615d0",
+            "sensorType": "Temperature",
+            "indicator": "9",
+            "panelGroupId": 3
+        },
+        {
+            "name": "Temp11",
+            "gateway": "C0CDD6CD7838",
+            "topic": "temperature",
+            "color": "#d6d015",
+            "sensorType": "Temperature",
+            "indicator": "10",
+            "panelGroupId": 3
+        },
+        {
+            "name": "Temp12",
+            "gateway": "C0CDD6CD7838",
+            "topic": "temperature",
+            "color": "#1fd615",
+            "sensorType": "Temperature",
+            "indicator": "11",
+            "panelGroupId": 3
+        },
+        {
+            "name": "Temp13",
+            "gateway": "C0CDD6CD7838",
+            "topic": "temperature",
+            "color": "#15d68c",
+            "sensorType": "Temperature",
+            "indicator": "12",
+            "panelGroupId": 3
+        },
+        {
+            "name": "Temp14",
+            "gateway": "C0CDD6CD7838",
+            "topic": "temperature",
+            "color": "#156cd6",
+            "sensorType": "Temperature",
+            "indicator": "13",
+            "panelGroupId": 3
+        },
+        {
+            "name": "Temp15",
+            "gateway": "C0CDD6CD7838",
+            "topic": "temperature",
+            "color": "#d61599",
+            "sensorType": "Temperature",
+            "indicator": "14",
+            "panelGroupId": 3
+        },
+        {
+            "name": "Temp16",
+            "gateway": "C0CDD6CD7838",
+            "topic": "temperature",
+            "color": "#b6d615",
+            "sensorType": "Temperature",
+            "indicator": "15",
+            "panelGroupId": 3
+        },
+        {
+            "name": "Temp17",
+            "gateway": "C0CDD6CD7838",
+            "topic": "temperature",
+            "color": "#15d659",
+            "sensorType": "Temperature",
+            "indicator": "16",
+            "panelGroupId": 3
+        },
+        {
+            "name": "Temp18",
+            "gateway": "C0CDD6CD7838",
+            "topic": "temperature",
+            "color": "#d64f15",
+            "sensorType": "Temperature",
+            "indicator": "17",
+            "panelGroupId": 3
+        },
+        {
+            "name": "Temp19",
+            "gateway": "C0CDD6CD7838",
+            "topic": "temperature",
+            "color": "#1599d6",
+            "sensorType": "Temperature",
+            "indicator": "18",
+            "panelGroupId": 3
+        },
+        {
+            "name": "Temp20",
+            "gateway": "C0CDD6CD7838",
+            "topic": "temperature",
+            "color": "#1542d6",
+            "sensorType": "Temperature",
+            "indicator": "19",
+            "panelGroupId": 3
+        },
+        {
+            "name": "P1",
+            "gateway": "C0CDD6CD7838",
+            "topic": "pressure",
+            "color": "#000000",
+            "sensorType": "Pressure",
+            "indicator": "20",
+            "panelGroupId": 3
+        },
+        {
+            "name": "P2",
+            "gateway": "C0CDD6CD7838",
+            "topic": "pressure",
+            "color": "#000000",
+            "sensorType": "Pressure",
+            "indicator": "21",
+            "panelGroupId": 3
+        },
+        {
+            "name": "Tensão",
+            "gateway": "C0CDD6CD7838",
+            "topic": "tension",
+            "color": "#000000",
+            "sensorType": "Tension",
+            "indicator": "22",
+            "panelGroupId": 3
+        },
+        {
+            "name": "Corrente",
+            "gateway": "C0CDD6CD7838",
+            "topic": "current",
+            "color": "#000000",
+            "sensorType": "Current",
+            "indicator": "23",
+            "panelGroupId": 3
+        },
+        {
+            "name": "Potencia",
+            "gateway": "C0CDD6CD7838",
+            "topic": "power",
+            "color": "#000000",
+            "sensorType": "Power",
+            "indicator": "24",
+            "panelGroupId": 3
+        },
+        {
+            "name": "Fator de Potencia",
+            "gateway": "C0CDD6CD7838",
+            "topic": "powerFactor",
+            "color": "#000000",
+            "sensorType": "PowerFactor",
+            "indicator": "25",
+            "panelGroupId": 3
+        },
+        {
+            "name": "Temp21",
+            "gateway": "C0CDD6CD7828",
+            "topic": "temperature",
+            "color": "#1542d6",
+            "sensorType": "Temperature",
+            "indicator": "10",
+            "panelGroupId": 3
+        },
+        {
+            "name": "Temp22",
+            "gateway": "C0CDD6CD7828",
+            "topic": "temperature",
+            "color": "#1542d6",
+            "sensorType": "Temperature",
+            "indicator": "11",
+            "panelGroupId": 3
+        },
+        {
+            "name": "Temp23",
+            "gateway": "C0CDD6CD7828",
+            "topic": "temperature",
+            "color": "#1542d6",
+            "sensorType": "Temperature",
+            "indicator": "12",
+            "panelGroupId": 3
+        },
+        {
+            "name": "Temp24",
+            "gateway": "C0CDD6CD7828",
+            "topic": "temperature",
+            "color": "#1542d6",
+            "sensorType": "Temperature",
+            "indicator": "13",
+            "panelGroupId": 3
+        },
+        {
+            "name": "Temp25",
+            "gateway": "C0CDD6CD7828",
+            "topic": "temperature",
+            "color": "#1542d6",
+            "sensorType": "Temperature",
+            "indicator": "14",
+            "panelGroupId": 3
+        },
+        {
+            "name": "Temp26",
+            "gateway": "C0CDD6CD7828",
+            "topic": "temperature",
+            "color": "#1542d6",
+            "sensorType": "Temperature",
+            "indicator": "15",
+            "panelGroupId": 3
+        },
+        {
+            "name": "Temp27",
+            "gateway": "C0CDD6CD7828",
+            "topic": "temperature",
+            "color": "#1542d6",
+            "sensorType": "Temperature",
+            "indicator": "16",
+            "panelGroupId": 3
+        },
+        {
+            "name": "Temp28",
+            "gateway": "C0CDD6CD7828",
+            "topic": "temperature",
+            "color": "#1542d6",
+            "sensorType": "Temperature",
+            "indicator": "17",
+            "panelGroupId": 3
+        },
+        {
+            "name": "Temp29",
+            "gateway": "C0CDD6CD7828",
+            "topic": "temperature",
+            "color": "#1542d6",
+            "sensorType": "Temperature",
+            "indicator": "18",
+            "panelGroupId": 3
+        },
+        {
+            "name": "Temp30",
+            "gateway": "C0CDD6CD7828",
+            "topic": "temperature",
+            "color": "#1542d6",
+            "sensorType": "Temperature",
+            "indicator": "19",
+            "panelGroupId": 3
+        }
+    ],
+    "camera 2 - B": [
+        {
+            "name": "Temp",
+            "gateway": "1C69209DB778",
+            "topic": "temperature",
+            "color": "#32a852",
+            "sensorType": "Temperature",
+            "indicator": "0",
+            "panelGroupId": 4
+        },
+        {
+            "name": "Temp2",
+            "gateway": "1C69209DB778",
+            "topic": "temperature",
+            "color": "#a83244",
+            "sensorType": "Temperature",
+            "indicator": "1",
+            "panelGroupId": 4
+        },
+        {
+            "name": "Temp3",
+            "gateway": "1C69209DB778",
+            "topic": "temperature",
+            "color": "#a83295",
+            "sensorType": "Temperature",
+            "indicator": "2",
+            "panelGroupId": 4
+        },
+        {
+            "name": "Temp4",
+            "gateway": "1C69209DB778",
+            "topic": "temperature",
+            "color": "#32a88b",
+            "sensorType": "Temperature",
+            "indicator": "3",
+            "panelGroupId": 4
+        },
+        {
+            "name": "Temp5",
+            "gateway": "1C69209DB778",
+            "topic": "temperature",
+            "color": "#d61515",
+            "sensorType": "Temperature",
+            "indicator": "4",
+            "panelGroupId": 4
+        },
+        {
+            "name": "Temp6",
+            "gateway": "1C69209DB778",
+            "topic": "temperature",
+            "color": "#15d6bc",
+            "sensorType": "Temperature",
+            "indicator": "5",
+            "panelGroupId": 4
+        },
+        {
+            "name": "Temp7",
+            "gateway": "1C69209DB778",
+            "topic": "temperature",
+            "color": "#123fd2",
+            "sensorType": "Temperature",
+            "indicator": "6",
+            "panelGroupId": 4
+        },
+        {
+            "name": "Temp8",
+            "gateway": "1C69209DB778",
+            "topic": "temperature",
+            "color": "#151fd6",
+            "sensorType": "Temperature",
+            "indicator": "7",
+            "panelGroupId": 4
+        },
+        {
+            "name": "Temp9",
+            "gateway": "1C69209DB778",
+            "topic": "temperature",
+            "color": "#7f15d6",
+            "sensorType": "Temperature",
+            "indicator": "8",
+            "panelGroupId": 4
+        },
+        {
+            "name": "Temp10",
+            "gateway": "1C69209DB778",
+            "topic": "temperature",
+            "color": "#d615d0",
+            "sensorType": "Temperature",
+            "indicator": "9",
+            "panelGroupId": 4
+        },
+        {
+            "name": "Temp11",
+            "gateway": "1C69209DB778",
+            "topic": "temperature",
+            "color": "#d6d015",
+            "sensorType": "Temperature",
+            "indicator": "10",
+            "panelGroupId": 4
+        },
+        {
+            "name": "Temp12",
+            "gateway": "1C69209DB778",
+            "topic": "temperature",
+            "color": "#1fd615",
+            "sensorType": "Temperature",
+            "indicator": "11",
+            "panelGroupId": 4
+        },
+        {
+            "name": "Temp13",
+            "gateway": "1C69209DB778",
+            "topic": "temperature",
+            "color": "#15d68c",
+            "sensorType": "Temperature",
+            "indicator": "12",
+            "panelGroupId": 4
+        },
+        {
+            "name": "Temp14",
+            "gateway": "1C69209DB778",
+            "topic": "temperature",
+            "color": "#156cd6",
+            "sensorType": "Temperature",
+            "indicator": "13",
+            "panelGroupId": 4
+        },
+        {
+            "name": "Temp15",
+            "gateway": "1C69209DB778",
+            "topic": "temperature",
+            "color": "#d61599",
+            "sensorType": "Temperature",
+            "indicator": "14",
+            "panelGroupId": 4
+        },
+        {
+            "name": "Temp16",
+            "gateway": "1C69209DB778",
+            "topic": "temperature",
+            "color": "#b6d615",
+            "sensorType": "Temperature",
+            "indicator": "15",
+            "panelGroupId": 4
+        },
+        {
+            "name": "Temp17",
+            "gateway": "1C69209DB778",
+            "topic": "temperature",
+            "color": "#15d659",
+            "sensorType": "Temperature",
+            "indicator": "16",
+            "panelGroupId": 4
+        },
+        {
+            "name": "Temp18",
+            "gateway": "1C69209DB778",
+            "topic": "temperature",
+            "color": "#d64f15",
+            "sensorType": "Temperature",
+            "indicator": "17",
+            "panelGroupId": 4
+        },
+        {
+            "name": "Temp19",
+            "gateway": "1C69209DB778",
+            "topic": "temperature",
+            "color": "#1599d6",
+            "sensorType": "Temperature",
+            "indicator": "18",
+            "panelGroupId": 4
+        },
+        {
+            "name": "Temp20",
+            "gateway": "1C69209DB778",
+            "topic": "temperature",
+            "color": "#1542d6",
+            "sensorType": "Temperature",
+            "indicator": "19",
+            "panelGroupId": 4
+        },
+        {
+            "name": "P1",
+            "gateway": "1C69209DB778",
+            "topic": "pressure",
+            "color": "#000000",
+            "sensorType": "Pressure",
+            "indicator": "20",
+            "panelGroupId": 4
+        },
+        {
+            "name": "P2",
+            "gateway": "1C69209DB778",
+            "topic": "pressure",
+            "color": "#000000",
+            "sensorType": "Pressure",
+            "indicator": "21",
+            "panelGroupId": 4
+        },
+        {
+            "name": "Tensão",
+            "gateway": "1C69209DB778",
+            "topic": "tension",
+            "color": "#000000",
+            "sensorType": "Tension",
+            "indicator": "22",
+            "panelGroupId": 4
+        },
+        {
+            "name": "Corrente",
+            "gateway": "1C69209DB778",
+            "topic": "current",
+            "color": "#000000",
+            "sensorType": "Current",
+            "indicator": "23",
+            "panelGroupId": 4
+        },
+        {
+            "name": "Potencia",
+            "gateway": "1C69209DB778",
+            "topic": "power",
+            "color": "#000000",
+            "sensorType": "Power",
+            "indicator": "24",
+            "panelGroupId": 4
+        },
+        {
+            "name": "Fator de Potencia",
+            "gateway": "1C69209DB778",
+            "topic": "powerFactor",
+            "color": "#000000",
+            "sensorType": "PowerFactor",
+            "indicator": "25",
+            "panelGroupId": 4
+        },
+        {
+            "name": "Temp21",
+            "gateway": "C0CDD6CD7828",
+            "topic": "temperature",
+            "color": "#1542d6",
+            "sensorType": "Temperature",
+            "indicator": "10",
+            "panelGroupId": 4
+        },
+        {
+            "name": "Temp22",
+            "gateway": "C0CDD6CD7828",
+            "topic": "temperature",
+            "color": "#1542d6",
+            "sensorType": "Temperature",
+            "indicator": "11",
+            "panelGroupId": 4
+        },
+        {
+            "name": "Temp23",
+            "gateway": "C0CDD6CD7828",
+            "topic": "temperature",
+            "color": "#1542d6",
+            "sensorType": "Temperature",
+            "indicator": "12",
+            "panelGroupId": 4
+        },
+        {
+            "name": "Temp24",
+            "gateway": "C0CDD6CD7828",
+            "topic": "temperature",
+            "color": "#1542d6",
+            "sensorType": "Temperature",
+            "indicator": "13",
+            "panelGroupId": 4
+        },
+        {
+            "name": "Temp25",
+            "gateway": "C0CDD6CD7828",
+            "topic": "temperature",
+            "color": "#1542d6",
+            "sensorType": "Temperature",
+            "indicator": "14",
+            "panelGroupId": 4
+        },
+        {
+            "name": "Temp26",
+            "gateway": "C0CDD6CD7828",
+            "topic": "temperature",
+            "color": "#1542d6",
+            "sensorType": "Temperature",
+            "indicator": "15",
+            "panelGroupId": 4
+        },
+        {
+            "name": "Temp27",
+            "gateway": "C0CDD6CD7828",
+            "topic": "temperature",
+            "color": "#1542d6",
+            "sensorType": "Temperature",
+            "indicator": "16",
+            "panelGroupId": 4
+        },
+        {
+            "name": "Temp28",
+            "gateway": "C0CDD6CD7828",
+            "topic": "temperature",
+            "color": "#1542d6",
+            "sensorType": "Temperature",
+            "indicator": "17",
+            "panelGroupId": 4
+        },
+        {
+            "name": "Temp29",
+            "gateway": "C0CDD6CD7828",
+            "topic": "temperature",
+            "color": "#1542d6",
+            "sensorType": "Temperature",
+            "indicator": "18",
+            "panelGroupId": 4
+        },
+        {
+            "name": "Temp30",
+            "gateway": "C0CDD6CD7828",
+            "topic": "temperature",
+            "color": "#1542d6",
+            "sensorType": "Temperature",
+            "indicator": "19",
+            "panelGroupId": 4
         }
     ]
 }

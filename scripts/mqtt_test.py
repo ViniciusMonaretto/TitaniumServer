@@ -12,7 +12,7 @@ MESSAGES_TO_SEND = 1
 # Base sensor values
 base_sensors = [
     {"value": -41.5, "active": True, "unit": "°C"},
-    {"value": -29.08, "active": True, "unit": "°C"},
+    {"value": -30, "active": True, "unit": "°C"},
     {"value": -18.41, "active": True, "unit": "°C"},
     {"value": -10.97, "active": True, "unit": "°C"},
     {"value": -0.67, "active": True, "unit": "°C"},
@@ -47,10 +47,6 @@ def on_connect(mqtt_client, userdata, flags, rc):
         print("Connected successfully")
         # Subscribe to the command topic
         mqtt_client.subscribe("iocloud/request/#")
-
-        # Send initial gateway status message
-        send_gateway_status(
-            mqtt_client, "iocloud/response/1C69209DFC08/command")
     else:
         print(f"Connection failed with code {rc}")
 
@@ -149,8 +145,10 @@ client.subscribe("iocloud/request/#")
 try:
     while True:
         sensors = []
+        count = 0
         for sensor in base_sensors:
-            if sensor["unit"] == "°C":
+            count += 1
+            if sensor["unit"] == "°C" and count != 2:
                 varied_value = round(
                     sensor["value"] + random.uniform(-5, 5), 2)
                 sensors.append({**sensor, "value": varied_value})

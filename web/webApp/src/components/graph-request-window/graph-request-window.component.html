@@ -30,10 +30,10 @@
             </mat-form-field>
             <mat-form-field appearance="outline">
                 <mat-label></mat-label>
-                <input matInput type="time" (change)="setTime($event, startDate)">
+                <input matInput type="time" [value]="timeInputValue(startDate)" (change)="setTime($event, startDate)">
             </mat-form-field>
         </div>
-        
+
         <div class="date-picker-class">
             <mat-form-field appearance="outline">
                 <mat-label>Data de Fim</mat-label>
@@ -43,14 +43,15 @@
             </mat-form-field>
             <mat-form-field appearance="outline">
                 <mat-label></mat-label>
-                <input matInput type="time" (change)="setTime($event, endDate)">
+                <input matInput type="time" [value]="timeInputValue(endDate)" (change)="setTime($event, endDate)">
             </mat-form-field>
         </div>
-        
+
     </div>
 
 </mat-dialog-content>
 <mat-dialog-actions style="display: flex; gap: 10px;">
     <io-button style="height: 30px;" variant="danger" (clicked)="onNoClick()">Cancelar</io-button>
-    <io-button style="height: 30px;" variant="primary" [disabled]="!validForm()" (clicked)="onAddCLick()">Adicionar</io-button>
+    <io-button style="height: 30px;" variant="primary" [disabled]="!validForm()"
+        (clicked)="onAddCLick()">Adicionar</io-button>
 </mat-dialog-actions>

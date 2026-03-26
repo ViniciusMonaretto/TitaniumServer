@@ -416,7 +416,8 @@ class ConfigHandler(ServiceInterface):
 
     def update_panel_group_command(self, command):
         data = command["data"]
-        result, message = self.update_panel_group(data["id"], data["name"])
+        result, message = self.update_panel_group(
+            data["groupId"], data["name"])
         self._middleware.send_command_answear(
             result, {}, command["requestId"])
 
@@ -447,8 +448,7 @@ class ConfigHandler(ServiceInterface):
         result = self._config_storage.update_panel_group(group_id, name)
         if result:
             with self._panel_groups_lock:
-                self._panel_groups[name] = self._panel_groups[group_id]
-                del self._panel_groups[group_id]
+                self._panel_groups[group_id].name = name
             return True, "Success"
         return False, "Error updating panel group"
 

@@ -11,11 +11,11 @@ import { DrawingMode, GraphComponent } from '../../components/graph/graph.compon
 import { GraphRequestWindowComponent } from '../../components/graph-request-window/graph-request-window.component';
 
 @Component({
-    selector: 'graph-view',
-    templateUrl: './graph-view.component.html',
-    styleUrls: ['./graph-view.component.scss'],
-    imports: [CommonModule, MatIconModule, GraphComponent],
-    standalone: true
+  selector: 'graph-view',
+  templateUrl: './graph-view.component.html',
+  styleUrls: ['./graph-view.component.scss'],
+  imports: [CommonModule, MatIconModule, GraphComponent],
+  standalone: true
 })
 export class GraphViewComponent implements OnInit {
 
@@ -32,10 +32,12 @@ export class GraphViewComponent implements OnInit {
   zoomWindowActivate: boolean = true
   lineChartData: Array<any> = [];
   clearLines: boolean = false;
+  lastRequestedStartDate: Date | null = null;
+  lastRequestedEndDate: Date | null = null;
 
   ngOnInit(): void { }
 
-  onGraphUpdate: Function = (tableInfo: {name: string, realName: string, color: string}, infoArr: Array<any>) => {
+  onGraphUpdate: Function = (tableInfo: { name: string, realName: string, color: string }, infoArr: Array<any>) => {
     let chartId = this.lineChartData.findIndex(x => x.realName == tableInfo.realName);
 
     if (chartId == -1) {
@@ -67,7 +69,7 @@ export class GraphViewComponent implements OnInit {
     // Update chart data and trigger Angular change detection
     this.lineChartData[chartId].data = newSeries.sort((a, b) => a.x - b.x);
 
-    this.lineChartData = [...this.lineChartData ]
+    this.lineChartData = [...this.lineChartData]
   };
 
   toggleHorizontalMode(): void {
@@ -131,36 +133,37 @@ export class GraphViewComponent implements OnInit {
     }
   }
 
-  toggleZoomWindowActivate()
-  {
+  toggleZoomWindowActivate() {
     this.zoomWindowActivate = !this.zoomWindowActivate
   }
 
-  openAddWindow()
-  {
+  openAddWindow() {
     const dialogRef = this.dialog.open(GraphRequestWindowComponent, {
       width: '500px',
       data: {
         "uiConfig": this.uiPanelService.GetUiConfig(),
-        callback: (sensorData: any)=>{
+        callback: (sensorData: any) => {
+          this.lastRequestedStartDate = sensorData['startDate']
+          this.lastRequestedEndDate = sensorData['endDate']
           this.getTable(sensorData)
-        }
+        },
+        "startDate": this.lastRequestedStartDate,
+        "endDate": this.lastRequestedEndDate
       }
     });
   }
 
-  removeAllLines()
-  {
+  removeAllLines() {
     this.lineChartData = []
   }
 
   getTable(sensorData: any): void {
     this.removeAllLines();
     this.serverConnector.sendRequestForTableInfo(sensorData['selectedSensors'],
-                                                 sensorData['group'], 
-                                                 sensorData['startDate'],
-                                                 sensorData['endDate'],
-                                                 this.onGraphUpdate)
+      sensorData['group'],
+      sensorData['startDate'],
+      sensorData['endDate'],
+      this.onGraphUpdate)
   }
 
 }

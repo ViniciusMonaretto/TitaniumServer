@@ -49,23 +49,26 @@ def on_connect(mqtt_client, userdata, flags, rc):
         mqtt_client.subscribe("iocloud/request/#")
 
         # Send initial gateway status message
-        #send_gateway_status(
+        # send_gateway_status(
         #    mqtt_client, "iocloud/response/1C69209DFC08/command")
-        #time.sleep(10)
+        # time.sleep(10)
         send_gateway_status(
-            mqtt_client, "iocloud/response/1C69209DFC09/command", "1C69209DFC09")
+            mqtt_client, "iocloud/response/1C69209DFC09/command", "1C69209DFC08")
         time.sleep(1)
         send_gateway_status(
-            mqtt_client, "iocloud/response/1C69209DFC10/command", "1C69209DFC10")
+            mqtt_client, "iocloud/response/1C69209DFC09/command", "C0CDD6CD7850")
         time.sleep(1)
         send_gateway_status(
-            mqtt_client, "iocloud/response/1C69209DFC11/command", "1C69209DFC11")
+            mqtt_client, "iocloud/response/1C69209DFC10/command", "C0CDD6CD7814")
         time.sleep(1)
         send_gateway_status(
-            mqtt_client, "iocloud/response/1C69209DFC012/command", "1C69209DFC12")
+            mqtt_client, "iocloud/response/1C69209DFC11/command", "C0CDD6CD7838")
         time.sleep(1)
         send_gateway_status(
-            mqtt_client, "iocloud/response/1C69209DFC13/command", "1C69209DFC13")
+            mqtt_client, "iocloud/response/1C69209DFC012/command", "C0CDD6CD7828")
+        time.sleep(1)
+        send_gateway_status(
+            mqtt_client, "iocloud/response/1C69209DFC13/command", "1C69209DB778")
         time.sleep(1)
     else:
         print(f"Connection failed with code {rc}")
@@ -100,7 +103,7 @@ def send_gateway_status(mqtt_client, response_topic, device_id):
     print(f"Sent status message to {status_topic}")
 
 
-def send_sensor_report(mqtt_client, payload_json, topic):   
+def send_sensor_report(mqtt_client, payload_json, topic):
     mqtt_client.publish(topic, payload_json)
     print(f"Sent sensor report to {topic}")
 
@@ -179,12 +182,19 @@ try:
             "sensors": sensors,
         }
         payload_json = json.dumps(payload)
-        #send_sensor_report(client, payload_json, "iocloud/response/1C69209DFC08/sensor/report")
-        send_sensor_report(client, payload_json, "iocloud/response/1C69209DFC09/sensor/report")
-        send_sensor_report(client, payload_json, "iocloud/response/1C69209DFC10/sensor/report")
-        send_sensor_report(client, payload_json, "iocloud/response/1C69209DFC11/sensor/report")
-        send_sensor_report(client, payload_json, "iocloud/response/1C69209DFC12/sensor/report")
-        send_sensor_report(client, payload_json, "iocloud/response/1C69209DFC13/sensor/report")
+        # send_sensor_report(client, payload_json, "iocloud/response/1C69209DFC08/sensor/report")
+        send_sensor_report(client, payload_json,
+                           "iocloud/response/1C69209DFC08/sensor/report")
+        send_sensor_report(client, payload_json,
+                           "iocloud/response/C0CDD6CD7850/sensor/report")
+        send_sensor_report(client, payload_json,
+                           "iocloud/response/C0CDD6CD7814/sensor/report")
+        send_sensor_report(client, payload_json,
+                           "iocloud/response/C0CDD6CD7838/sensor/report")
+        send_sensor_report(client, payload_json,
+                           "iocloud/response/C0CDD6CD7828/sensor/report")
+        send_sensor_report(client, payload_json,
+                           "iocloud/response/1C69209DB778/sensor/report")
         time.sleep(5)
 except KeyboardInterrupt:
     print("Stopping the client.")

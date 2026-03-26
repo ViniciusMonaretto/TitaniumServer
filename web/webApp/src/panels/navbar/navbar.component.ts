@@ -30,7 +30,7 @@ export class NavbarComponent implements OnInit {
     private UiPanelsService: UiPanelService,
     private serverConnector: ServerConectorService) { }
 
- 
+
 
   ngOnInit(): void {
   }
@@ -40,8 +40,7 @@ export class NavbarComponent implements OnInit {
     // Handle the sensor data (e.g., save it to the server)
   }
 
-  isPanelSelected(panel: number)
-  {
+  isPanelSelected(panel: number) {
     return this.mainScreenService.GetScreen() == panel
   }
 
@@ -52,19 +51,23 @@ export class NavbarComponent implements OnInit {
     });
   }
 
-  addNewGroup(): void {
+  renameGroup(groupId: number, groupName: string): void {
     const dialogRef = this.dialog.open(GroupAddWindowComponent, {
-      width: '250px',
-      data: { callback: (data: any) => {
-        this.serverConnector.sendCommand("addGroupPanel", data)
-      } }
+      width: '300px',
+      data: {
+        callback: (data: any) => {
+          this.serverConnector.sendCommand("updateGroupPanel", data)
+        },
+        groupId: groupId,
+        groupName: groupName
+      }
     });
   }
 
   deleteGroup(group: number) {
-    this.dialogHelper.openQuestionDialog("Deletar Grupo", 
+    this.dialogHelper.openQuestionDialog("Deletar Grupo",
       "Você tem certeza que deseja deletar o grupo?", () => {
-        this.serverConnector.sendCommand("removeGroupPanel", {"id": group})
+        this.serverConnector.sendCommand("removeGroupPanel", { "id": group })
       }
     )
   }
@@ -74,8 +77,7 @@ export class NavbarComponent implements OnInit {
     return Object.values(groups)
   }
 
-  checkIfGroupIsSelected(group: string)
-  {
+  checkIfGroupIsSelected(group: string) {
     return this.UiPanelsService.groupSelected == group
   }
 

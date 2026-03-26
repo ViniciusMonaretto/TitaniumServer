@@ -8,7 +8,7 @@
                 {{componentText}}
             </div>
         </button>
-        <img *ngIf="canEdit" (click)="deleteCallback.emit()" src="assets/icon/trashIcon.svg"
+        <img *ngIf="canEdit" (click)="editCallback.emit()" src="assets/icon/pencilIcon.svg"
             [style]="isSuboption?'height: 20px;padding: 15px; cursor: pointer;':'height: 28px; cursor: pointer;'" />
     </div>
 

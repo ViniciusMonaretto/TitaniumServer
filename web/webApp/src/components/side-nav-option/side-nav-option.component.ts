@@ -4,11 +4,11 @@ import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 
 @Component({
-    selector: 'side-nav-option',
-    templateUrl: './side-nav-option.component.html',
-    styleUrls: ['./side-nav-option.component.scss'],
-    imports: [CommonModule, MatIconModule],
-    standalone: true
+  selector: 'side-nav-option',
+  templateUrl: './side-nav-option.component.html',
+  styleUrls: ['./side-nav-option.component.scss'],
+  imports: [CommonModule, MatIconModule],
+  standalone: true
 })
 export class SideNavOptionComponent implements OnInit {
 
@@ -20,7 +20,7 @@ export class SideNavOptionComponent implements OnInit {
   @Input() canEdit: boolean = false;
   @Output() buttonCallback: EventEmitter<any> = new EventEmitter();
   @Output() deleteCallback: EventEmitter<any> = new EventEmitter();
-
+  @Output() editCallback: EventEmitter<any> = new EventEmitter();
   unfoldOptions: boolean = false
 
   constructor() { }
@@ -28,22 +28,19 @@ export class SideNavOptionComponent implements OnInit {
   ngOnInit(): void {
   }
 
-  getIcon()
-  {
-    return this.isSelected? this.iconSelected: this.icon;
+  getIcon() {
+    return this.isSelected ? this.iconSelected : this.icon;
 
   }
 
-  buttonCLick() : void {
-    if(!this.buttonCallback.observers.length)
-    {
+  buttonCLick(): void {
+    if (!this.buttonCallback.observers.length) {
       this.unfoldOptions = !this.unfoldOptions;
     }
-    else
-    {
+    else {
       this.buttonCallback.emit()
     }
-    
+
   }
 
 }

@@ -1,13 +1,22 @@
-<h2 mat-dialog-title>Adicionar Grupo</h2>
+<h2 mat-dialog-title>Modificat Grupo</h2>
 <mat-dialog-content>
     <div>
-        <div>Novo Nome</div>
+        <div>Nome</div>
         <mat-form-field style="width: 100%;" appearance="fill">
-                <input matInput [(ngModel)]="groupName" />
+            <input matInput [(ngModel)]="groupName" />
         </mat-form-field>
     </div>
 </mat-dialog-content>
 <mat-dialog-actions>
-    <io-button style="height: 30px;" variant="secondary" (clicked)="onCancelClick()">Cancelar</io-button>
-    <io-button style="height: 30px;" variant="primary" [disabled]="!validForm()" (clicked)="onAddCLick()">Adicionar</io-button>
+    <div style="display: flex;
+                justify-content: space-between;
+                width: 100%;
+                padding-right: 15px;
+                padding-left: 15px;">
+        <io-button style="height: 30px; width: 110px;" variant="secondary"
+            (clicked)="onCancelClick()">Cancelar</io-button>
+        <io-button style="height: 30px; width: 110px;" variant="primary" [disabled]="!validForm()"
+            (clicked)="onAddCLick()">Ok</io-button>
+    </div>
+
 </mat-dialog-actions>

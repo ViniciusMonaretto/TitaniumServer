@@ -1,5 +1,5 @@
 import { Component, Inject, ElementRef } from '@angular/core';
-import {MAT_DIALOG_DATA, MatDialogRef, MatDialogModule} from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogRef, MatDialogModule } from '@angular/material/dialog';
 
 import { CommonModule } from '@angular/common';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -11,49 +11,50 @@ import { IoButtonComponent } from '../io-button/io-button.component';
 
 
 @Component({
-    selector: 'app-group-add-window',
-    templateUrl: './group-add-window.component.html',
-    styleUrls: ['./group-add-window.component.scss'],
-    imports: [CommonModule,
-        MatFormFieldModule,
-        MatInputModule,
-        FormsModule,
-        MatDialogModule,
-        IoButtonComponent],
-    standalone: true
+  selector: 'app-group-add-window',
+  templateUrl: './group-add-window.component.html',
+  styleUrls: ['./group-add-window.component.scss'],
+  imports: [CommonModule,
+    MatFormFieldModule,
+    MatInputModule,
+    FormsModule,
+    MatDialogModule,
+    IoButtonComponent],
+  standalone: true
 })
 export class GroupAddWindowComponent {
   public groupName: string = ""
+  public groupId: number = -1
 
   constructor(public dialogRef: MatDialogRef<GroupAddWindowComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any,
     private elementRef: ElementRef
   ) {
-
+    this.groupId = data.groupId
+    this.groupName = data.groupName
   }
 
   onNoClick(): void {
     this.dialogRef.close();
   }
 
-  getGroupData()
-  {
+  getGroupData() {
     return {
-      "name": this.groupName
+      "name": this.groupName,
+      "groupId": this.groupId
     }
   }
 
-  validForm()
-  {
-    return this.groupName != "" 
+  validForm() {
+    return this.groupName != ""
   }
 
-  onAddCLick(): void{
+  onAddCLick(): void {
     this.data.callback(this.getGroupData())
     this.dialogRef.close();
   }
 
-  onCancelClick(): void{
+  onCancelClick(): void {
     this.dialogRef.close();
   }
 
