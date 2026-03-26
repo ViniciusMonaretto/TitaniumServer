@@ -100,10 +100,10 @@ echo "Installed-Size: $PACKAGE_SIZE" >> debian-package/DEBIAN/control
 print_header "Construindo pacote .deb..."
 
 # Constrói o pacote
-dpkg-deb --build debian-package titanium-server_1.0.0_amd64.deb
+dpkg-deb --build debian-package titanium-server_1.1.0_amd64.deb
 
 # Verifica se o pacote foi criado
-if [ -f "titanium-server_1.0.0_amd64.deb" ]; then
+if [ -f "titanium-server_1.1.0_amd64.deb" ]; then
     print_status "Pacote .deb criado com sucesso!"
     print_status "Arquivo: $(pwd)/titanium-server_1.0.0_amd64.deb"
     

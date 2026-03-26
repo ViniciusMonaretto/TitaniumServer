@@ -19,4 +19,4 @@ Description: Titanium Server - IoCloud Datalogger System
  .
  Após a instalação, o serviço será habilitado automaticamente
  e pode ser gerenciado através dos comandos systemctl padrão.
-Installed-Size: 15892
+Installed-Size: 15896
