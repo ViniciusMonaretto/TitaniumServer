@@ -34,6 +34,10 @@ export class UiPanelService {
 
     sensorCachedCurrentInfo: {[id: string]: any[]} = {}
 
+    /** Last graph request window range; survives graph panel close/reopen (root service). */
+    lastRequestedStartDate: Date | null = null;
+    lastRequestedEndDate: Date | null = null;
+
     private selectedSensor: SensorModule|null = null
     private spinnerDialogRef: MatDialogRef<SpinnerComponent> | null = null;
     

@@ -32,8 +32,6 @@ export class GraphViewComponent implements OnInit {
   zoomWindowActivate: boolean = true
   lineChartData: Array<any> = [];
   clearLines: boolean = false;
-  lastRequestedStartDate: Date | null = null;
-  lastRequestedEndDate: Date | null = null;
 
   ngOnInit(): void { }
 
@@ -143,12 +141,12 @@ export class GraphViewComponent implements OnInit {
       data: {
         "uiConfig": this.uiPanelService.GetUiConfig(),
         callback: (sensorData: any) => {
-          this.lastRequestedStartDate = sensorData['startDate']
-          this.lastRequestedEndDate = sensorData['endDate']
+          this.uiPanelService.lastRequestedStartDate = sensorData['startDate']
+          this.uiPanelService.lastRequestedEndDate = sensorData['endDate']
           this.getTable(sensorData)
         },
-        "startDate": this.lastRequestedStartDate,
-        "endDate": this.lastRequestedEndDate
+        "startDate": this.uiPanelService.lastRequestedStartDate,
+        "endDate": this.uiPanelService.lastRequestedEndDate
       }
     });
   }
