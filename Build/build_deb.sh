@@ -100,27 +100,27 @@ echo "Installed-Size: $PACKAGE_SIZE" >> debian-package/DEBIAN/control
 print_header "Construindo pacote .deb..."
 
 # Constrói o pacote
-dpkg-deb --build debian-package titanium-server_1.1.0_amd64.deb
+dpkg-deb --build debian-package titanium-server_1.1.2_amd64.deb
 
 # Verifica se o pacote foi criado
-if [ -f "titanium-server_1.1.0_amd64.deb" ]; then
+if [ -f "titanium-server_1.1.2_amd64.deb" ]; then
     print_status "Pacote .deb criado com sucesso!"
-    print_status "Arquivo: $(pwd)/titanium-server_1.0.0_amd64.deb"
+    print_status "Arquivo: $(pwd)/titanium-server_1.1.2_amd64.deb"
     
     # Mostra informações do arquivo
     echo ""
     print_status "Informações do pacote:"
-    ls -lh titanium-server_1.0.0_amd64.deb
+    ls -lh titanium-server_1.1.2_amd64.deb
     
     echo ""
     print_status "Para instalar o pacote:"
-    echo "  sudo dpkg -i titanium-server_1.0.0_amd64.deb"
+    echo "  sudo dpkg -i titanium-server_1.1.2_amd64.deb"
     echo ""
     print_status "Para verificar o conteúdo do pacote:"
-    echo "  dpkg -c titanium-server_1.0.0_amd64.deb"
+    echo "  dpkg -c titanium-server_1.1.2_amd64.deb"
     echo ""
     print_status "Para verificar informações do pacote:"
-    echo "  dpkg -I titanium-server_1.0.0_amd64.deb"
+    echo "  dpkg -I titanium-server_1.1.2_amd64.deb"
     
 else
     print_error "Falha ao criar o pacote .deb!"

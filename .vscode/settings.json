@@ -13,5 +13,6 @@
   // Optional: trim trailing whitespace on save (set to false to disable)
   "files.trimTrailingWhitespace": false,
   // Optional: insert final newline at the end of files
-  "files.insertFinalNewline": true
+  "files.insertFinalNewline": true,
+  "ROS2.distro": "humble"
 }

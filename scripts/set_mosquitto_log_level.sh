@@ -16,7 +16,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
-CONF="${REPO_ROOT}/server/config/mosquitto/config/mosquitto.conf"
+CONF="/opt/titanium-server/config/mosquitto/config/mosquitto.conf"
 LEVEL="${MOSQUITTO_LOG_LEVEL:-warning}"
 
 valid_levels='debug error warning notice information subscribe unsubscribe websockets all none'
