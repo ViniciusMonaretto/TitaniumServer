@@ -23,7 +23,7 @@ PUBLISH_TOPIC_LIST = ["GetLevel", "titanium/level"]
 GATEWAY_CONFIG_DIR = "titaniumGatewaysConfigs"
 
 # Get MQTT connection details from environment variables
-MQTT_SERVER = os.getenv('MQTT_HOST', 'localhost')
+MQTT_SERVER = 'localhost' #os.getenv('MQTT_HOST', 'localhost')
 MQTT_PORT = int(os.getenv('MQTT_PORT', '1883'))
 
 

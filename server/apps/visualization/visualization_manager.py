@@ -1,5 +1,6 @@
 import json
 import multiprocessing
+from datetime import datetime, timedelta
 import threading
 import time
 import tornado.web
@@ -26,6 +27,10 @@ import base64
 import mimetypes
 import copy
 import gc
+
+# Mirrors the range the graph request window allows, so a hand-crafted
+# websocket message can't ask for a year of history.
+MAX_GRAPH_WINDOW_DAYS = 14
 
 
 class Visualization(tornado.web.RequestHandler):
@@ -209,6 +214,26 @@ class VisualizationWebSocketHandler(tornado.websocket.WebSocketHandler):
             message.clear()
 
 ################# Status commands #############################
+    def is_graph_window_allowed(self, data):
+        """True when the requested range is within MAX_GRAPH_WINDOW_DAYS."""
+        if "beginDate" not in data:
+            # An open-ended request reaches the TTL horizon; log it but don't break callers
+            self._logger.warning(
+                "Visualization.is_graph_window_allowed: graph request with no beginDate")
+            return True
+
+        try:
+            begin_date = datetime.strptime(
+                data["beginDate"][:26], '%Y-%m-%dT%H:%M:%S.%f')
+            end_date = (datetime.strptime(data["endDate"][:26], '%Y-%m-%dT%H:%M:%S.%f')
+                        if "endDate" in data else datetime.now())
+        except ValueError as e:
+            self._logger.error(
+                f"Visualization.is_graph_window_allowed: invalid date in request {e}")
+            return False
+
+        return (end_date - begin_date) <= timedelta(days=MAX_GRAPH_WINDOW_DAYS)
+
     def request_status(self, request):
         self._logger.info(
             "Visualization.request_status: Incoming graph request")
@@ -220,6 +245,13 @@ class VisualizationWebSocketHandler(tornado.websocket.WebSocketHandler):
             data['beginDate'] = request["beginDate"]
         if ("endDate" in request):
             data['endDate'] = request["endDate"]
+
+        if not self.is_graph_window_allowed(data):
+            self._logger.warning(
+                "Visualization.request_status: rejected graph request outside the allowed window")
+            self.send_error_message(
+                f"O período selecionado não pode ser maior que {MAX_GRAPH_WINDOW_DAYS} dias")
+            return
 
         self._middleware.send_command(
             SensorDataStorageCommands.READ_SENSOR_INFO,

@@ -9,7 +9,10 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { MatInputModule } from '@angular/material/input';
 import { FormsModule } from '@angular/forms';
-import { SensorModule } from '../../models/sensor-module';
+import { MatIconModule } from '@angular/material/icon';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { GetSensorTypeLabel, SensorModule } from '../../models/sensor-module';
+import { SensorTypesEnum } from '../../enum/sensor-type';
 import { GroupInfo } from '../../services/ui-panels.service';
 import { IoButtonComponent } from '../io-button/io-button.component';
 import { DialogHelper } from '../../services/dialog-helper.service';
@@ -37,6 +40,8 @@ export const MY_DATE_FORMATS = {
     MatSelectModule,
     MatInputModule,
     FormsModule,
+    MatIconModule,
+    MatCheckboxModule,
     MatNativeDateModule,
     MatDatepickerModule,
     IoButtonComponent
@@ -58,7 +63,11 @@ export class GraphRequestWindowComponent implements OnInit {
   startDate: Date | null = null
   endDate: Date | null = null
 
-  option: string = ""
+  /** Selected sensor types. Each one gets its own Y axis on the chart. */
+  options: Array<SensorTypesEnum> = []
+
+  /** Types unfolded in the sensor selector; every type starts folded. */
+  expandedTypes: Set<SensorTypesEnum> = new Set()
 
   constructor(public dialogRef: MatDialogRef<SensorAddWindowComponent>, private dialogHelper: DialogHelper,
     @Inject(MAT_DIALOG_DATA) public data: any
@@ -138,24 +147,96 @@ export class GraphRequestWindowComponent implements OnInit {
     }
   }
 
-  getAvailableSensors() {
+  /** Every sensor in the selected group, regardless of which panel bucket holds it. */
+  private getGroupSensors(): Array<SensorModule> {
     if (this.selectedGroup == null) {
       return []
     }
-    switch (this.option) {
-      case "temperature":
-        return this.selectedGroup.panels.temperature
-      case "pressure":
-        return this.selectedGroup.panels.pressure
-      case "power":
-        return this.selectedGroup.panels.power
-      default:
-        return []
+    return [
+      ...this.selectedGroup.panels.temperature,
+      ...this.selectedGroup.panels.pressure,
+      ...this.selectedGroup.panels.power
+    ]
+  }
+
+  /** Sensor types actually present in this group, in the order they appear. */
+  getAvailableTypes(): Array<SensorTypesEnum> {
+    const types: Array<SensorTypesEnum> = []
+    for (const sensor of this.getGroupSensors()) {
+      if (!types.includes(sensor.sensorType)) {
+        types.push(sensor.sensorType)
+      }
+    }
+    return types
+  }
+
+  getTypeLabel(sensorType: SensorTypesEnum): string {
+    return GetSensorTypeLabel(sensorType)
+  }
+
+  /** With several types picked, the sensor list needs to say which is which. */
+  getSensorOptionLabel(sensor: SensorModule): string {
+    if (this.options.length < 2) {
+      return sensor.name
+    }
+    return `${sensor.name} — ${this.getTypeLabel(sensor.sensorType)}`
+  }
+
+  /** Selected types in the order the group lists them, one sensor section each. */
+  getSelectedTypes(): Array<SensorTypesEnum> {
+    return this.getAvailableTypes().filter(x => this.options.includes(x))
+  }
+
+  getSensorsOfType(sensorType: SensorTypesEnum): Array<SensorModule> {
+    return this.getGroupSensors().filter(x => x.sensorType == sensorType)
+  }
+
+  countSelectedOfType(sensorType: SensorTypesEnum): number {
+    return this.selectedSensors.filter(x => x.sensorType == sensorType).length
+  }
+
+  isTypeCollapsed(sensorType: SensorTypesEnum): boolean {
+    return !this.expandedTypes.has(sensorType)
+  }
+
+  toggleTypeCollapsed(sensorType: SensorTypesEnum): void {
+    if (this.expandedTypes.has(sensorType)) {
+      this.expandedTypes.delete(sensorType)
+    } else {
+      this.expandedTypes.add(sensorType)
     }
   }
 
+  areAllOfTypeSelected(sensorType: SensorTypesEnum): boolean {
+    const sensors = this.getSensorsOfType(sensorType)
+    return sensors.length > 0 && this.countSelectedOfType(sensorType) == sensors.length
+  }
+
+  setAllOfTypeSelected(sensorType: SensorTypesEnum, selected: boolean): void {
+    const others = this.selectedSensors.filter(x => x.sensorType != sensorType)
+    this.selectedSensors = selected ? [...others, ...this.getSensorsOfType(sensorType)] : others
+  }
+
+  onGroupChange(): void {
+    this.options = []
+    this.selectedSensors = []
+    this.expandedTypes.clear()
+  }
+
+  onTypesChange(): void {
+    // Drop sensors whose type is no longer selected, so they can't ride along unseen
+    this.selectedSensors = this.selectedSensors.filter(x => this.options.includes(x.sensorType))
+  }
+
+  getAvailableSensors(): Array<SensorModule> {
+    if (this.options.length == 0) {
+      return []
+    }
+    return this.getGroupSensors().filter(x => this.options.includes(x.sensorType))
+  }
+
   validForm() {
-    return this.selectedGroup != null && this.option != "" &&
+    return this.selectedGroup != null && this.options.length > 0 && this.selectedSensors.length > 0 &&
       ((this.startDate != null && this.endDate == null) ||
         (this.startDate != null && this.endDate != null && this.startDate?.getTime() < this.endDate.getTime()))
   }
@@ -177,10 +258,6 @@ export class GraphRequestWindowComponent implements OnInit {
         this.dialogHelper.openErrorDialog("O período selecionado não pode ser maior que 2 semanas");
         return;
       }
-    }
-
-    if (this.selectedSensors.length == 0) {
-      this.selectedSensors = this.getAvailableSensors()
     }
 
     for (let panel of this.selectedSensors) {

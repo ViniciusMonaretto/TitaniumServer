@@ -7,10 +7,18 @@
 }
 
 
+.graph-container {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+}
+
 .chart-wrapper {
     position: relative;
     width: 100%;
-    height: 100%;
+    flex: 1;
+    min-height: 0;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -20,4 +28,76 @@ canvas {
     display: block;
     //width: 95% !important;
     //height: 95% !important;
+}
+.graph-legend {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 8px 32px;
+    padding: 0 8px 4px;
+    font-size: 12px;
+    color: #666;
+    // Past this the legend scrolls instead of squeezing the chart
+    max-height: 80px;
+    overflow: auto;
+    flex-shrink: 0;
+}
+
+// One table per sensor type, side by side; flex-grow is set to its entry count
+.legend-group {
+    flex-shrink: 1;
+    flex-basis: 110px;
+    min-width: 110px;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 4px;
+}
+
+// Stays visible while the entries scroll under it
+.legend-group-title {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background: #fff;
+    font-weight: 600;
+    padding: 4px 0 2px;
+    border-bottom: 1px solid #ddd;
+}
+
+// As many evenly spaced columns as the group's width fits
+.legend-items {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+    gap: 2px 16px;
+}
+
+.legend-item {
+    display: inline-flex;
+    min-width: 0;
+    white-space: nowrap;
+    align-items: center;
+    gap: 6px;
+    padding: 0;
+    border: none;
+    background: none;
+    font: inherit;
+    color: inherit;
+    cursor: pointer;
+}
+
+.legend-label {
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.legend-item-hidden {
+    text-decoration: line-through;
+    opacity: 0.5;
+}
+
+.legend-swatch {
+    width: 12px;
+    height: 12px;
+    flex-shrink: 0;
 }

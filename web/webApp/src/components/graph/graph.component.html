@@ -1,9 +1,25 @@
-<div class="chart-wrapper" #chartContainer>
-    <canvas
-        style="height: 100%;"
-        baseChart
-        [data]="lineChartData"
-        [options]="lineChartOptions"
-        type="line"
-    ></canvas>
+<div class="graph-container">
+    <div class="chart-wrapper" #chartContainer>
+        <canvas
+            style="height: 100%;"
+            baseChart
+            [data]="lineChartData"
+            [options]="lineChartOptions"
+            type="line"
+        ></canvas>
+    </div>
+    <div class="graph-legend" *ngIf="legendGroups.length">
+        <!-- Width is shared out by entry count, so big groups get room to spread -->
+        <div class="legend-group" *ngFor="let group of legendGroups" [style.flex-grow]="group.items.length">
+            <span class="legend-group-title" *ngIf="group.title">{{group.title}}</span>
+            <div class="legend-items">
+                <button type="button" class="legend-item" *ngFor="let item of group.items"
+                    [class.legend-item-hidden]="isDatasetHidden(item.index)" (click)="toggleDataset(item.index)"
+                    [title]="item.label">
+                    <span class="legend-swatch" [style.background]="item.color"></span>
+                    <span class="legend-label">{{item.label}}</span>
+                </button>
+            </div>
+        </div>
+    </div>
 </div>

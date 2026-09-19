@@ -1,5 +1,5 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
-import { SensorModule } from '../../models/sensor-module';
+import { GetSensorUnit, SensorModule, ToBaseUnit } from '../../models/sensor-module';
 import { SensorTypesEnum } from '../../enum/sensor-type';
 
 import { CommonModule } from '@angular/common';
@@ -24,37 +24,7 @@ export class SensorComponent implements OnInit {
   constructor() { }
 
   getMeasureIcon(): String {
-    let scaleString = ""
-    if (this.sensorInfo.multiplier == 10) {
-      scaleString = "d";
-    }
-    if (this.sensorInfo.multiplier == 100) {
-      scaleString = "c";
-    }
-    if (this.sensorInfo.multiplier == 1000) {
-      scaleString = "k";
-    }
-
-    if (this.sensorInfo.sensorType == SensorTypesEnum.PREASSURE) {
-      return scaleString + "Pa"
-    }
-    if (this.sensorInfo.sensorType == SensorTypesEnum.TEMPERATURE) {
-      return scaleString + "ºC"
-    }
-    if (this.sensorInfo.sensorType == SensorTypesEnum.POWER) {
-      return scaleString + "W"
-    }
-    if (this.sensorInfo.sensorType == SensorTypesEnum.CURRENT) {
-      return scaleString + "A"
-    }
-    if (this.sensorInfo.sensorType == SensorTypesEnum.TENSION) {
-      return scaleString + "V"
-    }
-    if (this.sensorInfo.sensorType == SensorTypesEnum.POWER_FACTOR) {
-      return scaleString + "%"
-    }
-
-    return ""
+    return GetSensorUnit(this.sensorInfo.sensorType, this.sensorInfo.multiplier)
   }
 
   ngOnInit(): void {
@@ -140,7 +110,7 @@ export class SensorComponent implements OnInit {
 
   getCurrentReading() {
     return this.sensorInfo && this.sensorInfo?.isActive && this.sensorInfo?.value != null ? 
-                    (Number(this.sensorInfo.value)/this.sensorInfo.multiplier).toFixed(2) : "--"
+                    (ToBaseUnit(this.sensorInfo.sensorType, Number(this.sensorInfo.value))/this.sensorInfo.multiplier).toFixed(2) : "--"
   }
 
 }

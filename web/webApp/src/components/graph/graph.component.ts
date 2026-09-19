@@ -128,6 +128,14 @@ const multilineLabelsPlugin = {
 
 Chart.register(multilineLabelsPlugin);
 
+/** Axis used by datasets that carry no sensor type (e.g. the sensor-info dialog). */
+export const DEFAULT_Y_AXIS_ID = 'y';
+
+/** Datasets of the same sensor type share one Y axis, so each unit keeps its own scale. */
+export function GetAxisIdForSensorType(sensorType?: string | null): string {
+  return sensorType ? `y-${sensorType}` : DEFAULT_Y_AXIS_ID;
+}
+
 export enum DrawingMode {
   None = 0,
   Horizontal = 1,
@@ -152,7 +160,9 @@ export class GraphComponent {
   }
   @Input() zoomEnabled: boolean = true
   @Input() set selectedDataLineIndex(value: number) {
+    const previousAxisId = this.activeAxisId;
     this._selectedDataLineIndex = value;
+    this.dropHorizontalLinesIfAxisChanged(previousAxisId);
     this.updateLines();
   }
   get selectedDataLineIndex(): number {
@@ -187,15 +197,22 @@ export class GraphComponent {
   // Propriedades para linha temporária que segue o mouse
   private _tempMousePosition: { x: number | null, y: number | null } = { x: null, y: null };
   private _isMouseOverChart: boolean = false;
-  private marginY: number = 0
-  private marginX: number = 0
-  private maxY: number = 0
-  private minY: number = 0
   private maxX: number = 0
   private minX: number = 0
 
+  // One entry per Y axis in play, keyed by axis id.
+  private margins: Map<string, { min: number, max: number }> = new Map();
+  private axisOrder: string[] = [DEFAULT_Y_AXIS_ID];
+  private axisUnits: Map<string, string> = new Map();
+  private axisLabels: Map<string, string> = new Map();
+
+  /** Legend under the chart, one group per Y axis (i.e. per sensor type). */
+  legendGroups: Array<{ title: string, items: Array<{ index: number, label: string, color: string }> }> = [];
+
   @Input() set inputInfo(newValue: any) {
     console.log('Novo info de gráfico recebido:');
+
+    const previousAxisId = this.activeAxisId;
 
     // Configure datasets with proper point settings
     const datasetsWithPoints = newValue.map((dataset: any) => ({
@@ -213,6 +230,8 @@ export class GraphComponent {
     }
 
     this.calculateMargin(datasetsWithPoints)
+    this.buildScales(datasetsWithPoints, previousAxisId)
+    this.buildLegendGroups(datasetsWithPoints)
 
     this.updateZoomLimits()
     this.fitAllGraph()
@@ -287,8 +306,9 @@ export class GraphComponent {
         threshold: 500   // Enable decimation only if points > threshold
       },
       legend: {
+        // Replaced by the grouped HTML legend in the template
         position: 'bottom',
-        display: true,
+        display: false,
         labels: {
           boxWidth: 12
         }
@@ -317,7 +337,9 @@ export class GraphComponent {
           },
           label: (context) => {
             const value = context.parsed.y;
-            return `${context.dataset.label}: ${value}`;
+            const unit = (context.dataset as any).unit ?? '';
+            return unit ? `${context.dataset.label}: ${value} ${unit}`
+                        : `${context.dataset.label}: ${value}`;
           }
         }
       },
@@ -350,6 +372,8 @@ export class GraphComponent {
 
             return true
           },
+          // Horizontal line labels read values off every Y axis, so refresh them once the axes move
+          onZoomComplete: () => this.refreshHorizontalLineLabels(),
           drag: {
             enabled: true,
             backgroundColor: 'rgba(0,123,255,0.25)',
@@ -370,7 +394,8 @@ export class GraphComponent {
               chart.options.plugins!.zoom!.pan!.enabled = true;
             }
             return true
-          }
+          },
+          onPanComplete: () => this.refreshHorizontalLineLabels()
         },
         limits: {
           x: {
@@ -498,9 +523,13 @@ export class GraphComponent {
     const x = event.clientX - rect.left;
     const y = event.clientY - rect.top;
 
-    // Convert pixel coordinates to chart coordinates
-    const yScale = this.chart.chart.scales['y'];
+    // Convert pixel coordinates to chart coordinates of the active axis
+    const yScale = this.chart.chart.scales[this.activeAxisId];
     const xScale = this.chart.chart.scales['x'];
+
+    if (!yScale || !xScale) {
+      return;
+    }
 
     const yValue = yScale.getValueForPixel(y);
     const xValue = xScale.getValueForPixel(x);
@@ -541,9 +570,13 @@ export class GraphComponent {
       const x = event.clientX - rect.left;
       const y = event.clientY - rect.top;
 
-      // Convert pixel coordinates to chart coordinates
-      const yScale = this.chart.chart.scales['y'];
+      // Convert pixel coordinates to chart coordinates of the active axis
+      const yScale = this.chart.chart.scales[this.activeAxisId];
       const xScale = this.chart.chart.scales['x'];
+
+      if (!yScale || !xScale) {
+        return;
+      }
 
       const yValue = yScale.getValueForPixel(y);
       const xValue = xScale.getValueForPixel(x);
@@ -671,12 +704,20 @@ export class GraphComponent {
   }
 
   calculateMargin(linesInfos: any) {
-    let minYaxis = Number.MAX_SAFE_INTEGER
-    let maxYaxis = Number.MIN_SAFE_INTEGER
+    this.margins.clear()
 
     let minXaxis = new Date(8640000000000000).getTime();
     let maxXaxis = new Date(-8640000000000000).getTime()
+
     for (var infos of linesInfos) {
+      const axisId = infos.yAxisID ?? DEFAULT_Y_AXIS_ID
+
+      let range = this.margins.get(axisId)
+      if (!range) {
+        range = { min: Number.MAX_SAFE_INTEGER, max: Number.MIN_SAFE_INTEGER }
+        this.margins.set(axisId, range)
+      }
+
       for (let info of infos.data) {
         let point: Point = <any>(info)
         let dt = point.x;
@@ -689,41 +730,206 @@ export class GraphComponent {
           maxXaxis = dt
         }
 
-        if (minYaxis > value) {
-          minYaxis = value
+        if (range.min > value) {
+          range.min = value
         }
-        if (maxYaxis < value) {
-          maxYaxis = value
+        if (range.max < value) {
+          range.max = value
         }
-
-
       }
     }
 
-    this.marginY = (maxYaxis - minYaxis) * 0.2
-    this.maxY = maxYaxis + this.marginY
-    this.minY = minYaxis - this.marginY
+    for (const [axisId, range] of this.margins) {
+      // An axis whose datasets are all empty gets a neutral range instead of a nonsense one
+      if (range.min > range.max) {
+        this.margins.set(axisId, { min: 0, max: 1 })
+        continue
+      }
+
+      // 20% headroom, falling back to +/-1 for a flat series
+      const margin = (range.max - range.min) * 0.2 || 1
+      this.margins.set(axisId, { min: range.min - margin, max: range.max + margin })
+    }
+
     this.maxX = maxXaxis
     this.minX = minXaxis
   }
 
-  fitAllGraph() {
-    if (this.lineChartData && !this.blockFitAll) {
-      if (this.lineChartOptions.scales &&
-        this.lineChartOptions.scales['y'] &&
-        this.lineChartOptions.scales['x']) {
-        this.lineChartOptions.scales['y'].max = this.maxY
-        this.lineChartOptions.scales['y'].min = this.minY
+  /**
+   * Rebuilds the Y scales from the axis ids the datasets declare: one scale per
+   * sensor type, all stacked on the left side. Ranges stay undefined
+   * here so fitAllGraph stays in charge of them (and blockFitAll still works).
+   */
+  private buildScales(datasets: any[], previousAxisId: string): void {
+    const order: string[] = []
+    this.axisUnits.clear()
+    this.axisLabels.clear()
 
-        if (this.marginY === 0) {
-          this.lineChartOptions.scales['y'].max += 1
-          this.lineChartOptions.scales['y'].min -= 1
+    for (const dataset of datasets) {
+      const axisId = dataset.yAxisID ?? DEFAULT_Y_AXIS_ID
+
+      if (!order.includes(axisId)) {
+        order.push(axisId)
+      }
+      if (dataset.unit && !this.axisUnits.has(axisId)) {
+        this.axisUnits.set(axisId, dataset.unit)
+      }
+      if (dataset.typeLabel && !this.axisLabels.has(axisId)) {
+        this.axisLabels.set(axisId, dataset.typeLabel)
+      }
+    }
+
+    if (order.length === 0) {
+      order.push(DEFAULT_Y_AXIS_ID)
+    }
+
+    this.axisOrder = order
+
+    const scales: any = { x: this.lineChartOptions.scales!['x'] }
+
+    order.forEach((axisId, index) => {
+      scales[axisId] = {
+        type: 'linear',
+        position: 'left',
+        beginAtZero: true,
+        title: {
+          display: true,
+          text: this.axisTitle(axisId),
+        },
+        min: undefined,
+        max: undefined,
+        // Only the first axis draws gridlines, otherwise they double up
+        grid: {
+          display: true,
+          drawOnChartArea: index === 0,
+          drawTicks: true
         }
+      }
+    })
 
-        this.lineChartOptions.scales['x'].max = new Date(this.maxX).getTime()
-        this.lineChartOptions.scales['x'].min = new Date(this.minX).getTime()
+    this.lineChartOptions.scales = scales
+
+    this.dropHorizontalLinesIfAxisChanged(previousAxisId)
+  }
+
+  private axisTitle(axisId: string): string {
+    return this.axisName(axisId) || 'Valor'
+  }
+
+  /** e.g. "Pressão (Pa)"; empty when the datasets carry neither type nor unit. */
+  private axisName(axisId: string): string {
+    const label = this.axisLabels.get(axisId)
+    const unit = this.axisUnits.get(axisId)
+
+    if (label && unit) {
+      return `${label} (${unit})`
+    }
+    return label || unit || ''
+  }
+
+  private buildLegendGroups(datasets: any[]): void {
+    this.legendGroups = this.axisOrder
+      .map(axisId => ({
+        title: this.axisName(axisId),
+        items: datasets
+          .map((dataset, index) => ({ dataset, index }))
+          .filter(({ dataset }) => (dataset.yAxisID ?? DEFAULT_Y_AXIS_ID) === axisId)
+          .map(({ dataset, index }) => ({ index, label: dataset.label ?? '', color: dataset.borderColor }))
+          // Natural order, so Temp2 comes before Temp10
+          .sort((a, b) => a.label.localeCompare(b.label, 'pt-BR', { numeric: true }))
+      }))
+      .filter(group => group.items.length > 0)
+  }
+
+  isDatasetHidden(index: number): boolean {
+    const chart = this.chart?.chart
+    return chart ? !chart.isDatasetVisible(index) : false
+  }
+
+  /** Same show/hide behaviour the built-in Chart.js legend had. */
+  toggleDataset(index: number): void {
+    const chart = this.chart?.chart
+    if (!chart) {
+      return
+    }
+    chart.setDatasetVisibility(index, !chart.isDatasetVisible(index))
+    chart.update('none')
+  }
+
+  /** Axis the drawn lines and min/max markers are measured against. */
+  private get activeAxisId(): string {
+    const datasets: any[] = this.lineChartData?.datasets ?? []
+    const selected = datasets[this._selectedDataLineIndex]
+
+    if (this._selectedDataLineIndex >= 0 && selected) {
+      return selected.yAxisID ?? DEFAULT_Y_AXIS_ID
+    }
+    return this.axisOrder[0] ?? DEFAULT_Y_AXIS_ID
+  }
+
+  private get activeAxisUnit(): string {
+    return this.axisUnits.get(this.activeAxisId) ?? ''
+  }
+
+  private refreshHorizontalLineLabels(): void {
+    if (this._horizontalLines.length > 0 && this.axisOrder.length > 1) {
+      this.updateLines()
+    }
+  }
+
+  /**
+   * A horizontal line sits at one height, which reads as a different value on each
+   * Y axis, so the label lists the value on every axis at that height.
+   */
+  private horizontalLineLabel(yValue: number): string | string[] {
+    const activeAxisId = this.activeAxisId
+    const scales = this.chart?.chart?.scales
+    const activeScale = scales?.[activeAxisId]
+
+    const format = (axisId: string, value: number) => {
+      const unit = this.axisUnits.get(axisId)
+      return unit ? `${value.toFixed(2)} ${unit}` : value.toFixed(2)
+    }
+
+    if (!scales || !activeScale || this.axisOrder.length < 2) {
+      return format(activeAxisId, yValue)
+    }
+
+    const pixel = activeScale.getPixelForValue(yValue)
+    const lines: string[] = []
+    for (const axisId of this.axisOrder) {
+      const value = axisId === activeAxisId ? yValue : scales[axisId]?.getValueForPixel(pixel)
+      if (value === null || value === undefined || isNaN(value)) {
+        continue
+      }
+      lines.push(format(axisId, value))
+    }
+    return lines
+  }
+
+  /** A value fixed against one unit means nothing against another, so drop them. */
+  private dropHorizontalLinesIfAxisChanged(previousAxisId: string): void {
+    if (this.activeAxisId !== previousAxisId && this._horizontalLines.length > 0) {
+      this._horizontalLines = []
+    }
+  }
+
+  fitAllGraph() {
+    const scales: any = this.lineChartOptions.scales
+
+    if (this.lineChartData && !this.blockFitAll && scales) {
+      for (const axisId of this.axisOrder) {
+        const range = this.margins.get(axisId)
+        if (range && scales[axisId]) {
+          scales[axisId].min = range.min
+          scales[axisId].max = range.max
+        }
       }
 
+      if (scales['x']) {
+        scales['x'].max = new Date(this.maxX).getTime()
+        scales['x'].min = new Date(this.minX).getTime()
+      }
     }
 
     this.updateZoomLimits();
@@ -750,6 +956,9 @@ export class GraphComponent {
     // Calculate min/max points if enabled
     this.calculateMinMaxPoints();
 
+    // Every annotation is measured against the active axis, so it must name it
+    const activeAxisId = this.activeAxisId;
+
     // Create annotations object
     const annotations: any = {};
 
@@ -762,6 +971,7 @@ export class GraphComponent {
       (this._drawingMode === DrawingMode.Horizontal || this._drawingMode === DrawingMode.Both)) {
       annotations['tempHorizontalLine'] = {
         type: 'line',
+        yScaleID: activeAxisId,
         yMin: this._tempMousePosition.y,
         yMax: this._tempMousePosition.y,
         borderColor: 'rgba(200, 198, 194, 0.8)',
@@ -780,12 +990,18 @@ export class GraphComponent {
         const chart = this.chart.chart;
         const xScale = chart.scales['x'];
         if (xScale) {
-          const xValue = xScale.min + (xScale.max - xScale.min) * 0.015; // Grudado no eixo Y
+          const xValue = xScale.min; // Grudado no eixo Y
           annotations['tempHorizontalLineText'] = {
             type: 'label',
+            xScaleID: 'x',
+            yScaleID: activeAxisId,
             xValue: xValue,
             yValue: this._tempMousePosition.y,
-            content: `${this._tempMousePosition.y.toFixed(2)}`,
+            content: this.horizontalLineLabel(this._tempMousePosition.y),
+            // Anchor the left edge so wider multi-axis labels grow into the chart, not past it
+            position: { x: 'start', y: 'center' },
+            textAlign: 'left',
+            xAdjust: 4,
             backgroundColor: 'rgba(200, 198, 194, 0.9)',
             color: 'rgba(0, 0, 0, 0.8)',
             font: {
@@ -805,6 +1021,7 @@ export class GraphComponent {
     this._horizontalLines.forEach((yValue, index) => {
       annotations[`horizontalLine${index}`] = {
         type: 'line',
+        yScaleID: activeAxisId,
         yMin: yValue,
         yMax: yValue,
         borderColor: 'rgba(43, 42, 42, 0.8)',
@@ -823,12 +1040,18 @@ export class GraphComponent {
         const chart = this.chart.chart;
         const xScale = chart.scales['x'];
         if (xScale) {
-          const xValue = xScale.min + (xScale.max - xScale.min) * 0.015; // Grudado no eixo Y
+          const xValue = xScale.min; // Grudado no eixo Y
           annotations[`horizontalLineText${index}`] = {
             type: 'label',
+            xScaleID: 'x',
+            yScaleID: activeAxisId,
             xValue: xValue,
             yValue: yValue,
-            content: `${yValue}`,
+            content: this.horizontalLineLabel(yValue),
+            // Anchor the left edge so wider multi-axis labels grow into the chart, not past it
+            position: { x: 'start', y: 'center' },
+            textAlign: 'left',
+            xAdjust: 4,
             backgroundColor: 'rgba(186, 183, 178, 0.9)',
             color: 'rgba(0, 0, 0, 0.8)',
             font: {
@@ -849,6 +1072,7 @@ export class GraphComponent {
       (this._drawingMode === DrawingMode.Vertical || this._drawingMode === DrawingMode.Both)) {
       annotations['tempVerticalLine'] = {
         type: 'line',
+        xScaleID: 'x',
         xMin: this._tempMousePosition.x,
         xMax: this._tempMousePosition.x,
         borderColor: 'rgba(200, 198, 194, 0.8)', // Orange color for temporary line
@@ -859,11 +1083,13 @@ export class GraphComponent {
       // Add text annotation for temporary vertical line value
       if (this.chart?.chart) {
         const chart = this.chart.chart;
-        const yScale = chart.scales['y'];
+        const yScale = chart.scales[activeAxisId];
         if (yScale) {
           const yValue = yScale.min + (yScale.max - yScale.min) * 0.015; // Grudado no eixo X
           annotations['tempVerticalLineText'] = {
             type: 'label',
+            xScaleID: 'x',
+            yScaleID: activeAxisId,
             xValue: this._tempMousePosition.x,
             yValue: yValue,
             content: new Date(this._tempMousePosition.x).toLocaleString('pt-BR', {
@@ -891,6 +1117,7 @@ export class GraphComponent {
     this._verticalLines.forEach((xValue, index) => {
       annotations[`verticalLine${index}`] = {
         type: 'line',
+        xScaleID: 'x',
         xMin: xValue,
         xMax: xValue,
         borderColor: 'rgba(43, 42, 42, 0.8)',
@@ -901,11 +1128,13 @@ export class GraphComponent {
       // Add text annotation for vertical line value
       if (this.chart?.chart) {
         const chart = this.chart.chart;
-        const yScale = chart.scales['y'];
+        const yScale = chart.scales[activeAxisId];
         if (yScale) {
           const yValue = yScale.min + (yScale.max - yScale.min) * 0.015; // Grudado no eixo X
           annotations[`verticalLineText${index}`] = {
             type: 'label',
+            xScaleID: 'x',
+            yScaleID: activeAxisId,
             xValue: xValue,
             yValue: yValue,
             content: new Date(xValue).toLocaleString('pt-BR', {
@@ -983,11 +1212,25 @@ export class GraphComponent {
   }
 
   private updateZoomLimits(): void {
-    if (this.lineChartOptions.plugins?.zoom?.limits) {
-      this.lineChartOptions.plugins.zoom.limits['x']!.min = this.minX;
-      this.lineChartOptions.plugins.zoom.limits['x']!.max = this.maxX;
-      this.lineChartOptions.plugins.zoom.limits['y']!.min = this.minY;
-      this.lineChartOptions.plugins.zoom.limits['y']!.max = this.maxY;
+    const limits: any = this.lineChartOptions.plugins?.zoom?.limits;
+    if (!limits) {
+      return;
+    }
+
+    // Drop limits belonging to axes that are no longer on the chart
+    for (const key of Object.keys(limits)) {
+      if (key !== 'x' && !this.axisOrder.includes(key)) {
+        delete limits[key];
+      }
+    }
+
+    limits['x'] = { min: this.minX, max: this.maxX };
+
+    for (const axisId of this.axisOrder) {
+      const range = this.margins.get(axisId);
+      if (range) {
+        limits[axisId] = { min: range.min, max: range.max };
+      }
     }
   }
 
@@ -998,6 +1241,8 @@ export class GraphComponent {
       // Min point annotation
       annotations['minPoint'] = {
         type: 'point',
+        xScaleID: 'x',
+        yScaleID: this.activeAxisId,
         xValue: this._minMaxPoints.min.x,
         yValue: this._minMaxPoints.min.y,
         backgroundColor: 'rgba(0, 255, 0, 0.8)',
@@ -1005,7 +1250,7 @@ export class GraphComponent {
         borderWidth: 3,
         radius: 6,
         label: {
-          content: `MIN: ${this._minMaxPoints.min.y.toFixed(2)}`,
+          content: `MIN: ${this._minMaxPoints.min.y.toFixed(2)}${this.activeAxisUnit ? ' ' + this.activeAxisUnit : ''}`,
           enabled: true,
           position: 'bottom',
           backgroundColor: 'rgba(0, 255, 0, 0.9)',
@@ -1022,6 +1267,7 @@ export class GraphComponent {
       // Min point vertical line
       annotations['minVerticalLine'] = {
         type: 'line',
+        xScaleID: 'x',
         xMin: this._minMaxPoints.min.x,
         xMax: this._minMaxPoints.min.x,
         borderColor: 'rgba(0, 255, 0, 0.6)',
@@ -1034,6 +1280,8 @@ export class GraphComponent {
       // Max point annotation
       annotations['maxPoint'] = {
         type: 'point',
+        xScaleID: 'x',
+        yScaleID: this.activeAxisId,
         xValue: this._minMaxPoints.max.x,
         yValue: this._minMaxPoints.max.y,
         backgroundColor: 'rgba(255, 0, 0, 0.8)',
@@ -1041,7 +1289,7 @@ export class GraphComponent {
         borderWidth: 3,
         radius: 6,
         label: {
-          content: `MAX: ${this._minMaxPoints.max.y.toFixed(2)}`,
+          content: `MAX: ${this._minMaxPoints.max.y.toFixed(2)}${this.activeAxisUnit ? ' ' + this.activeAxisUnit : ''}`,
           enabled: true,
           position: 'top',
           backgroundColor: 'rgba(255, 0, 0, 0.9)',
@@ -1058,6 +1306,7 @@ export class GraphComponent {
       // Max point vertical line
       annotations['maxVerticalLine'] = {
         type: 'line',
+        xScaleID: 'x',
         xMin: this._minMaxPoints.max.x,
         xMax: this._minMaxPoints.max.x,
         borderColor: 'rgba(255, 0, 0, 0.6)',

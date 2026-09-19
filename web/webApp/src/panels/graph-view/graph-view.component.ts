@@ -6,7 +6,9 @@ import { MatDialog } from '@angular/material/dialog';
 import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 
-import { DrawingMode, GraphComponent } from '../../components/graph/graph.component';
+import { DrawingMode, GetAxisIdForSensorType, GraphComponent } from '../../components/graph/graph.component';
+import { GetSensorTypeLabel, ToBaseUnit } from '../../models/sensor-module';
+import { SensorTypesEnum } from '../../enum/sensor-type';
 
 import { GraphRequestWindowComponent } from '../../components/graph-request-window/graph-request-window.component';
 
@@ -35,7 +37,7 @@ export class GraphViewComponent implements OnInit {
 
   ngOnInit(): void { }
 
-  onGraphUpdate: Function = (tableInfo: { name: string, realName: string, color: string }, infoArr: Array<any>) => {
+  onGraphUpdate: Function = (tableInfo: { name: string, realName: string, color: string, sensorType?: SensorTypesEnum | null, unit?: string }, infoArr: Array<any>) => {
     let chartId = this.lineChartData.findIndex(x => x.realName == tableInfo.realName);
 
     if (chartId == -1) {
@@ -43,6 +45,10 @@ export class GraphViewComponent implements OnInit {
         label: tableInfo.name,
         type: 'line',
         realName: tableInfo.realName,
+        // Sensors of the same type share an axis, so pressure never flattens against temperature
+        yAxisID: GetAxisIdForSensorType(tableInfo.sensorType),
+        unit: tableInfo.unit ?? '',
+        typeLabel: tableInfo.sensorType ? GetSensorTypeLabel(tableInfo.sensorType) : '',
         borderColor: tableInfo.color,
         backgroundColor: tableInfo.color + '0A',
         tension: 0.3,
@@ -58,7 +64,7 @@ export class GraphViewComponent implements OnInit {
       let timestamp = info['timestamp'];
       if (timestamp && !isNaN(new Date(timestamp).getTime())) {
         let dt = new Date(timestamp);
-        newSeries.push({ x: dt.getTime(), y: info["value"] });
+        newSeries.push({ x: dt.getTime(), y: ToBaseUnit(tableInfo.sensorType, info["value"]) });
       } else {
         console.error('Invalid timestamp:', timestamp); // Debugging
       }
@@ -153,6 +159,8 @@ export class GraphViewComponent implements OnInit {
 
   removeAllLines() {
     this.lineChartData = []
+    // The dropdown selection points at datasets that no longer exist
+    this.selectedDataLineIndex = -1
   }
 
   getTable(sensorData: any): void {

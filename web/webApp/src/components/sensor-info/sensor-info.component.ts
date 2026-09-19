@@ -2,7 +2,7 @@ import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { MatCardModule } from '@angular/material/card';
 import { CommonModule } from '@angular/common';
 
-import { SensorModule } from '../../models/sensor-module';
+import { SensorModule, ToBaseUnit } from '../../models/sensor-module';
 import { GraphComponent } from '../graph/graph.component';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -87,7 +87,7 @@ export class SensorInfoComponent implements OnInit {
       let timestamp = info['timestamp'];
       if (timestamp && !isNaN(new Date(timestamp).getTime())) {
         let dt = new Date(timestamp);
-        newSeries.push({ x: dt.getTime(), y: info["value"] });
+        newSeries.push({ x: dt.getTime(), y: ToBaseUnit(this.sensorInfo?.sensorType, info["value"]) });
       } else {
         console.error('Invalid timestamp:', timestamp); // Debugging
       }

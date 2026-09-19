@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import {GetTableName, SensorModule} from "../models/sensor-module"
+import {GetSensorBaseUnit, GetTableName, SensorModule} from "../models/sensor-module"
 import { SensorTypesEnum } from '../enum/sensor-type';
 import { table } from 'console';
 import { GatewayModule } from '../models/gateway-model';
@@ -219,6 +219,23 @@ export class UiPanelService {
       return this.groups[this.groupSelected]
     }
 
+    /** Finds the panel a history table belongs to, across every sensor bucket. */
+    FindPanelByTableName(groupId: string, tableName: string): SensorModule | undefined
+    {
+      const group = this.groups[groupId]
+      if(!group)
+      {
+        return undefined
+      }
+
+      const matchesTable = (x: SensorModule) =>
+        GetTableName(x.gateway, x.topic, x.indicator.toString()) == tableName
+
+      return group.panels.temperature.find(matchesTable)
+          ?? group.panels.pressure.find(matchesTable)
+          ?? group.panels.power.find(matchesTable)
+    }
+
     OnStatusInfoUpdate(requestId: any, infoArray:any)
     {
       if(requestId in this.subscriptionInfoArrayMap)
@@ -228,30 +245,17 @@ export class UiPanelService {
         {
           let info = {}
 
-          let panel = this.groups[obj.group].panels.temperature.find(x=> GetTableName(x.gateway, 
-                                                                               x.topic, 
-                                                                               x.indicator.toString()) == tableName)
+          let panel = this.FindPanelByTableName(obj.group, tableName)
 
-          if(!panel)
-          {
-            panel = this.groups[obj.group].panels.pressure.find(x=> GetTableName(x.gateway, 
-              x.topic, 
-              x.indicator.toString()) == tableName)
-          }
-
-          if(!panel)
-          {
-            panel = this.groups[obj.group].panels.power.find(x=> GetTableName(x.gateway, 
-              x.topic, 
-              x.indicator.toString()) == tableName)
-          }
-                                                                               
           if(panel)
           {
             info = {
-              "name": panel?.name,
+              "name": panel.name,
               "realName": tableName,
-              "color": panel?.color,
+              "color": panel.color,
+              "sensorType": panel.sensorType,
+              // The graph plots the raw value, without dividing by the multiplier
+              "unit": GetSensorBaseUnit(panel.sensorType),
             }
           }
           else
@@ -260,6 +264,8 @@ export class UiPanelService {
               "name": tableName,
               "realName": tableName,
               "color": "#FFFFFF",
+              "sensorType": null,
+              "unit": "",
             }
           }
           

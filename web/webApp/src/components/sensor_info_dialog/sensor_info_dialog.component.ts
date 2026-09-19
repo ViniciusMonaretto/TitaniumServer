@@ -6,7 +6,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { MatInputModule } from '@angular/material/input';
 import { FormsModule } from '@angular/forms';
-import { SensorModule } from '../../models/sensor-module';
+import { FromBaseUnit, SensorModule, ToBaseUnit } from '../../models/sensor-module';
 import { ColorChromeModule } from 'ngx-color/chrome';
 import { IoButtonComponent } from '../io-button/io-button.component';
 
@@ -56,8 +56,9 @@ export class SensorInfoDialogComponent {
     this.gain = data.sensorInfo.gain ?? null
     this.offset = data.sensorInfo.offset ?? null
     this.panelId = data.sensorInfo.id
-    this.maxAlarm = data.sensorInfo.maxAlarm?.threshold
-    this.minAlarm = data.sensorInfo.minAlarm?.threshold
+    // Thresholds are stored like the readings, but typed in the unit the panel shows
+    this.maxAlarm = this.thresholdToBaseUnit(data.sensorInfo.maxAlarm?.threshold)
+    this.minAlarm = this.thresholdToBaseUnit(data.sensorInfo.minAlarm?.threshold)
 
     this.calibrate = this.gain != null && this.offset != null
 
@@ -88,8 +89,8 @@ export class SensorInfoDialogComponent {
       "name": this.newName,
       "gain": this.gain,
       "offset": this.offset,
-      "maxAlarm": this.enableAlarms ? this.maxAlarm : null,
-      "minAlarm": this.enableAlarms ? this.minAlarm : null,
+      "maxAlarm": this.enableAlarms ? this.thresholdFromBaseUnit(this.maxAlarm) : null,
+      "minAlarm": this.enableAlarms ? this.thresholdFromBaseUnit(this.minAlarm) : null,
       "gateway": this.gateway,
       "topic": this.topic,
       "indicator": this.indicator,
@@ -97,6 +98,18 @@ export class SensorInfoDialogComponent {
       "color": this.color,
       "multiplier": this.kiloSelected ? 1000 : 1
     }
+  }
+
+  private thresholdToBaseUnit(threshold: Number | null | undefined): Number | null | undefined {
+    if (threshold == null) {
+      return threshold
+    }
+    // Drop float noise from the scaling, e.g. 101.45 kPa -> 101449.99999999999 Pa
+    return Number(ToBaseUnit(this.data.sensorInfo.sensorType, Number(threshold)).toPrecision(12))
+  }
+
+  private thresholdFromBaseUnit(threshold: Number | null | undefined): Number | null | undefined {
+    return threshold == null ? threshold : FromBaseUnit(this.data.sensorInfo.sensorType, Number(threshold))
   }
 
   onCancel(): void {

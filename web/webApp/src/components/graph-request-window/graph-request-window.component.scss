@@ -1,3 +1,45 @@
 .date-picker-class{
     display: flex;
 }
+// The select panel renders in an overlay outside this component
+::ng-deep .sensor-type-panel {
+    .mat-mdc-optgroup-label {
+        padding: 0;
+
+        .mdc-list-item__primary-text {
+            width: 100%;
+        }
+    }
+
+    .type-group-header {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 0 16px 0 8px;
+        min-height: 48px;
+        cursor: pointer;
+        user-select: none;
+        font-weight: 600;
+
+        &:hover {
+            background: rgba(0, 0, 0, 0.04);
+        }
+    }
+
+    .type-group-name {
+        flex: 1;
+    }
+
+    .type-group-header .mat-mdc-checkbox {
+        font-weight: normal;
+    }
+
+    .type-group-count {
+        font-weight: normal;
+        opacity: 0.7;
+    }
+
+    .mat-mdc-option.type-collapsed {
+        display: none;
+    }
+}

@@ -39,6 +39,10 @@ MONGO_DB_COLLECTION = "SensorData"
 # Default timeout for MongoDB operations (in seconds)
 DEFAULT_MONGO_OPERATION_TIMEOUT = 600  # 10 minutes
 
+# Safety valve on a single history read. One sample per sensor per minute means
+# 14 days of 24 sensors is ~484k documents, so this only trips on runaway queries.
+MAX_READ_DOCUMENTS = 750000
+
 
 class SensorDataStorage(ServiceInterface):
     """Service for storing and managing sensor data in MongoDB."""
@@ -352,8 +356,10 @@ class SensorDataStorage(ServiceInterface):
         try:
             # Adiciona limite e ordenação para controlar tamanho dos dados
             cursor = self._collection.find(query).sort(
-                "Timestamp", -1)
+                "Timestamp", -1).limit(MAX_READ_DOCUMENTS)
+            document_count = 0
             async for doc in cursor:
+                document_count += 1
                 sensor_name = doc["SensorFullTopic"]
                 if sensor_name not in data_out['info']:
                     data_out['info'][sensor_name] = []
@@ -362,6 +368,12 @@ class SensorDataStorage(ServiceInterface):
                     {'timestamp': tm.isoformat(), 'value': doc["Value"]})
             data_out['requestId'] = data['websocketId']
             await cursor.close()
+
+            if document_count >= MAX_READ_DOCUMENTS:
+                # Sorted newest first, so what was dropped is the oldest end of the range
+                self._logger.warning(
+                    f"SensorDataStorage::read_sensor_info: hit the {MAX_READ_DOCUMENTS} document "
+                    f"ceiling, the oldest readings of this range were not returned")
 
         except Exception as e:
             self._logger.error(
