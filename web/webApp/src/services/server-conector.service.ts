@@ -125,7 +125,7 @@ export class ServerConectorService {
   }
 
   public sendRequestForTableInfo(sensorInfos: Array<any>,
-    group: string,
+    groups: Array<string>,
     beginDate?: Date | null,
     endDate?: Date | null,
     callback?: Function) {
@@ -138,13 +138,13 @@ export class ServerConectorService {
       }
     }
 
-    this.uiPanelService.AddGraphRequest(sensorInfos, requestId, group, callback)
+    this.uiPanelService.AddGraphRequest(sensorInfos, requestId, groups, callback)
     this.openSpinnerDialog("Buscando dados");
     this.sendCommand("getStatusHistory", obj)
   }
 
   public sendRequestForReportInfo(sensorInfos: Array<any>,
-    group: string,
+    groups: Array<string>,
     beginDate?: Date | null,
     endDate?: Date | null) {
     const requestId = uuidv4();

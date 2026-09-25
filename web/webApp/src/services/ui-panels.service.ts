@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import {GetSensorBaseUnit, GetTableName, SensorModule} from "../models/sensor-module"
 import { SensorTypesEnum } from '../enum/sensor-type';
-import { table } from 'console';
 import { GatewayModule } from '../models/gateway-model';
 import { DialogHelper } from './dialog-helper.service';
 import { MatDialogRef } from '@angular/material/dialog';
@@ -26,7 +25,7 @@ export class UiPanelService {
     
     groups: {[id: string]:  GroupInfo} = {}
     subscriptioMap: {[id: string]: Array<SensorModule | Function>} = {}
-    subscriptionInfoArrayMap: {[id: string]: {"callback": Function, "tableNames": Array<string>, "group": string}} = {}
+    subscriptionInfoArrayMap: {[id: string]: {"callback": Function, "tableNames": Array<string>, "groups": Array<string>, "notifyMissing": boolean}} = {}
 
 
     gateways: GatewayModule[] = []
@@ -37,6 +36,15 @@ export class UiPanelService {
     /** Last graph request window range; survives graph panel close/reopen (root service). */
     lastRequestedStartDate: Date | null = null;
     lastRequestedEndDate: Date | null = null;
+
+    /**
+     * Last report window, kept apart from the graph one so the two dialogs don't
+     * overwrite each other. The choice is stored too: a relative one ("última hora")
+     * is recomputed on reopen, only "personalizado" restores the exact dates.
+     */
+    lastReportStartDate: Date | null = null;
+    lastReportEndDate: Date | null = null;
+    lastReportTimeRange: string | null = null;
 
     private selectedSensor: SensorModule|null = null
     private spinnerDialogRef: MatDialogRef<SpinnerComponent> | null = null;
@@ -170,7 +178,7 @@ export class UiPanelService {
       this.sensorCachedCurrentInfo[info.realName] = infoArr
     }
 
-    AddGraphRequest(sensorInfos: Array<any>, requestId: any, group: string, callback?: Function)
+    AddGraphRequest(sensorInfos: Array<any>, requestId: any, groups: Array<string>, callback?: Function)
     {
       let arr = []
       for(let sensorInfo of sensorInfos)
@@ -180,11 +188,11 @@ export class UiPanelService {
       }
       if(callback)
       {
-        this.subscriptionInfoArrayMap[requestId] = {"callback": callback, "tableNames": arr, "group":group}
+        this.subscriptionInfoArrayMap[requestId] = {"callback": callback, "tableNames": arr, "groups":groups, "notifyMissing": true}
       }
       else
       {
-        this.subscriptionInfoArrayMap[requestId] = {"callback": this.SensorInfoCallback, "tableNames": arr, "group":group}
+        this.subscriptionInfoArrayMap[requestId] = {"callback": this.SensorInfoCallback, "tableNames": arr, "groups":groups, "notifyMissing": false}
       }
        
     } 
@@ -219,21 +227,69 @@ export class UiPanelService {
       return this.groups[this.groupSelected]
     }
 
-    /** Finds the panel a history table belongs to, across every sensor bucket. */
-    FindPanelByTableName(groupId: string, tableName: string): SensorModule | undefined
+    /**
+     * Finds the panel a history table belongs to, across every sensor bucket of the
+     * requested groups, and the group it was found in. A graph can mix groups, so the
+     * first group holding the table wins.
+     */
+    FindPanelByTableName(groupIds: Array<string>, tableName: string): {panel: SensorModule, group: GroupInfo} | undefined
     {
-      const group = this.groups[groupId]
-      if(!group)
-      {
-        return undefined
-      }
-
       const matchesTable = (x: SensorModule) =>
         GetTableName(x.gateway, x.topic, x.indicator.toString()) == tableName
 
-      return group.panels.temperature.find(matchesTable)
-          ?? group.panels.pressure.find(matchesTable)
-          ?? group.panels.power.find(matchesTable)
+      for(const groupId of groupIds)
+      {
+        const group = this.groups[groupId]
+        if(!group)
+        {
+          continue
+        }
+
+        const panel = group.panels.temperature.find(matchesTable)
+                   ?? group.panels.pressure.find(matchesTable)
+                   ?? group.panels.power.find(matchesTable)
+        if(panel)
+        {
+          return {panel: panel, group: group}
+        }
+      }
+
+      return undefined
+    }
+
+    /** Panel name for a history table, with the group when the request spans several. */
+    private GetTableDisplayName(groupIds: Array<string>, tableName: string): string
+    {
+      const found = this.FindPanelByTableName(groupIds, tableName)
+      if(!found)
+      {
+        return tableName
+      }
+      // Sensors of different groups can share a name, so the group has to show
+      return groupIds.length > 1 ? `${found.panel.name} (${found.group.name})` : found.panel.name
+    }
+
+    /**
+     * A sensor with no reading in the requested range simply never comes back, and the
+     * graph would just be missing a line with nothing to say why. Name those sensors.
+     */
+    private WarnAboutSensorsWithoutData(groupIds: Array<string>, requestedTables: Array<string>, infoArray: any)
+    {
+      const missing = requestedTables.filter(x => !(x in infoArray))
+      if(missing.length == 0)
+      {
+        return
+      }
+
+      const MAX_NAMES = 8
+      let names = missing.slice(0, MAX_NAMES).map(x => this.GetTableDisplayName(groupIds, x)).join(", ")
+      if(missing.length > MAX_NAMES)
+      {
+        names += ` e mais ${missing.length - MAX_NAMES}`
+      }
+
+      this.dialogHelper.openInfoDialog(
+        `Sem dados no período selecionado para: ${names}`, "Sensores sem dados")
     }
 
     OnStatusInfoUpdate(requestId: any, infoArray:any)
@@ -245,12 +301,13 @@ export class UiPanelService {
         {
           let info = {}
 
-          let panel = this.FindPanelByTableName(obj.group, tableName)
+          let found = this.FindPanelByTableName(obj.groups, tableName)
 
-          if(panel)
+          if(found)
           {
+            const panel = found.panel
             info = {
-              "name": panel.name,
+              "name": this.GetTableDisplayName(obj.groups, tableName),
               "realName": tableName,
               "color": panel.color,
               "sensorType": panel.sensorType,
@@ -270,6 +327,11 @@ export class UiPanelService {
           }
           
           obj.callback(info, infoArray[tableName]);
+        }
+
+        if(obj.notifyMissing)
+        {
+          this.WarnAboutSensorsWithoutData(obj.groups, obj.tableNames, infoArray)
         }
 
         delete this.subscriptionInfoArrayMap[requestId]

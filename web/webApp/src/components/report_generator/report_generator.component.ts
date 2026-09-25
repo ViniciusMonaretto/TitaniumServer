@@ -11,7 +11,8 @@ import { DateAdapter, MAT_DATE_LOCALE, MAT_DATE_FORMATS, MatNativeDateModule } f
 import { BrazilianDateAdapter } from '../../app/brazilian-date-adapter';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MY_DATE_FORMATS } from '../graph-request-window/graph-request-window.component';
-import { SensorTreeComponent } from '../sensor-tree/sensor-tree.component';
+import { SensorSelectorComponent } from '../sensor-selector/sensor-selector.component';
+import { GroupInfo } from '../../services/ui-panels.service';
 import { MatRadioModule } from '@angular/material/radio';
 import { IoButtonComponent } from '../io-button/io-button.component';
 import { DialogHelper } from '../../services/dialog-helper.service';
@@ -29,7 +30,7 @@ import { DialogHelper } from '../../services/dialog-helper.service';
     FormsModule,
     MatNativeDateModule,
     MatDatepickerModule,
-    SensorTreeComponent,
+    SensorSelectorComponent,
     MatRadioModule,
     IoButtonComponent
   ],
@@ -41,10 +42,10 @@ import { DialogHelper } from '../../services/dialog-helper.service';
   standalone: true
 })
 export class ReportGeneratorComponent {
-  uiConfig: { [id: string]: any } = {}
+  uiConfig: { [id: string]: GroupInfo } = {}
 
-  selectedSensors: { [id: string]: SensorModule } = {}
-  selectedGroup: string = ""
+  selectedSensors: Array<SensorModule> = []
+  selectedGroups: Array<GroupInfo> = []
 
   startDate: Date | null = null
   endDate: Date | null = null
@@ -54,17 +55,31 @@ export class ReportGeneratorComponent {
   timeRangeChoice: string = 'lastHour';
 
   constructor(public dialogRef: MatDialogRef<ReportGeneratorComponent>, public dialogHelper: DialogHelper,
-    @Inject(MAT_DIALOG_DATA) public data: {uiConfig: any[], callback: ((obj: any) => void), canEdit: boolean}
+    @Inject(MAT_DIALOG_DATA) public data: {uiConfig: { [id: string]: GroupInfo }, callback: ((obj: any) => void),
+      canEdit: boolean, timeRange?: string | null, startDate?: Date | null, endDate?: Date | null}
   ) {
-    this.uiConfig = {};
-    for(let groupIndex in data.uiConfig) {
-      var group = data.uiConfig[groupIndex];
-      this.uiConfig[group.name] = group.panels;
-    }
+    this.uiConfig = data.uiConfig
+    this.timeRangeChoice = data.timeRange ?? this.timeRangeChoice
+    this.startDate = data.startDate ?? null
+    this.endDate = data.endDate ?? null
   }
 
   ngOnInit(): void {
-    this.setTimeRange(this.timeRangeChoice);
+    // A relative range means "the last hour from now", so only a custom one keeps
+    // the dates it was reopened with
+    if (this.timeRangeChoice !== 'custom' || this.startDate == null || this.endDate == null) {
+      this.setTimeRange(this.timeRangeChoice);
+    }
+  }
+
+  /** Formats a Date as HH:mm for native <input type="time"> */
+  timeInputValue(date: Date | null): string {
+    if (!date) {
+      return '';
+    }
+    const h = date.getHours().toString().padStart(2, '0');
+    const m = date.getMinutes().toString().padStart(2, '0');
+    return `${h}:${m}`;
   }
 
   setTimeRange(choice: string) {
@@ -88,10 +103,6 @@ export class ReportGeneratorComponent {
     }
   }
 
-  getGroups(): string[] {
-    return Object.keys(this.uiConfig);
-  }
-
   setTime(event: any, selectedDateTime: Date | null) {
     if (selectedDateTime) {
       const [hours, minutes] = event.target.value.split(':');
@@ -101,7 +112,7 @@ export class ReportGeneratorComponent {
 
 
   validForm() {
-    return Object.keys(this.selectedSensors).length > 0 && this.startDate && this.endDate;
+    return this.selectedSensors.length > 0 && this.startDate && this.endDate;
   }
 
   onCancel(): void {
@@ -124,7 +135,7 @@ export class ReportGeneratorComponent {
     }
 
 
-    for (let sensor of Object.values(this.selectedSensors)) {
+    for (let sensor of this.selectedSensors) {
       selectedPanels.push({
         "gateway": sensor.gateway,
         "topic": sensor.topic,
@@ -136,7 +147,8 @@ export class ReportGeneratorComponent {
       "selectedSensors": selectedPanels,
       "startDate": this.startDate,
       "endDate": this.endDate,
-      "group": this.selectedGroup
+      "groups": this.selectedGroups.map(x => String(x.id)),
+      "timeRange": this.timeRangeChoice
     }
 
     this.data.callback(obj)

@@ -1,0 +1,41 @@
+<mat-form-field style="width: 100%;" appearance="fill">
+    <mat-label>Selecionar Grupos</mat-label>
+    <mat-select [ngModel]="groups" (ngModelChange)="onGroupsChange($event)" multiple>
+        <mat-option *ngFor="let group of getAvailableGroups()" [value]="group">{{group.name}}</mat-option>
+    </mat-select>
+</mat-form-field>
+<mat-form-field style="width: 100%;" appearance="fill" *ngIf="groups.length != 0">
+    <mat-label>Selecionar Tipo</mat-label>
+    <mat-select [(ngModel)]="options" (ngModelChange)="onTypesChange()" multiple>
+        <mat-option *ngFor="let type of getAvailableTypes()" [value]="type">{{getTypeLabel(type)}}</mat-option>
+    </mat-select>
+</mat-form-field>
+<mat-form-field style="width: 100%;" appearance="fill" *ngIf="groups.length != 0 && options.length != 0">
+    <mat-label>Selecionar Sensores</mat-label>
+    <mat-select [ngModel]="sensors" (ngModelChange)="setSensors($event)" multiple panelClass="sensor-type-panel">
+        <ng-container *ngFor="let groupSection of groupSections">
+            <!-- No "select all" here on purpose: the group row only folds its types -->
+            <div class="group-header" (click)="toggleGroupCollapsed(groupSection)">
+                <mat-icon>{{isGroupCollapsed(groupSection) ? 'chevron_right' : 'expand_more'}}</mat-icon>
+                <span class="group-name">{{groupSection.group.name}}</span>
+                <span class="group-count">{{countSelectedOfGroup(groupSection)}}/{{countSensorsOfGroup(groupSection)}}</span>
+            </div>
+            <!-- Hidden with CSS, not *ngIf: mat-select drops selected values whose option leaves the DOM -->
+            <mat-optgroup *ngFor="let section of groupSection.sections"
+                [class.group-collapsed]="isGroupCollapsed(groupSection)">
+                <div class="type-group-header" (click)="toggleSectionCollapsed(section)">
+                    <mat-icon>{{isSectionCollapsed(section) ? 'chevron_right' : 'expand_more'}}</mat-icon>
+                    <span class="type-group-name">{{getTypeLabel(section.sensorType)}}</span>
+                    <span class="type-group-count">{{countSelectedOfSection(section)}}/{{section.sensors.length}}</span>
+                    <!-- stopPropagation: ticking it must not fold/unfold the type -->
+                    <mat-checkbox (click)="$event.stopPropagation()"
+                        [checked]="areAllOfSectionSelected(section)"
+                        [indeterminate]="countSelectedOfSection(section) > 0 && !areAllOfSectionSelected(section)"
+                        (change)="setAllOfSectionSelected(section, $event.checked)">Todos</mat-checkbox>
+                </div>
+                <mat-option *ngFor="let panel of section.sensors" [value]="panel"
+                    [class.type-collapsed]="isSectionCollapsed(section)">{{getSensorOptionLabel(panel)}}</mat-option>
+            </mat-optgroup>
+        </ng-container>
+    </mat-select>
+</mat-form-field>

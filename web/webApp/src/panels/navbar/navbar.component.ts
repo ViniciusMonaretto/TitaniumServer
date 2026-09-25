@@ -107,15 +107,21 @@ export class NavbarComponent implements OnInit {
       data: {
         "uiConfig": this.UiPanelsService.GetUiConfig(),
         callback: (reportData: any) => {
+          this.UiPanelsService.lastReportStartDate = reportData['startDate']
+          this.UiPanelsService.lastReportEndDate = reportData['endDate']
+          this.UiPanelsService.lastReportTimeRange = reportData['timeRange']
           this.requestReport(reportData)
-        }
+        },
+        "startDate": this.UiPanelsService.lastReportStartDate,
+        "endDate": this.UiPanelsService.lastReportEndDate,
+        "timeRange": this.UiPanelsService.lastReportTimeRange
       }
     });
   }
 
   requestReport(sensorData: any) {
     this.serverConnector.sendRequestForReportInfo(sensorData['selectedSensors'],
-      sensorData['group'],
+      sensorData['groups'],
       sensorData['startDate'],
       sensorData['endDate'])
   }

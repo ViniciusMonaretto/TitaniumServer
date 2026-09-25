@@ -1,37 +1,6 @@
 <h2 mat-dialog-title>Opções Gráfico</h2>
 <mat-dialog-content>
-    <mat-form-field style="width: 100%;" appearance="fill">
-        <mat-label>Selecionar Grupo</mat-label>
-        <mat-select [(ngModel)]="selectedGroup" (ngModelChange)="onGroupChange()">
-            <mat-option *ngFor="let group of getGroups()" [value]="group">{{group.name}}</mat-option>
-        </mat-select>
-    </mat-form-field>
-    <mat-form-field style="width: 100%;" appearance="fill" *ngIf="selectedGroup">
-        <mat-label>Selecionar Tipo</mat-label>
-        <mat-select [(ngModel)]="options" (ngModelChange)="onTypesChange()" multiple>
-            <mat-option *ngFor="let type of getAvailableTypes()" [value]="type">{{getTypeLabel(type)}}</mat-option>
-        </mat-select>
-    </mat-form-field>
-    <mat-form-field style="width: 100%;" appearance="fill" *ngIf="selectedGroup && getAvailableSensors().length != 0">
-        <mat-label>Selecionar Sensores</mat-label>
-        <mat-select [(ngModel)]="selectedSensors" multiple panelClass="sensor-type-panel">
-            <mat-optgroup *ngFor="let type of getSelectedTypes()">
-                <div class="type-group-header" (click)="toggleTypeCollapsed(type)">
-                    <mat-icon>{{isTypeCollapsed(type) ? 'chevron_right' : 'expand_more'}}</mat-icon>
-                    <span class="type-group-name">{{getTypeLabel(type)}}</span>
-                    <span class="type-group-count">{{countSelectedOfType(type)}}/{{getSensorsOfType(type).length}}</span>
-                    <!-- stopPropagation: ticking it must not fold/unfold the group -->
-                    <mat-checkbox (click)="$event.stopPropagation()"
-                        [checked]="areAllOfTypeSelected(type)"
-                        [indeterminate]="countSelectedOfType(type) > 0 && !areAllOfTypeSelected(type)"
-                        (change)="setAllOfTypeSelected(type, $event.checked)">Todos</mat-checkbox>
-                </div>
-                <!-- Hidden with CSS, not *ngIf: mat-select drops selected values whose option leaves the DOM -->
-                <mat-option *ngFor="let panel of getSensorsOfType(type)" [value]="panel"
-                    [class.type-collapsed]="isTypeCollapsed(type)">{{getSensorOptionLabel(panel)}}</mat-option>
-            </mat-optgroup>
-        </mat-select>
-    </mat-form-field>
+    <sensor-selector [uiConfig]="uiConfig" [(groups)]="selectedGroups" [(sensors)]="selectedSensors"></sensor-selector>
     <div>
         <div class="date-picker-class">
             <mat-form-field appearance="outline">

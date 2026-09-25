@@ -1,0 +1,65 @@
+// The select panel renders in an overlay outside this component
+::ng-deep .sensor-type-panel {
+    .mat-mdc-optgroup-label {
+        padding: 0;
+
+        .mdc-list-item__primary-text {
+            width: 100%;
+        }
+    }
+
+    .group-header,
+    .type-group-header {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        min-height: 48px;
+        cursor: pointer;
+        user-select: none;
+        font-weight: 600;
+
+        &:hover {
+            background: rgba(0, 0, 0, 0.04);
+        }
+    }
+
+    .group-header {
+        padding: 0 16px 0 8px;
+        // Material colors the optgroup label explicitly; this row sits outside one, so
+        // without the same token it inherits the UA default — white under a dark
+        // color-scheme, invisible on the panel's light background
+        color: var(--mat-optgroup-label-text-color, var(--mat-sys-on-surface-variant, rgba(0, 0, 0, 0.87)));
+        // The group row heads a block of type rows, so it reads one step louder
+        font-size: 1.05em;
+    }
+
+    // Indented under the group row it belongs to
+    .type-group-header {
+        padding: 0 16px 0 28px;
+    }
+
+    .group-name,
+    .type-group-name {
+        flex: 1;
+    }
+
+    .type-group-header .mat-mdc-checkbox {
+        font-weight: normal;
+    }
+
+    .group-count,
+    .type-group-count {
+        font-weight: normal;
+        opacity: 0.7;
+    }
+
+    // Sensors sit one step deeper than the type row that holds them
+    .mat-mdc-optgroup .mat-mdc-option {
+        padding-left: 40px;
+    }
+
+    .mat-mdc-optgroup.group-collapsed,
+    .mat-mdc-option.type-collapsed {
+        display: none;
+    }
+}

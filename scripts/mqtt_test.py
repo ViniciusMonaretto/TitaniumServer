@@ -8,6 +8,19 @@ import paho.mqtt.client as mqtt
 BROKER = 'localhost'  # 'broker.hivemq.com'  # "mqtt.eclipseprojects.io"
 PORT = 1883
 MESSAGES_TO_SEND = 1
+REPORT_INTERVAL = 10
+
+# Every gateway used by the panel groups, so one run feeds all of them. The
+# gateways whose panels are temperature only just ignore the trailing indexes.
+# For a layout derived from ui_config.json instead, use mqtt_ui_config_test.py.
+GATEWAYS = [
+    "1C69209DFC08",
+    "C0CDD6CD7814",
+    "C0CDD6CD7828",
+    "C0CDD6CD7838",
+    "C0CDD6CD7850",
+    "1C69209DB778"
+]
 
 # Base sensor values
 base_sensors = [
@@ -39,6 +52,18 @@ base_sensors = [
     {"value": 0.96, "active": True, "unit": "%"}
 ]
 
+# How far each unit swings around its base value on every report. A unit that is
+# not listed here is sent flat; add it to give those sensors a curve too.
+VARIATION_BY_UNIT = {
+    "°C": 5.0,
+    "kPa": 2.0,
+    "V": 5.0
+}
+
+# This one index stays on its base value, as a flat reference line on the graph.
+FIXED_SENSOR_INDEX = 1
+
+
 # Callback for successful connection
 
 
@@ -47,12 +72,14 @@ def on_connect(mqtt_client, userdata, flags, rc):
         print("Connected successfully")
         # Subscribe to the command topic
         mqtt_client.subscribe("iocloud/request/#")
+        # The server only learns the sensor indexes from the status message
+        send_all_gateway_status(mqtt_client)
     else:
         print(f"Connection failed with code {rc}")
 
 
 # Function to create and send gateway status message
-def send_gateway_status(mqtt_client, response_topic):
+def send_gateway_status(mqtt_client, device_id):
     panels = []
     counter = 0
     for sensor_data in base_sensors:
@@ -69,15 +96,52 @@ def send_gateway_status(mqtt_client, response_topic):
     status_payload = {
         "command_index": 2,
         "command_status": 0,
-        "device_id": "1C69209DFC08",
+        "device_id": device_id,
         "ip_address": "192.168.3.79",
         "uptime": 19510,
         "sensors": panels
     }
 
-    status_topic = response_topic
+    status_topic = f"iocloud/response/{device_id}/command"
     mqtt_client.publish(status_topic, json.dumps(status_payload))
     print(f"Sent status message to {status_topic}")
+
+
+def send_all_gateway_status(mqtt_client):
+    for device_id in GATEWAYS:
+        send_gateway_status(mqtt_client, device_id)
+
+
+def gateway_offset(unit, gateway_index):
+    """Shifts a gateway's whole curve, so several of them stay apart on one graph."""
+    return gateway_index * VARIATION_BY_UNIT.get(unit, 0.0)
+
+
+def build_report_sensors(gateway_index):
+    sensors = []
+    for index, sensor in enumerate(base_sensors):
+        swing = VARIATION_BY_UNIT.get(sensor["unit"], 0.0)
+
+        if swing == 0.0 or index == FIXED_SENSOR_INDEX:
+            sensors.append(sensor.copy())
+            continue
+
+        varied_value = round(sensor["value"]
+                             + gateway_offset(sensor["unit"], gateway_index)
+                             + random.uniform(-swing, swing), 2)
+        sensors.append({**sensor, "value": varied_value})
+    return sensors
+
+
+def send_all_gateway_reports(mqtt_client):
+    for gateway_index, device_id in enumerate(GATEWAYS):
+        payload = {
+            "timestamp": datetime.now().timestamp(),
+            "sensors": build_report_sensors(gateway_index),
+        }
+        topic = f"iocloud/response/{device_id}/sensor/report"
+        mqtt_client.publish(topic, json.dumps(payload))
+        print(f"Sent MQTT message to {topic}")
 
 
 # Callback for receiving messages
@@ -105,8 +169,8 @@ def on_message(mqtt_client, userdata, msg):
         return
 
     if obj["command"] == 2:
-        send_gateway_status(
-            mqtt_client, "iocloud/response/1C69209DFC08/command")
+        # The request goes to every gateway at once, so every one answers
+        send_all_gateway_status(mqtt_client)
         return
 
     # Check if required fields exist
@@ -144,26 +208,8 @@ client.subscribe("iocloud/request/#")
 
 try:
     while True:
-        sensors = []
-        count = 0
-        for sensor in base_sensors:
-            count += 1
-            if sensor["unit"] == "°C" and count != 2:
-                varied_value = round(
-                    sensor["value"] + random.uniform(-5, 5), 2)
-                sensors.append({**sensor, "value": varied_value})
-            else:
-                sensors.append(sensor.copy())
-        payload = {
-            "timestamp": datetime.now().timestamp(),
-            "sensors": sensors,
-        }
-        topic = "iocloud/response/1C69209DFC08/sensor/report"
-        payload_json = json.dumps(payload)
-        print(f"Sending MQTT message to {topic}")
-        client.publish(topic, payload_json)
-        print("Sent MQTT message")
-        time.sleep(10)
+        send_all_gateway_reports(client)
+        time.sleep(REPORT_INTERVAL)
 except KeyboardInterrupt:
     print("Stopping the client.")
     client.loop_stop()

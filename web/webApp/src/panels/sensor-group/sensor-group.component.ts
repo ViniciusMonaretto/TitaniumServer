@@ -83,7 +83,7 @@ export class SensorGroupComponent implements OnInit {
         "topic": tableInfo['table'],
         "indicator": tableInfo['indicator']
       }],
-        this.getGroupName(),
+        [this.UiPanelsService.GetGroup()],
         startDate,
         endDate)
     }

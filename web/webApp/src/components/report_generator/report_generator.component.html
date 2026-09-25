@@ -1,9 +1,6 @@
 <h2 mat-dialog-title>Gerar Relatório</h2>
 <mat-dialog-content>
-    <div style="width: 100%;" appearance="fill">
-        <mat-label>Selecionar Sensores</mat-label>
-        <sensor-tree [panelsInfo]="uiConfig" [selectedSensors]="selectedSensors"></sensor-tree>
-    </div>
+    <sensor-selector [uiConfig]="uiConfig" [(groups)]="selectedGroups" [(sensors)]="selectedSensors"></sensor-selector>
     <div class="time-choice-div">
         <div>
             <mat-label>Selecionar Intervalo de Tempo</mat-label>
@@ -25,7 +22,7 @@
             </mat-form-field>
             <mat-form-field appearance="outline">
                 <mat-label></mat-label>
-                <input matInput type="time" (change)="setTime($event, startDate)">
+                <input matInput type="time" [value]="timeInputValue(startDate)" (change)="setTime($event, startDate)">
             </mat-form-field>
         </div>
         
@@ -38,7 +35,7 @@
             </mat-form-field>
             <mat-form-field appearance="outline">
                 <mat-label></mat-label>
-                <input matInput type="time" (change)="setTime($event, endDate)">
+                <input matInput type="time" [value]="timeInputValue(endDate)" (change)="setTime($event, endDate)">
             </mat-form-field>
         </div>
         
