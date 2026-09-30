@@ -1,5 +1,5 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
-import { GetSensorUnit, SensorModule, ToBaseUnit } from '../../models/sensor-module';
+import { GetSensorUnit, SensorModule, ToDisplayUnit } from '../../models/sensor-module';
 import { SensorTypesEnum } from '../../enum/sensor-type';
 
 import { CommonModule } from '@angular/common';
@@ -110,7 +110,7 @@ export class SensorComponent implements OnInit {
 
   getCurrentReading() {
     return this.sensorInfo && this.sensorInfo?.isActive && this.sensorInfo?.value != null ? 
-                    (ToBaseUnit(this.sensorInfo.sensorType, Number(this.sensorInfo.value))/this.sensorInfo.multiplier).toFixed(2) : "--"
+                    ToDisplayUnit(this.sensorInfo.sensorType, Number(this.sensorInfo.value), this.sensorInfo.multiplier).toFixed(2) : "--"
   }
 
 }

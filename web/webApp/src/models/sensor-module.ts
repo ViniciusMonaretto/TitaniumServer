@@ -70,9 +70,15 @@ export function FromBaseUnit(sensorType: SensorTypesEnum | null | undefined, val
 }
 
 /**
- * Unit of the value converted by ToBaseUnit, ignoring the panel multiplier.
- * This is what the graph uses, because the graph does not divide by the multiplier.
+ * Converts a stored reading to what the panel shows: the base unit divided by the
+ * multiplier (e.g. 1500 Pa with multiplier 1000 -> 1.5 kPa). Graphs use this too,
+ * so they match the unit returned by GetSensorUnit.
  */
+export function ToDisplayUnit(sensorType: SensorTypesEnum | null | undefined, value: number, multiplier: number = 1): number {
+    return ToBaseUnit(sensorType, value) / (multiplier || 1)
+}
+
+/** Unit of the value converted by ToBaseUnit, ignoring the panel multiplier. */
 export function GetSensorBaseUnit(sensorType: SensorTypesEnum): string {
     return SENSOR_BASE_UNITS[sensorType] ?? ""
 }

@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import {GetSensorBaseUnit, GetTableName, SensorModule} from "../models/sensor-module"
+import {GetSensorUnit, GetTableName, SensorModule} from "../models/sensor-module"
 import { SensorTypesEnum } from '../enum/sensor-type';
 import { GatewayModule } from '../models/gateway-model';
 import { DialogHelper } from './dialog-helper.service';
@@ -311,8 +311,9 @@ export class UiPanelService {
               "realName": tableName,
               "color": panel.color,
               "sensorType": panel.sensorType,
-              // The graph plots the raw value, without dividing by the multiplier
-              "unit": GetSensorBaseUnit(panel.sensorType),
+              // The graph divides by the multiplier like the panel does, so the unit follows it
+              "multiplier": panel.multiplier,
+              "unit": GetSensorUnit(panel.sensorType, panel.multiplier),
             }
           }
           else
@@ -322,6 +323,7 @@ export class UiPanelService {
               "realName": tableName,
               "color": "#FFFFFF",
               "sensorType": null,
+              "multiplier": 1,
               "unit": "",
             }
           }

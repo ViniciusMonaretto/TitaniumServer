@@ -131,9 +131,15 @@ Chart.register(multilineLabelsPlugin);
 /** Axis used by datasets that carry no sensor type (e.g. the sensor-info dialog). */
 export const DEFAULT_Y_AXIS_ID = 'y';
 
-/** Datasets of the same sensor type share one Y axis, so each unit keeps its own scale. */
-export function GetAxisIdForSensorType(sensorType?: string | null): string {
-  return sensorType ? `y-${sensorType}` : DEFAULT_Y_AXIS_ID;
+/**
+ * Datasets of the same sensor type and unit share one Y axis, so each unit keeps its
+ * own scale (a Pa panel and a kPa panel get separate axes).
+ */
+export function GetAxisIdForSensorType(sensorType?: string | null, unit?: string | null): string {
+  if (!sensorType) {
+    return DEFAULT_Y_AXIS_ID;
+  }
+  return unit ? `y-${sensorType}-${unit}` : `y-${sensorType}`;
 }
 
 export enum DrawingMode {
