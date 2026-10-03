@@ -6,7 +6,8 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { MatInputModule } from '@angular/material/input';
 import { FormsModule } from '@angular/forms';
-import { FromBaseUnit, SensorModule, ToBaseUnit } from '../../models/sensor-module';
+import { FromBaseUnit, GetSensorBaseUnit, PRESSURE_UNITS, PressureUnit, SensorModule, ToBaseUnit } from '../../models/sensor-module';
+import { SensorTypesEnum } from '../../enum/sensor-type';
 import { ColorChromeModule } from 'ngx-color/chrome';
 import { IoButtonComponent } from '../io-button/io-button.component';
 
@@ -41,6 +42,12 @@ export class SensorInfoDialogComponent {
   color: string = ""
   newName: string = ""  
   kiloSelected: boolean = false
+  isPressure: boolean = false
+  enableRange: boolean = false
+  zeroValue: Number | null | undefined = null
+  maxValue: Number | null | undefined = null
+  pressureUnits = PRESSURE_UNITS
+  pressureUnit: PressureUnit = "Pa"
 
   private onApplyAction: ((obj: any) => void) | null = null
 
@@ -71,17 +78,60 @@ export class SensorInfoDialogComponent {
     this.canEdit = data.canEdit
     this.color = data.sensorInfo.color
     this.kiloSelected = data.sensorInfo.multiplier == 1000
+
+    this.isPressure = data.sensorInfo.sensorType == SensorTypesEnum.PREASSURE
+    this.pressureUnit = data.sensorInfo.pressureUnit ?? "Pa"
+    this.zeroValue = this.thresholdToBaseUnit(data.sensorInfo.zeroValue)
+    this.maxValue = this.thresholdToBaseUnit(data.sensorInfo.maxValue)
+    this.enableRange = this.isPressure && this.zeroValue != null && this.maxValue != null
+  }
+
+  get baseUnit(): string {
+    return GetSensorBaseUnit(this.data.sensorInfo.sensorType, this.isPressure ? this.pressureUnit : null)
+  }
+
+  /** Only Pa has a kilo prefix worth showing (kPa); psi and bar are shown as they are. */
+  canUseKilo(): boolean {
+    return !this.isPressure || this.pressureUnit == "Pa"
+  }
+
+  private getMultiplier(): number {
+    return this.kiloSelected && this.canUseKilo() ? 1000 : 1
+  }
+
+  isPressureUnitDifferent() {
+    return this.isPressure && this.pressureUnit != (this.data.sensorInfo.pressureUnit ?? "Pa")
+  }
+
+  validRange() {
+    return !this.enableRange ||
+           (this.zeroValue != null && this.maxValue != null && Number(this.maxValue) > Number(this.zeroValue))
+  }
+
+  isRangeDifferent() {
+    var range = this.getRange()
+    return range.zeroValue != (this.data.sensorInfo.zeroValue ?? null) ||
+           range.maxValue != (this.data.sensorInfo.maxValue ?? null)
+  }
+
+  private getRange() {
+    var useRange = this.isPressure && this.enableRange
+    return {
+      zeroValue: useRange ? this.thresholdFromBaseUnit(this.zeroValue) ?? null : null,
+      maxValue: useRange ? this.thresholdFromBaseUnit(this.maxValue) ?? null : null
+    }
   }
 
   validForm() {
-    var choosenMultiplier = this.kiloSelected ? 1000 : 1
+    var choosenMultiplier = this.getMultiplier()
     var validMultiplier = choosenMultiplier != this.data.sensorInfo.multiplier
     var isColorDifferent = this.color !== this.data.sensorInfo.color
     var isNameDifferent = this.newName !== this.data.sensorInfo.name
     var validCalibration = !this.calibrate ||   
                            (this.gain !== null && this.offset !== null)
     console.log(validCalibration)
-    return this.canEdit && (this.calibrate || this.enableAlarms || isColorDifferent || isNameDifferent || validMultiplier) && (validCalibration)
+    return this.canEdit && (this.calibrate || this.enableAlarms || isColorDifferent || isNameDifferent || validMultiplier || this.isRangeDifferent() || this.isPressureUnitDifferent()) &&
+           validCalibration && this.validRange()
   }
 
   getChangeInfoPanel() {
@@ -96,7 +146,9 @@ export class SensorInfoDialogComponent {
       "indicator": this.indicator,
       "panelId": this.panelId,
       "color": this.color,
-      "multiplier": this.kiloSelected ? 1000 : 1
+      "multiplier": this.getMultiplier(),
+      "pressureUnit": this.isPressure ? this.pressureUnit : null,
+      ...this.getRange()
     }
   }
 

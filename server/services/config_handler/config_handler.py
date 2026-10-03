@@ -94,12 +94,7 @@ class ConfigHandler(ServiceInterface):
         calibration_info = []
         for group in self._panel_groups.values():
             for panel in group.panels:
-                calibration_info.append({
-                    "gateway": panel.gateway,
-                    "indicator": panel.indicator,
-                    "offset": panel.offset,
-                    "gain": panel.gain
-                })
+                calibration_info.append(panel.get_calibration_info())
         self._middleware.send_command(
             MqttCommands.CALIBRATION, calibration_info)
 
@@ -247,13 +242,19 @@ class ConfigHandler(ServiceInterface):
             panel.color = update_panel_info["color"]
             panel.name = update_panel_info["name"]
             panel.multiplier = update_panel_info["multiplier"]
+            panel.set_pressure_unit(update_panel_info.get("pressureUnit"))
+
+            old_range = (panel.zero_value, panel.max_value)
+            panel.set_range(update_panel_info.get("zeroValue"),
+                            update_panel_info.get("maxValue"))
+            range_update = old_range != (panel.zero_value, panel.max_value)
 
             calibration_update = gain != panel.gain or offset != panel.offset
-            if calibration_update:
+            if calibration_update or range_update:
                 panel.gain = gain
                 panel.offset = offset
                 self._middleware.send_command(
-                    MqttCommands.CALIBRATION, [update_panel_info]
+                    MqttCommands.CALIBRATION, [panel.get_calibration_info()]
                 )
             if not self._config_storage.update_panel(panel):
                 self._logger.error(

@@ -59,9 +59,22 @@ class ConfigStorage(ServiceInterface):
                 gain FLOAT,
                 offset FLOAT,
                 multiplier INTEGER,
+                zeroValue FLOAT,
+                maxValue FLOAT,
+                pressureUnit TEXT,
                 FOREIGN KEY (panelGroupId) REFERENCES PanelsGroups (id) ON DELETE CASCADE
             );
             """)
+
+            # Databases created before the pressure range/unit existed lack these columns
+            panel_columns = [column[1] for column in cursor.execute(
+                "PRAGMA table_info(Panels);").fetchall()]
+            for column, column_type in (("zeroValue", "FLOAT"),
+                                        ("maxValue", "FLOAT"),
+                                        ("pressureUnit", "TEXT")):
+                if column not in panel_columns:
+                    cursor.execute(
+                        f"ALTER TABLE Panels ADD COLUMN {column} {column_type};")
 
             cursor.execute("""
             CREATE TABLE IF NOT EXISTS Alarms (
@@ -119,9 +132,9 @@ class ConfigStorage(ServiceInterface):
             cursor = conn.cursor()
 
             cursor.execute('''
-                INSERT INTO Panels (name, gateway, topic, color, panelGroupId, indicator, sensorType, multiplier, gain, offset)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            ''', (panel.name, panel.gateway, panel.topic, panel.color, panel.group_id, panel.indicator, panel.sensor_type, panel.multiplier, panel.gain, panel.offset))
+                INSERT INTO Panels (name, gateway, topic, color, panelGroupId, indicator, sensorType, multiplier, gain, offset, zeroValue, maxValue, pressureUnit)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ''', (panel.name, panel.gateway, panel.topic, panel.color, panel.group_id, panel.indicator, panel.sensor_type, panel.multiplier, panel.gain, panel.offset, panel.zero_value, panel.max_value, panel.pressure_unit))
 
             conn.commit()
             new_id = cursor.lastrowid
@@ -213,7 +226,10 @@ class ConfigStorage(ServiceInterface):
                     sensorType = ?,
                     gain = ?,
                     offset = ?,
-                    multiplier = ?
+                    multiplier = ?,
+                    zeroValue = ?,
+                    maxValue = ?,
+                    pressureUnit = ?
                 WHERE id = ?;
                 """
 
@@ -228,6 +244,9 @@ class ConfigStorage(ServiceInterface):
                 panel.gain,                  # gain
                 panel.offset,                  # offset
                 panel.multiplier,            # multiplier
+                panel.zero_value,            # zeroValue
+                panel.max_value,             # maxValue
+                panel.pressure_unit,         # pressureUnit
                 panel.id,                     # id (which row to update)
             )
 
@@ -273,6 +292,9 @@ class ConfigStorage(ServiceInterface):
                         p.gain,
                         p.offset,
                         p.multiplier,
+                        p.zeroValue,
+                        p.maxValue,
+                        p.pressureUnit,
 
                         a.alarmId,
                         a.alarmName,
@@ -306,6 +328,9 @@ class ConfigStorage(ServiceInterface):
                         'gain': row['gain'],
                         'offset': row['offset'],
                         'multiplier': row['multiplier'],
+                        'zeroValue': row['zeroValue'],
+                        'maxValue': row['maxValue'],
+                        'pressureUnit': row['pressureUnit'],
                     }
                     panels.append(panel)
                     last_panel_id = info['panelId']

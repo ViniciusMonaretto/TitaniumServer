@@ -44,8 +44,10 @@ base_sensors = [
     {"value": 124.4, "active": True, "unit": "°C"},
     {"value": 132.87, "active": True, "unit": "°C"},
     {"value": 140.7, "active": True, "unit": "°C"},
-    {"value": 20, "active": True, "unit": "kPa"},
-    {"value": 20, "active": True, "unit": "kPa"},
+    # Pressure is sent raw, in the gateway's 600..2400 range (4-20 mA); the
+    # server maps it onto the panel's zeroValue..maxValue
+    {"value": 1000, "active": True, "unit": "kPa"},
+    {"value": 1800, "active": True, "unit": "kPa"},
     {"value": 221, "active": True, "unit": "V"},
     {"value": 2, "active": True, "unit": "A"},
     {"value": 1000, "active": True, "unit": "W"},
@@ -56,7 +58,7 @@ base_sensors = [
 # not listed here is sent flat; add it to give those sensors a curve too.
 VARIATION_BY_UNIT = {
     "°C": 5.0,
-    "kPa": 2.0,
+    "kPa": 60.0,
     "V": 5.0
 }
 

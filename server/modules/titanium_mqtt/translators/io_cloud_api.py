@@ -19,11 +19,16 @@ import json
 # topic: iocloud/response/1C69209DFC08/sensor/report
 # payload: {timestamp, readings: [{value, active}]}
 
+# Raw range reported by the gateways for pressure sensors
+PRESSURE_RAW_ZERO = 600
+PRESSURE_RAW_MAX = 2400
+
 
 class IoCloudApiTranslator(PayloadTranslator):
     logger = Logger()
     _gateways_mapping: dict[str, dict[str, str]]
-    _calibration_mapping: dict[str, {"gain": float, "offset": float}] = {}
+    _calibration_mapping: dict[str, {"gain": float, "offset": float,
+                                     "zeroValue": float, "maxValue": float}] = {}
 
     def initialize(self):
         self._gateways_mapping = {}
@@ -114,15 +119,28 @@ class IoCloudApiTranslator(PayloadTranslator):
 
         offset = 0
         gain = 1
+        value = reading_json["value"]
         calibration_key = f"{gateway}_{index_str}"
         if calibration_key in self._calibration_mapping:
-            offset = self._calibration_mapping[calibration_key]["offset"]
-            gain = self._calibration_mapping[calibration_key]["gain"]
+            calibration = self._calibration_mapping[calibration_key]
+            offset = calibration["offset"]
+            gain = calibration["gain"]
+            if type_of_sensor == "pressure":
+                value = self._map_pressure_range(
+                    value, calibration["zeroValue"], calibration["maxValue"])
 
-        reading.value = reading_json["value"] * gain + offset
+        reading.value = value * gain + offset
         reading.timestamp = timestamp
         reading.is_active = reading_json["active"]
         return reading
+
+    @staticmethod
+    def _map_pressure_range(value, zero_value, max_value):
+        if zero_value is None or max_value is None:
+            return value
+        ratio = (value - PRESSURE_RAW_ZERO) / \
+            (PRESSURE_RAW_MAX - PRESSURE_RAW_ZERO)
+        return zero_value + ratio * (max_value - zero_value)
 
     def _read_sensor_report_message(self, gateway: str, message_json: Any):
 
@@ -215,7 +233,9 @@ class IoCloudApiTranslator(PayloadTranslator):
             key = f"{calibration['gateway']}_{calibration['indicator']}"
             self._calibration_mapping[key] = {
                 "gain": calibration['gain'],
-                "offset": calibration['offset']
+                "offset": calibration['offset'],
+                "zeroValue": calibration.get('zeroValue'),
+                "maxValue": calibration.get('maxValue')
             }
 
     def translate_incoming_message(self, topic: str, payload):

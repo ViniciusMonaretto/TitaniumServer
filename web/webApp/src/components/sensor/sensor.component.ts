@@ -24,7 +24,7 @@ export class SensorComponent implements OnInit {
   constructor() { }
 
   getMeasureIcon(): String {
-    return GetSensorUnit(this.sensorInfo.sensorType, this.sensorInfo.multiplier)
+    return GetSensorUnit(this.sensorInfo.sensorType, this.sensorInfo.multiplier, this.sensorInfo.pressureUnit)
   }
 
   ngOnInit(): void {

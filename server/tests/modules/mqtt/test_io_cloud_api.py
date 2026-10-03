@@ -162,3 +162,98 @@ def test_translate_incoming_message_report(monkeypatch, translator):
     assert result.gateway == "gw1"
     assert result.action == "report"
     assert result.data == ["ok"]
+
+
+def _create_pressure_reading(translator, value, sensor_type="pressure"):
+    translator._gateways_mapping = {"gw1": {"0": sensor_type}}
+    with patch("modules.titanium_mqtt.translators.io_cloud_api.MqttReadingModel"), \
+            patch("modules.titanium_mqtt.translators.io_cloud_api.MqttHelper.get_topic_from_mosquitto_obj_report",
+                  return_value="topic/test"):
+        return translator._create_reading(
+            "gw1", datetime.now(), {"value": value, "active": True},
+            {"current_index": 0})
+
+
+@pytest.mark.parametrize("value, expected", [
+    (600, 0.0),
+    (2400, 10.0),
+    (1500, 5.0),
+    (1050, 2.5),
+])
+def test_map_pressure_range(value, expected):
+    assert IoCloudApiTranslator._map_pressure_range(value, 0, 10) == \
+        pytest.approx(expected)
+
+
+def test_map_pressure_range_with_offset_zero():
+    assert IoCloudApiTranslator._map_pressure_range(600, 2, 6) == 2
+    assert IoCloudApiTranslator._map_pressure_range(1500, 2, 6) == \
+        pytest.approx(4)
+
+
+def test_map_pressure_range_extrapolates_outside_raw_range():
+    assert IoCloudApiTranslator._map_pressure_range(300, 0, 10) == \
+        pytest.approx(-5 / 3)
+    assert IoCloudApiTranslator._map_pressure_range(2700, 0, 10) == \
+        pytest.approx(35 / 3)
+
+
+@pytest.mark.parametrize("zero_value, max_value",
+                         [(None, 10), (0, None), (None, None)])
+def test_map_pressure_range_without_range_keeps_value(zero_value, max_value):
+    assert IoCloudApiTranslator._map_pressure_range(
+        1234, zero_value, max_value) == 1234
+
+
+def test_update_calibration_stores_range(translator):
+    translator._calibration_mapping = {}
+    translator.update_calibration([
+        {"gateway": "gw1", "indicator": "0", "gain": 2, "offset": 1,
+         "zeroValue": 0.0, "maxValue": 10.0, "pressureUnit": "bar"},
+        {"gateway": "gw2", "indicator": 3, "gain": 1, "offset": 0},
+    ])
+    assert translator._calibration_mapping == {
+        "gw1_0": {"gain": 2, "offset": 1, "zeroValue": 0.0, "maxValue": 10.0},
+        "gw2_3": {"gain": 1, "offset": 0, "zeroValue": None, "maxValue": None},
+    }
+
+
+def test_create_reading_maps_pressure_range_before_calibration(translator):
+    translator._calibration_mapping = {}
+    translator.update_calibration([
+        {"gateway": "gw1", "indicator": "0", "gain": 2, "offset": 1,
+         "zeroValue": 0, "maxValue": 10}])
+
+    reading = _create_pressure_reading(translator, 1500)
+
+    # 1500 -> 5 in the 0..10 range, then 5 * 2 + 1
+    assert reading.value == pytest.approx(11)
+
+
+def test_create_reading_pressure_without_range_uses_raw_value(translator):
+    translator._calibration_mapping = {}
+    translator.update_calibration([
+        {"gateway": "gw1", "indicator": "0", "gain": 2, "offset": 1}])
+
+    reading = _create_pressure_reading(translator, 1500)
+
+    assert reading.value == 3001
+
+
+def test_create_reading_range_ignored_for_non_pressure(translator):
+    translator._calibration_mapping = {}
+    translator.update_calibration([
+        {"gateway": "gw1", "indicator": "0", "gain": 1, "offset": 0,
+         "zeroValue": 0, "maxValue": 10}])
+
+    reading = _create_pressure_reading(translator, 1500, "temperature")
+
+    assert reading.value == 1500
+
+
+def test_create_reading_pressure_without_calibration(translator):
+    translator._calibration_mapping = {}
+
+    reading = _create_pressure_reading(translator, 1500)
+
+    assert reading.value == 1500

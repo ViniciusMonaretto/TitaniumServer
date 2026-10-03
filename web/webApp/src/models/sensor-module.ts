@@ -16,11 +16,19 @@ export class SensorModule {
     public maxAlarm: AlarmModule | null = null
     public minAlarm: AlarmModule | null = null
     public multiplier: number = 1
+    // Pressure only: values the raw gateway range (600..2400) is mapped to
+    public zeroValue: number | null = null
+    public maxValue: number | null = null
+    // Pressure only: unit the mapped values are in
+    public pressureUnit: PressureUnit | null = null
 
     constructor() {
 
     }
 }
+
+export const PRESSURE_UNITS = ["Pa", "psi", "bar"] as const
+export type PressureUnit = typeof PRESSURE_UNITS[number]
 
 export function GetTableName(gateway: string, table: string, indicator: string) {
     return gateway == "*" ? table : gateway + '-' + table + '-' + indicator
@@ -78,8 +86,14 @@ export function ToDisplayUnit(sensorType: SensorTypesEnum | null | undefined, va
     return ToBaseUnit(sensorType, value) / (multiplier || 1)
 }
 
-/** Unit of the value converted by ToBaseUnit, ignoring the panel multiplier. */
-export function GetSensorBaseUnit(sensorType: SensorTypesEnum): string {
+/**
+ * Unit of the value converted by ToBaseUnit, ignoring the panel multiplier.
+ * Pressure panels choose their own unit, defaulting to Pa.
+ */
+export function GetSensorBaseUnit(sensorType: SensorTypesEnum, pressureUnit?: PressureUnit | null): string {
+    if (sensorType == SensorTypesEnum.PREASSURE && pressureUnit) {
+        return pressureUnit
+    }
     return SENSOR_BASE_UNITS[sensorType] ?? ""
 }
 
@@ -87,8 +101,8 @@ export function GetSensorBaseUnit(sensorType: SensorTypesEnum): string {
  * Unit shown on the panel, which divides the reading by the multiplier — so the
  * prefix follows that division. e.g. "kW", "ºC", "Pa".
  */
-export function GetSensorUnit(sensorType: SensorTypesEnum, multiplier: number = 1): string {
-    const base = GetSensorBaseUnit(sensorType)
+export function GetSensorUnit(sensorType: SensorTypesEnum, multiplier: number = 1, pressureUnit?: PressureUnit | null): string {
+    const base = GetSensorBaseUnit(sensorType, pressureUnit)
     if (!base) {
         return base
     }

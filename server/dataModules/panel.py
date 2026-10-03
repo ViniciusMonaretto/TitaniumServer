@@ -28,6 +28,18 @@ class SensorTypes:
         return cls.Unknow
 
 
+class PressureUnits:
+    Pa = "Pa"
+    Psi = "psi"
+    Bar = "bar"
+
+    @classmethod
+    def GetUnit(cls, unit):
+        if unit in (cls.Pa, cls.Psi, cls.Bar):
+            return unit
+        return cls.Pa
+
+
 class Panel:
     id = None
     name = ""
@@ -42,6 +54,11 @@ class Panel:
     max_alarm: Alarm = None
     sensor_type = SensorTypes.Unknow
     multiplier = 1
+    # Pressure only: values the raw gateway range (600..2400) is mapped to
+    zero_value: float = None
+    max_value: float = None
+    # Pressure only: unit the mapped values are in
+    pressure_unit: str = None
 
     def __init__(self, obj):
         if "id" in obj:
@@ -76,6 +93,34 @@ class Panel:
         if "maxAlarm" in obj and "id" in obj["maxAlarm"]:
             self.max_alarm = Alarm(obj["maxAlarm"])
         self.sensor_type = SensorTypes.GetType(obj["sensorType"])
+        self.set_range(obj.get("zeroValue"), obj.get("maxValue"))
+        self.set_pressure_unit(obj.get("pressureUnit"))
+
+    def set_pressure_unit(self, unit):
+        if self.sensor_type == SensorTypes.Pressure:
+            self.pressure_unit = PressureUnits.GetUnit(unit)
+        else:
+            self.pressure_unit = None
+
+    def set_range(self, zero_value, max_value):
+        if (self.sensor_type == SensorTypes.Pressure and
+                zero_value is not None and max_value is not None):
+            self.zero_value = float(zero_value)
+            self.max_value = float(max_value)
+        else:
+            self.zero_value = None
+            self.max_value = None
+
+    def get_calibration_info(self):
+        return {
+            "gateway": self.gateway,
+            "indicator": self.indicator,
+            "offset": self.offset,
+            "gain": self.gain,
+            "zeroValue": self.zero_value,
+            "maxValue": self.max_value,
+            "pressureUnit": self.pressure_unit
+        }
 
     def get_full_name(self):
         return self.gateway + "-" + self.topic
@@ -94,5 +139,8 @@ class Panel:
             "sensorType": self.sensor_type,
             "minAlarm": (self.min_alarm.to_json() if self.min_alarm else {}),
             "maxAlarm": (self.max_alarm.to_json() if self.max_alarm else {}),
-            "multiplier": self.multiplier
+            "multiplier": self.multiplier,
+            "zeroValue": self.zero_value,
+            "maxValue": self.max_value,
+            "pressureUnit": self.pressure_unit
         }

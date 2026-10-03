@@ -3,7 +3,7 @@
     <div>
         <div>Nome</div>
         <mat-form-field style="width: 100%;" appearance="fill">
-                <input matInput [(ngModel)]="newName" [disabled]="!canEdit" />
+            <input matInput [(ngModel)]="newName" [disabled]="!canEdit" />
         </mat-form-field>
     </div>
     <div>
@@ -11,20 +11,30 @@
         <mat-form-field style="width: 100%;" appearance="fill">
             <input matInput [value]="color" [disabled]="!canEdit" readonly (click)="showPicker = !showPicker" />
         </mat-form-field>
-        
+
         <div *ngIf="showPicker">
             <color-chrome [(color)]="color"></color-chrome>
         </div>
     </div>
-    <div>
+    <div *ngIf="isPressure">
+        <div>Unidade de medida</div>
+        <mat-form-field style="width: 100%;" appearance="fill">
+            <mat-select [(ngModel)]="pressureUnit" [disabled]="!canEdit">
+                <mat-option *ngFor="let unit of pressureUnits" [value]="unit">{{unit}}</mat-option>
+            </mat-select>
+        </mat-form-field>
+    </div>
+    <div *ngIf="canUseKilo()">
         <label class="inline-flex items-center mb-2">
-            <input type="checkbox" id="alarmEnabled" [disabled]="!canEdit" [(ngModel)]="kiloSelected" class="form-checkbox h-5 w-5 text-blue-600">
+            <input type="checkbox" id="alarmEnabled" [disabled]="!canEdit" [(ngModel)]="kiloSelected"
+                class="form-checkbox h-5 w-5 text-blue-600">
             <span class="ml-2 text-sm text-gray-700">Mostrar em Kilo</span>
         </label>
     </div>
-    
+
     <label class="inline-flex items-center mb-2">
-        <input type="checkbox" id="alarmEnabled" [disabled]="!canEdit" [(ngModel)]="calibrate" class="form-checkbox h-5 w-5 text-blue-600">
+        <input type="checkbox" id="alarmEnabled" [disabled]="!canEdit" [(ngModel)]="calibrate"
+            class="form-checkbox h-5 w-5 text-blue-600">
         <span class="ml-2 text-sm text-gray-700">Calibrar</span>
     </label>
     <div *ngIf="calibrate">
@@ -39,9 +49,33 @@
             <input matInput type="number" [disabled]="!calibrate" step="0.01" [(ngModel)]="offset">
         </mat-form-field>
     </div>
+    <div *ngIf="isPressure" class="border-t pt-4">
+        <label class="inline-flex items-center mb-2">
+            <input type="checkbox" id="rangeEnabled" [disabled]="!canEdit" [(ngModel)]="enableRange"
+                class="form-checkbox h-5 w-5 text-blue-600">
+            <span class="ml-2 text-sm text-gray-700">Mapear faixa do sensor</span>
+        </label>
+        <div class="alarm-div" *ngIf="enableRange">
+            <div style="width: calc(50% - 5px);">
+                <div>Zero ({{baseUnit}})</div>
+                <mat-form-field style="width: 100%;" appearance="fill">
+                    <input [disabled]="!canEdit" matInput type="number" [(ngModel)]="zeroValue">
+                </mat-form-field>
+            </div>
+            <div style="width: calc(50% - 5px);">
+                <div>Máximo ({{baseUnit}})</div>
+                <mat-form-field style="width: 100%;" appearance="fill">
+                    <input [disabled]="!canEdit" matInput type="number" [(ngModel)]="maxValue">
+                </mat-form-field>
+            </div>
+        </div>
+        <div *ngIf="!validRange()" class="text-sm" style="color: #d32f2f;">O valor máximo deve ser maior que o zero.
+        </div>
+    </div>
     <div class="border-t pt-4">
         <label class="inline-flex items-center mb-2">
-            <input type="checkbox" id="alarmEnabled" [disabled]="!canEdit" [(ngModel)]="enableAlarms" class="form-checkbox h-5 w-5 text-blue-600">
+            <input type="checkbox" id="alarmEnabled" [disabled]="!canEdit" [(ngModel)]="enableAlarms"
+                class="form-checkbox h-5 w-5 text-blue-600">
             <span class="ml-2 text-sm text-gray-700">Habilitar Alarmes</span>
         </label>
         <div class="alarm-div" *ngIf="enableAlarms">
@@ -56,11 +90,12 @@
                 <mat-form-field style="width: 100%;" appearance="fill">
                     <input [disabled]="!enableAlarms || !canEdit" matInput type="number" [(ngModel)]="minAlarm">
                 </mat-form-field>
-            </div> 
-        </div>   
+            </div>
+        </div>
     </div>
 </mat-dialog-content>
 <mat-dialog-actions style="display: flex; gap: 10px;">
     <io-button style="height: 30px;" variant="secondary" (clicked)="onCancel()">Cancelar</io-button>
-    <io-button style="height: 30px;" variant="primary" [disabled]="!validForm()" (clicked)="onApply()" cdkFocusInitial>Aplicar</io-button>
+    <io-button style="height: 30px;" variant="primary" [disabled]="!validForm()" (clicked)="onApply()"
+        cdkFocusInitial>Aplicar</io-button>
 </mat-dialog-actions>

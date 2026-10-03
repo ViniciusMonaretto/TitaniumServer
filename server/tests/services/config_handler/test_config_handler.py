@@ -944,3 +944,171 @@ class TestPanelListAndStatus:
         expected_topic = "gateway1-temperature-0"
         assert expected_topic in topic_to_name
         assert expected_topic in topic_to_type
+
+
+@pytest.fixture
+def pressure_panel_info():
+    """Create a pressure panel info with a mapped range."""
+    return {
+        "name": "Pressure Panel",
+        "gateway": "gateway1",
+        "topic": "pressure",
+        "color": "#0000FF",
+        "group": 1,
+        "indicator": "0",
+        "sensorType": "Pressure",
+        "multiplier": 1,
+        "gain": 1,
+        "offset": 0,
+        "zeroValue": 0,
+        "maxValue": 10,
+        "pressureUnit": "bar"
+    }
+
+
+class TestPressureRange:
+    """Test the pressure range and unit handling."""
+
+    @pytest.fixture
+    def pressure_panel(self, config_handler, pressure_panel_info, mock_config_storage, mock_sensor_data_storage, mock_middleware):
+        mock_config_storage.add_panel_group.return_value = 1
+        config_handler.add_panel_group("0")
+        mock_config_storage.add_panel.return_value = 1
+        mock_sensor_data_storage.add_new_subscription.return_value = (
+            True, "Success")
+        config_handler.add_panel(pressure_panel_info)
+        mock_middleware.send_command.reset_mock()
+        mock_config_storage.update_panel.reset_mock()
+        return config_handler._find_panel_from_id(1)
+
+    @staticmethod
+    def _update_info(**overrides):
+        info = {
+            "panelId": 1,
+            "name": "Pressure Panel",
+            "color": "#0000FF",
+            "gain": 1,
+            "offset": 0,
+            "multiplier": 1,
+            "zeroValue": 0,
+            "maxValue": 10,
+            "pressureUnit": "bar"
+        }
+        info.update(overrides)
+        return info
+
+    @staticmethod
+    def _calibration_calls(mock_middleware):
+        return [c for c in mock_middleware.send_command.call_args_list
+                if c[0][0] == MqttCommands.CALIBRATION]
+
+    def test_add_panel_keeps_range_and_unit(self, pressure_panel):
+        assert pressure_panel.zero_value == 0.0
+        assert pressure_panel.max_value == 10.0
+        assert pressure_panel.pressure_unit == "bar"
+
+    def test_initialize_system_sends_range_in_calibration(self, config_handler, pressure_panel, mock_middleware):
+        config_handler.initialize_system()
+
+        calls = self._calibration_calls(mock_middleware)
+        assert len(calls) == 1
+        assert calls[0][0][1] == [pressure_panel.get_calibration_info()]
+        assert calls[0][0][1][0]["zeroValue"] == 0.0
+        assert calls[0][0][1][0]["maxValue"] == 10.0
+
+    def test_range_change_sends_calibration(self, config_handler, pressure_panel, mock_middleware, mock_config_storage):
+        config_handler.update_panel_functions(
+            self._update_info(zeroValue=2, maxValue=20))
+
+        assert pressure_panel.zero_value == 2.0
+        assert pressure_panel.max_value == 20.0
+        calls = self._calibration_calls(mock_middleware)
+        assert len(calls) == 1
+        assert calls[0][0][1] == [{
+            "gateway": "gateway1",
+            "indicator": "0",
+            "offset": 0,
+            "gain": 1,
+            "zeroValue": 2.0,
+            "maxValue": 20.0,
+            "pressureUnit": "bar"
+        }]
+        mock_config_storage.update_panel.assert_called_once_with(
+            pressure_panel)
+
+    def test_range_removed_sends_calibration(self, config_handler, pressure_panel, mock_middleware):
+        config_handler.update_panel_functions(
+            self._update_info(zeroValue=None, maxValue=None))
+
+        assert pressure_panel.zero_value is None
+        assert pressure_panel.max_value is None
+        calls = self._calibration_calls(mock_middleware)
+        assert len(calls) == 1
+        assert calls[0][0][1][0]["zeroValue"] is None
+        assert calls[0][0][1][0]["maxValue"] is None
+
+    def test_missing_range_keys_clear_range(self, config_handler, pressure_panel, mock_middleware):
+        info = self._update_info()
+        del info["zeroValue"]
+        del info["maxValue"]
+
+        config_handler.update_panel_functions(info)
+
+        assert pressure_panel.zero_value is None
+        assert pressure_panel.max_value is None
+        assert len(self._calibration_calls(mock_middleware)) == 1
+
+    def test_unchanged_range_does_not_send_calibration(self, config_handler, pressure_panel, mock_middleware, mock_config_storage):
+        config_handler.update_panel_functions(self._update_info())
+
+        assert self._calibration_calls(mock_middleware) == []
+        mock_config_storage.update_panel.assert_called_once()
+
+    def test_same_range_as_strings_does_not_send_calibration(self, config_handler, pressure_panel, mock_middleware):
+        config_handler.update_panel_functions(
+            self._update_info(zeroValue="0", maxValue="10.0"))
+
+        assert self._calibration_calls(mock_middleware) == []
+
+    def test_unit_change_is_saved_without_calibration(self, config_handler, pressure_panel, mock_middleware, mock_config_storage):
+        config_handler.update_panel_functions(
+            self._update_info(pressureUnit="psi"))
+
+        assert pressure_panel.pressure_unit == "psi"
+        assert self._calibration_calls(mock_middleware) == []
+        mock_config_storage.update_panel.assert_called_once_with(
+            pressure_panel)
+
+    def test_invalid_unit_falls_back_to_pa(self, config_handler, pressure_panel):
+        config_handler.update_panel_functions(
+            self._update_info(pressureUnit="atm"))
+
+        assert pressure_panel.pressure_unit == "Pa"
+
+    def test_gain_change_sends_range_along(self, config_handler, pressure_panel, mock_middleware):
+        config_handler.update_panel_functions(self._update_info(gain=2))
+
+        assert pressure_panel.gain == 2
+        calls = self._calibration_calls(mock_middleware)
+        assert len(calls) == 1
+        assert calls[0][0][1][0]["gain"] == 2
+        assert calls[0][0][1][0]["zeroValue"] == 0.0
+        assert calls[0][0][1][0]["maxValue"] == 10.0
+
+    def test_range_change_on_non_pressure_panel_is_ignored(self, config_handler, sample_panel_info, mock_config_storage, mock_sensor_data_storage, mock_middleware):
+        mock_config_storage.add_panel_group.return_value = 1
+        config_handler.add_panel_group("0")
+        mock_config_storage.add_panel.return_value = 1
+        mock_sensor_data_storage.add_new_subscription.return_value = (
+            True, "Success")
+        config_handler.add_panel(sample_panel_info)
+        panel = config_handler._find_panel_from_id(1)
+        mock_middleware.send_command.reset_mock()
+
+        config_handler.update_panel_functions(self._update_info(
+            gain=panel.gain, offset=panel.offset))
+
+        assert panel.zero_value is None
+        assert panel.max_value is None
+        assert panel.pressure_unit is None
+        assert self._calibration_calls(mock_middleware) == []

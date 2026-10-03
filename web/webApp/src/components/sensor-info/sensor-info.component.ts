@@ -74,7 +74,7 @@ export class SensorInfoComponent implements OnInit {
     this.lineChartData.push({
       label: this.sensorInfo?.name,
       realName: this.sensorInfo?.name,
-      unit: this.sensorInfo ? GetSensorUnit(this.sensorInfo.sensorType, this.sensorInfo.multiplier) : '',
+      unit: this.sensorInfo ? GetSensorUnit(this.sensorInfo.sensorType, this.sensorInfo.multiplier, this.sensorInfo.pressureUnit) : '',
       borderColor: this.sensorInfo?.color,
       backgroundColor: this.sensorInfo?.color + '0A',
       tension: 0.3,

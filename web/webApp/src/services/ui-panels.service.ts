@@ -313,7 +313,7 @@ export class UiPanelService {
               "sensorType": panel.sensorType,
               // The graph divides by the multiplier like the panel does, so the unit follows it
               "multiplier": panel.multiplier,
-              "unit": GetSensorUnit(panel.sensorType, panel.multiplier),
+              "unit": GetSensorUnit(panel.sensorType, panel.multiplier, panel.pressureUnit),
             }
           }
           else
